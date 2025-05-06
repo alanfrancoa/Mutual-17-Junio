@@ -16,8 +16,9 @@ Sistema integral de gestión desarrollado para **Mutual 17 de Junio** que modern
 | **Préstamos**   | Cálculo automático de intereses (INAES), digitalización de contratos/pagarés |  
 | **Cobranzas**   | Alertas automáticas (7 días antes de vencimientos), generación de recibos |  
 | **Inventario**  | Gestión de kits (escolares/nacimiento), control de stock |  
+| **Proveedores**    | Registro de proveedores, pagos de proveedores y servicios  |
 | **Reportes**    | Exportación en formatos compatibles con INAES (trimestrales/mensuales) |  
-
+| **Usuarios**    | Gestion de permisos de usuarios y Auditoria |    
 ---
 
 ## 🛠️ Stack Tecnológico  
