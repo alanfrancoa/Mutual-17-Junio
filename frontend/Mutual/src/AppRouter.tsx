@@ -10,7 +10,7 @@ const AppRouter: React.FC = () => {
       <Routes>
         {/* Rutas públicas */}
         <Route path="/auth/login" element={<Login />} />
-        <Route path="/auth/recover" element={<ForgotPassword />} />
+        <Route path="/auth/forgot-password" element={<ForgotPassword />} />
 
         {/* Rutas privadas */}
         
