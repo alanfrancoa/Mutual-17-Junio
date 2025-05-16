@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
 import ForgotPassword from "./pages/auth/ForgotPassword";
+import Proveedores from "./pages/modules/suppliers/Suppliers";
 
 const AppRouter: React.FC = () => {
   return (
@@ -15,6 +16,7 @@ const AppRouter: React.FC = () => {
         {/* Rutas privadas */}
         
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/proveedores" element={<Proveedores />} />
             {/*Poner aca demas rutas que necesiten auth, modulos,etc. */}
         
           <Route path="*" element={<Navigate to="/auth/login" replace />} />

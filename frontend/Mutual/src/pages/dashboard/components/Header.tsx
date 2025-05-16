@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ userName, userRole, hasNotifications = 
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center">
           <img 
-            src="/api/placeholder/40/40" 
+            src="assets/logo-mutual.png" 
             alt="Logo Mutual" 
             className="h-10 w-10 rounded-full mr-3"
           />
