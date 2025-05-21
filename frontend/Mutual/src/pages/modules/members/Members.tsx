@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 
-
-
 const MembersSidebar: React.FC = () => (
   <nav className="h-full flex flex-col p-4 bg-white shadow-md">
     <h2 className="text-lg font-bold mb-6">Menú</h2>
@@ -175,21 +173,26 @@ const Asociados: React.FC<DashboardProps> = ({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const navigate = useNavigate();
+  const [estadoFiltro, setEstadoFiltro] = useState<"Todos" | "Activo" | "Inactivo">("Todos"); // Nuevo estado
 
-  // Filtrado por búsqueda
+  // Filtrado por búsqueda y estado
   const filtered = asociadosFuerzaAerea.filter(
     (a) =>
-      a.dni.includes(search) ||
-      a.nombreCompleto.toLowerCase().includes(search.toLowerCase()) ||
-      a.organismo.toLowerCase().includes(search.toLowerCase()) ||
-      a.categoria.toLowerCase().includes(search.toLowerCase()) ||
-      a.email.toLowerCase().includes(search.toLowerCase())
+      (estadoFiltro === "Todos" || a.estado === estadoFiltro) &&
+      (
+        a.dni.includes(search) ||
+        a.nombreCompleto.toLowerCase().includes(search.toLowerCase()) ||
+        a.organismo.toLowerCase().includes(search.toLowerCase()) ||
+        a.categoria.toLowerCase().includes(search.toLowerCase()) ||
+        a.email.toLowerCase().includes(search.toLowerCase())
+      )
   );
 
   // Paginación
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -244,25 +247,37 @@ const Asociados: React.FC<DashboardProps> = ({
         {/* Contenido principal */}
         <div className="flex-1 flex flex-col p-6 bg-gray-100">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Asociados</h1>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-            
-            
-          </div>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4"></div>
           <div className="flex-1 w-full">
             <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
-              {/* Buscador y botón agregar asociado */}
+              {/* Buscador, filtro y botón agregar asociado */}
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
-                <input
-                  type="text"
-                  placeholder="Buscar por DNI, nombre, organismo, categoría o email..."
-                  className="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(1);
-                  }}
-                />
-                
+                <div className="flex gap-2 w-full md:w-auto">
+                  <input
+                    type="text"
+                    placeholder="Buscar por DNI, nombre, organismo, categoría o email..."
+                    className="w-full md:w-72 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(1);
+                    }}
+                  />
+                  {/* Filtro de estado */}
+                  <select
+                    name="estadoFiltro"
+                    value={estadoFiltro}
+                    onChange={(e) => {
+                      setEstadoFiltro(e.target.value as "Todos" | "Activo" | "Inactivo");
+                      setPage(1);
+                    }}
+                    className="px-3 py-2 border border-gray-300 rounded bg-white text-gray-700"
+                  >
+                    <option value="Todos">Todos</option>
+                    <option value="Activo">Activos</option>
+                    <option value="Inactivo">Inactivos</option>
+                  </select>
+                </div>
                 <button
                   onClick={() => navigate("/asociados/nuevo")}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded font-semibold shadow transition w-full md:w-auto"
@@ -354,19 +369,33 @@ const Asociados: React.FC<DashboardProps> = ({
                           {asociado.email}
                         </td>
                         <td className="px-4 py-4 border-b text-right space-x-2 whitespace-nowrap">
-                          <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium">
+                          <button
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                            onClick={() =>
+                              navigate(`/asociados/editar/`)
+                            }
+                          >
                             Editar
                           </button>
-                          <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded transition text-xs font-medium">
+                          <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                          onClick={() =>
+                            navigate(`/asociados/eliminar/`)
+                          }                          
+                          >                            
                             Eliminar
                           </button>
-                          <button className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded transition text-xs font-medium">
+                          <button className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                          
+                            onClick={() =>
+                            navigate(`/asociados/detalle/`)
+                          }
+                          >
                             Ver
                           </button>
                         </td>
                       </tr>
                     ))
-                    )}
+                  )}
                 </tbody>
               </table>
               {/* Paginación centrada debajo de la tabla */}
