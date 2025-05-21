@@ -1,1 +1,407 @@
-export {}
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Header from "../../dashboard/components/Header";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
+
+
+
+const MembersSidebar: React.FC = () => (
+  <nav className="h-full flex flex-col p-4 bg-white shadow-md">
+    <h2 className="text-lg font-bold mb-6">Menú</h2>
+    <ul className="space-y-4">
+      <li>
+        <a href=" " className="text-blue-700 hover:underline">
+          Asociados
+        </a>
+      </li>
+
+      <li>
+        <a href=" " className="text-blue-700 hover:underline">
+          Reportes
+        </a>
+      </li>
+    </ul>
+  </nav>
+);
+
+interface Asociado {
+  dni: string;
+  nombreCompleto: string;
+  estado: string;
+  organismo: string;
+  direccion: string;
+  fechaNacimiento: string;
+  categoria: string;
+  email: string;
+}
+
+const asociadosFuerzaAerea: Asociado[] = [
+  {
+    dni: "12345678",
+    nombreCompleto: "Juan Pérez",
+    estado: "Activo",
+    organismo: "Fuerza Aérea",
+    direccion: "Av. Siempre Viva 123, CABA",
+    fechaNacimiento: "1985-04-12",
+    categoria: "Oficial",
+    email: "juan.perez@faa.gob.ar",
+  },
+  {
+    dni: "23456789",
+    nombreCompleto: "María Gómez",
+    estado: "Inactivo",
+    organismo: "Fuerza Aérea",
+    direccion: "Calle Falsa 456, Córdoba",
+    fechaNacimiento: "1990-09-23",
+    categoria: "Suboficial",
+    email: "maria.gomez@faa.gob.ar",
+  },
+  {
+    dni: "34567890",
+    nombreCompleto: "Carlos López",
+    estado: "Activo",
+    organismo: "Fuerza Aérea",
+    direccion: "Ruta 8 Km 45, El Palomar",
+    fechaNacimiento: "1978-01-30",
+    categoria: "Civil",
+    email: "carlos.lopez@faa.gob.ar",
+  },
+  {
+    dni: "45678901",
+    nombreCompleto: "Ana Martínez",
+    estado: "Activo",
+    organismo: "Fuerza Aérea Argentina",
+    direccion: "San Martín 789, Mendoza",
+    fechaNacimiento: "1982-07-15",
+    categoria: "Oficial",
+    email: "ana.martinez@faa.gob.ar",
+  },
+  {
+    dni: "56789012",
+    nombreCompleto: "Luis Fernández",
+    estado: "Activo",
+    organismo: "Fuerza Aérea Argentina",
+    direccion: "Belgrano 321, Rosario",
+    fechaNacimiento: "1988-11-05",
+    categoria: "Suboficial",
+    email: "luis.fernandez@faa.gob.ar",
+  },
+  {
+    dni: "67890123",
+    nombreCompleto: "Patricia Díaz",
+    estado: "Inactivo",
+    organismo: "Fuerza Aérea Argentina",
+    direccion: "Mitre 654, Salta",
+    fechaNacimiento: "1993-03-18",
+    categoria: "Civil",
+    email: "patricia.diaz@faa.gob.ar",
+  },
+  {
+    dni: "78901234",
+    nombreCompleto: "Ricardo Torres",
+    estado: "Activo",
+    organismo: "Fuerza Aérea Argentina",
+    direccion: "Av. Libertador 1001, CABA",
+    fechaNacimiento: "1975-12-01",
+    categoria: "Oficial",
+    email: "ricardo.torres@faa.gob.ar",
+  },
+  {
+    dni: "89012345",
+    nombreCompleto: "Sofía Romero",
+    estado: "Activo",
+    organismo: "Fuerza Aérea Argentina",
+    direccion: "Sarmiento 222, Córdoba",
+    fechaNacimiento: "1987-06-22",
+    categoria: "Suboficial",
+    email: "sofia.romero@faa.gob.ar",
+  },
+  {
+    dni: "90123456",
+    nombreCompleto: "Martín Castro",
+    estado: "Inactivo",
+    organismo: "Fuerza Aérea Argentina",
+    direccion: "Av. Rivadavia 333, Buenos Aires",
+    fechaNacimiento: "1991-10-10",
+    categoria: "Civil",
+    email: "martin.castro@faa.gob.ar",
+  },
+  {
+    dni: "11223344",
+    nombreCompleto: "Gabriela Ruiz",
+    estado: "Activo",
+    organismo: "Fuerza Aérea Argentina",
+    direccion: "Av. San Juan 444, Tucumán",
+    fechaNacimiento: "1983-02-14",
+    categoria: "Oficial",
+    email: "gabriela.ruiz@faa.gob.ar",
+  },
+  {
+    dni: "22334455",
+    nombreCompleto: "Jorge Benítez",
+    estado: "Activo",
+    organismo: "Fuerza Aérea Argentina",
+    direccion: "Calle 9 555, La Plata",
+    fechaNacimiento: "1979-08-09",
+    categoria: "Suboficial",
+    email: "jorge.benitez@faa.gob.ar",
+  },
+  {
+    dni: "33445566",
+    nombreCompleto: "Lucía Herrera",
+    estado: "Inactivo",
+    organismo: "Fuerza Aérea Argentina",
+    direccion: "Av. Colón 888, Mar del Plata",
+    fechaNacimiento: "1995-05-27",
+    categoria: "Civil",
+    email: "lucia.herrera@faa.gob.ar",
+  },
+];
+
+// Paginación y búsqueda
+const PAGE_SIZE = 10;
+
+interface DashboardProps {
+  userName?: string;
+  userRole?: "administrador" | "gestor" | "consultante";
+  hasNotifications?: boolean;
+}
+
+const Asociados: React.FC<DashboardProps> = ({
+  userName = "Fernando",
+  userRole = "administrador",
+  hasNotifications = true,
+}) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const navigate = useNavigate();
+
+  // Filtrado por búsqueda
+  const filtered = asociadosFuerzaAerea.filter(
+    (a) =>
+      a.dni.includes(search) ||
+      a.nombreCompleto.toLowerCase().includes(search.toLowerCase()) ||
+      a.organismo.toLowerCase().includes(search.toLowerCase()) ||
+      a.categoria.toLowerCase().includes(search.toLowerCase()) ||
+      a.email.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // Paginación
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      {/* Header */}
+      <Header
+        userName={userName}
+        userRole={userRole}
+        hasNotifications={hasNotifications}
+      />
+
+      {/* Botón hamburguesa solo en mobile */}
+      <button
+        className="md:hidden absolute top-4 left-4 z-20"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label="Abrir menú"
+      >
+        <svg
+          className="h-8 w-8 text-gray-800"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 6h16M4 12h16M4 18h16"
+          />
+        </svg>
+      </button>
+
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <div
+          className={`
+            fixed inset-y-0 left-0 z-10 w-64 bg-white shadow-lg transform
+            ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+            transition-transform duration-200 ease-in-out
+            md:static md:translate-x-0 md:w-64
+          `}
+        >
+          <MembersSidebar />
+        </div>
+        {/* Overlay para cerrar el sidebar en mobile */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-30 z-0 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Contenido principal */}
+        <div className="flex-1 flex flex-col p-6 bg-gray-100">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Asociados</h1>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+            
+            
+          </div>
+          <div className="flex-1 w-full">
+            <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
+              {/* Buscador y botón agregar asociado */}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
+                <input
+                  type="text"
+                  placeholder="Buscar por DNI, nombre, organismo, categoría o email..."
+                  className="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                />
+                
+                <button
+                  onClick={() => navigate("/asociados/nuevo")}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded font-semibold shadow transition w-full md:w-auto"
+                >
+                  + Agregar Asociado
+                </button>
+              </div>
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-gray-50 border-b">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      DNI
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Nombre Completo
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Organismo
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Dirección
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Fecha Nac.
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Categoría
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginated.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={9}
+                        className="text-center py-8 text-gray-400"
+                      >
+                        No hay asociados registrados
+                      </td>
+                    </tr>
+                  ) : (
+                    paginated.map((asociado, idx) => (
+                      <tr
+                        key={asociado.dni}
+                        className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                      >
+                        <td className="px-4 py-4 border-b whitespace-nowrap">
+                          {asociado.dni}
+                        </td>
+                        <td className="px-4 py-4 border-b whitespace-nowrap">
+                          {asociado.nombreCompleto}
+                        </td>
+                        <td className="px-4 py-4 border-b whitespace-nowrap">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold
+                            ${
+                              asociado.estado === "Activo"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            {asociado.estado}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 border-b whitespace-nowrap">
+                          {asociado.organismo}
+                        </td>
+                        <td className="px-4 py-4 border-b whitespace-nowrap">
+                          {asociado.direccion}
+                        </td>
+                        <td className="px-4 py-4 border-b whitespace-nowrap">
+                          {new Date(
+                            asociado.fechaNacimiento
+                          ).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-4 border-b whitespace-nowrap">
+                          {asociado.categoria}
+                        </td>
+                        <td className="px-4 py-4 border-b whitespace-nowrap">
+                          {asociado.email}
+                        </td>
+                        <td className="px-4 py-4 border-b text-right space-x-2 whitespace-nowrap">
+                          <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium">
+                            Editar
+                          </button>
+                          <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded transition text-xs font-medium">
+                            Eliminar
+                          </button>
+                          <button className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded transition text-xs font-medium">
+                            Ver
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                    )}
+                </tbody>
+              </table>
+              {/* Paginación centrada debajo de la tabla */}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-2">
+                <div className="flex justify-center items-center gap-4 flex-1">
+                  <button
+                    className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    aria-label="Anterior"
+                  >
+                    <ChevronLeftIcon className="h-5 w-5 text-gray-700" />
+                  </button>
+                  <span className="text-gray-700">
+                    Página {page} de {totalPages}
+                  </span>
+                  <button
+                    className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    aria-label="Siguiente"
+                  >
+                    <ChevronRightIcon className="h-5 w-5 text-gray-700" />
+                  </button>
+                </div>
+                <span className="text-gray-500 text-sm md:ml-4 md:w-auto w-full text-center md:text-right">
+                  {filtered.length} asociado(s) encontrado(s)
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Asociados;

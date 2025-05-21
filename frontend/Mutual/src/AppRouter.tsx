@@ -3,6 +3,9 @@ import Login from "./pages/auth/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import Proveedores from "./pages/modules/suppliers/Suppliers";
+import Asociados from "./pages/modules/members/Members";
+import CreateMember from "./pages/modules/members/createMember";
+
 
 const AppRouter: React.FC = () => {
   return (
@@ -16,6 +19,8 @@ const AppRouter: React.FC = () => {
         
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/proveedores" element={<Proveedores />} />
+            <Route path="/asociados" element={<Asociados />} />
+            <Route path="/asociados/nuevo" element={<CreateMember />} />
             <Route path="/proveedores/ordenes/nueva" element={<Proveedores showOrderForm={true} />} />
 
         

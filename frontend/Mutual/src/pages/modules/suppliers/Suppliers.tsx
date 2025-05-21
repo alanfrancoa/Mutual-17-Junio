@@ -96,4 +96,4 @@ const Proveedores: React.FC<DashboardProps> = ({
   );
 };
 
-export default Proveedores;npm devicePixelRatio
+export default Proveedores;
