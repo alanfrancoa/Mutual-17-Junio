@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -17,7 +16,8 @@ const AppRouter: React.FC = () => {
         
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/proveedores" element={<Proveedores />} />
-            {/*Poner aca demas rutas que necesiten auth, modulos,etc. */}
+            <Route path="/proveedores/ordenes/nueva" element={<Proveedores showOrderForm={true} />} />
+
         
           <Route path="*" element={<Navigate to="/auth/login" replace />} />
        
