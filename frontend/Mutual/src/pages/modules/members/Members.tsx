@@ -279,7 +279,7 @@ const Asociados: React.FC<DashboardProps> = ({
                   </select>
                 </div>
                 <button
-                  onClick={() => navigate("/asociados/nuevo")}
+                  onClick={() => navigate("/asociados/crear")}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded font-semibold shadow transition w-full md:w-auto"
                 >
                   + Agregar Asociado
