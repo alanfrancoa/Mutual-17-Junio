@@ -1,13 +1,30 @@
+// src/components/Login.tsx
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthService } from "../../api/authservice";
+
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Lógica de login 
-    console.log({ email, password });
+    setLoading(true);
+    setError("");
+
+    try {
+      await AuthService.login(username, password);
+      // Redirigir al dashboard después de login exitoso
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error desconocido");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,14 +52,20 @@ const Login = () => {
 
         {/* Card blanca */}
         <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 text-black">
+          {error && (
+            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-sm">
+              {error}
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium mb-1">Usuario</label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="xxxxx@gmail.com"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Ingrese su usuario"
                 className="w-full px-4 py-2 border border-gray-400 rounded focus:outline-none"
                 required
               />
@@ -54,7 +77,7 @@ const Login = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="xxxxxxxxx"
+                placeholder="Ingrese su contraseña"
                 className="w-full px-4 py-2 border border-gray-400 rounded focus:outline-none"
                 required
               />
@@ -62,13 +85,14 @@ const Login = () => {
 
             <button
               type="submit"
-              className="w-full bg-blue-400 hover:bg-blue-500 text-white py-2 rounded-full font-semibold transition"
+              disabled={loading}
+              className={`w-full ${loading ? 'bg-blue-300' : 'bg-blue-400 hover:bg-blue-500'} text-white py-2 rounded-full font-semibold transition`}
             >
-              Iniciar sesión
+              {loading ? "Iniciando sesión..." : "Iniciar sesión"}
             </button>
           </form>
 
-            <div className="mt-4 flex flex-col items-center space-y-2">
+          <div className="mt-4 flex flex-col items-center space-y-2">
             <a
               href="/auth/forgot-password"
               className="text-blue-600 hover:underline text-sm"
@@ -77,12 +101,12 @@ const Login = () => {
             </a>
             <button
               type="button"
-              onClick={() => (window.location.href = "/dashboard")}
+              onClick={() => navigate("/dashboard")}
               className="mt-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full font-semibold transition"
             >
               Ir al Dashboard
             </button>
-            </div>
+          </div>
         </div>
 
         {/* Footer */}
