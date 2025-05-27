@@ -2,25 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
-
-const MembersSidebar: React.FC = () => (
-  <nav className="h-full flex flex-col p-4 bg-white shadow-md">
-    <h2 className="text-lg font-bold mb-6">Menú</h2>
-    <ul className="space-y-4">
-      <li>
-        <a href=" " className="text-blue-700 hover:underline">
-          Asociados
-        </a>
-      </li>
-
-      <li>
-        <a href=" " className="text-blue-700 hover:underline">
-          Reportes
-        </a>
-      </li>
-    </ul>
-  </nav>
-);
+import Sidebar from "../../dashboard/components/Sidebar";
 
 interface Asociado {
   dni: string;
@@ -161,7 +143,7 @@ const PAGE_SIZE = 10;
 
 interface DashboardProps {
   userName?: string;
-  userRole?: "administrador" | "gestor" | "consultante";
+  userRole?: string;
   hasNotifications?: boolean;
 }
 
@@ -195,57 +177,17 @@ const Asociados: React.FC<DashboardProps> = ({
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
-      {/* Header */}
-      <Header
-        userName={userName}
-        userRole={userRole}
-        hasNotifications={hasNotifications}
-      />
+    <div className="min-h-screen bg-gray-100 flex">
+      {/* Sidebar fija a la izquierda */}
+      <Sidebar />
 
-      {/* Botón hamburguesa solo en mobile */}
-      <button
-        className="md:hidden absolute top-4 left-4 z-20"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        aria-label="Abrir menú"
-      >
-        <svg
-          className="h-8 w-8 text-gray-800"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 6h16M4 12h16M4 18h16"
-          />
-        </svg>
-      </button>
+      {/* Contenido principal desplazado a la derecha */}
+      <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" /* w-72 = 288px */ }}>
+        {/* Header */}
+        <Header hasNotifications={hasNotifications} />
 
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <div
-          className={`
-            fixed inset-y-0 left-0 z-10 w-64 bg-white shadow-lg transform
-            ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-            transition-transform duration-200 ease-in-out
-            md:static md:translate-x-0 md:w-64
-          `}
-        >
-          <MembersSidebar />
-        </div>
-        {/* Overlay para cerrar el sidebar en mobile */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-30 z-0 md:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        {/* Contenido principal */}
-        <div className="flex-1 flex flex-col p-6 bg-gray-100">
+        {/* Main Content */}
+        <main className="flex-1 p-6 bg-gray-100">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Asociados</h1>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4"></div>
           <div className="flex-1 w-full">
@@ -427,7 +369,7 @@ const Asociados: React.FC<DashboardProps> = ({
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
+import Sidebar from "../../dashboard/components/Sidebar";
 
 const categorias = ["Oficial", "Suboficial", "Civil"];
 const estados = ["Activo", "Inactivo"];
@@ -52,8 +53,11 @@ const CreateMember: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+      
+      {/* Sidebar fija a la izquierda */}
+      <Sidebar />
       {/* Header agregado */}
-      <Header userName="Fernando" userRole="administrador" hasNotifications={true} />
+      <Header hasNotifications={true} />
       <div className="flex flex-col items-center py-8 flex-1">
         <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8">
           <h2 className="text-2xl font-bold mb-6 text-blue-900">Nuevo Asociado</h2>

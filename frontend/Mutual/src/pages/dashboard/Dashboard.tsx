@@ -1,37 +1,31 @@
 import React from "react";
-import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import { useNavigate } from "react-router-dom";
-
+import Sidebar from "./components/Sidebar";
 
 interface DashboardProps {
-  userName?: string;
-  userRole?: "administrador" | "gestor" | "consultante";
   hasNotifications?: boolean;
 }
 
-
-
-const Dashboard: React.FC<DashboardProps> = ({
-  userName = "Fernando",
-  userRole = "administrador",
-  hasNotifications = true,
- 
-}) => {
+const Dashboard: React.FC<DashboardProps> = ({ hasNotifications = true }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
-      {/* Header */}
-      <Header
-        userName={userName}
-        userRole={userRole}
-        hasNotifications={hasNotifications}
-      />
+    <div className="min-h-screen bg-gray-100">
+      <Sidebar />
+      <div className="pl-72">
+        <Header hasNotifications={hasNotifications} />
 
-      {/* Main Content */}
-      <div className="flex flex-1">
+        <div className="w-full flex justify-center">
+          <div className="bg-blue-100 border border-blue-300 rounded-lg px-8 py-4 my-6 flex items-center shadow">
+            <span className="text-xl font-semibold text-blue-900 text-center">
+              ¡Bienvenido/a al sistema de gestión!
+            </span>
+          </div>
+        </div>
+
         {/* Main Content Area */}
+
         <div className="flex-1 p-6">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
             {/* Proveedores */}
@@ -56,13 +50,12 @@ const Dashboard: React.FC<DashboardProps> = ({
                 <h3 className="text-lg font-semibold mb-2 text-center">
                   PROVEEDORES
                 </h3>
-                <button 
-                  onClick={() => navigate('/proveedores/ordenes/nueva')}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                <button
+                  onClick={() => navigate("/proveedores/ordenes/nueva")}
+                  className="mt-2 px-8 py-3 bg-blue-600 text-white rounded-full text-lg font-semibold hover:bg-blue-700 transition"
                 >
-                  Nueva Orden Compra
-              </button>
-
+                  Ingresar
+                </button>
               </div>
             </div>
 
@@ -88,7 +81,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 <h3 className="text-lg font-semibold mb-2 text-center">
                   COBROS Y MOROSIDAD
                 </h3>
-                <button className="mt-2 px-4 py-2 bg-blue-200 text-blue-800 rounded-md hover:bg-blue-300 transition">
+                <button className="mt-2 px-8 py-3 bg-blue-600 text-white rounded-full text-lg font-semibold hover:bg-blue-700 transition">
                   Ingresar
                 </button>
               </div>
@@ -116,12 +109,11 @@ const Dashboard: React.FC<DashboardProps> = ({
                 <h3 className="text-lg font-semibold mb-2 text-center">
                   ASOCIADOS
                 </h3>
-                 <button 
-                  onClick={() => navigate('/asociados')}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
+                <button
+                  onClick={() => navigate("/asociados")}
+                  className="mt-2 px-8 py-3 bg-blue-600 text-white rounded-full text-lg font-semibold hover:bg-blue-700 transition">
                   Ingresar
-              </button>
+                </button>
               </div>
             </div>
 
@@ -147,7 +139,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 <h3 className="text-lg font-semibold mb-2 text-center">
                   INVENTARIO
                 </h3>
-                <button className="mt-2 px-4 py-2 bg-blue-200 text-blue-800 rounded-md hover:bg-blue-300 transition">
+                <button className="mt-2 px-8 py-3 bg-blue-600 text-white rounded-full text-lg font-semibold hover:bg-blue-700 transition">
                   Ingresar
                 </button>
               </div>
@@ -175,7 +167,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 <h3 className="text-lg font-semibold mb-2 text-center">
                   PRÉSTAMOS
                 </h3>
-                <button className="mt-2 px-4 py-2 bg-blue-200 text-blue-800 rounded-md hover:bg-blue-300 transition">
+                <button className="mt-2 px-8 py-3 bg-blue-600 text-white rounded-full text-lg font-semibold hover:bg-blue-700 transition">
                   Ingresar
                 </button>
               </div>
@@ -203,16 +195,13 @@ const Dashboard: React.FC<DashboardProps> = ({
                 <h3 className="text-lg font-semibold mb-2 text-center">
                   REPORTES Y NORMATIVAS
                 </h3>
-                <button className="mt-2 px-4 py-2 bg-blue-200 text-blue-800 rounded-md hover:bg-blue-300 transition">
+                <button className="mt-2 px-8 py-3 bg-blue-600 text-white rounded-full text-lg font-semibold hover:bg-blue-700 transition">
                   Ingresar
                 </button>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Sidebar with navigation icons (visible only on larger screens) */}
-        <Sidebar userRole={userRole} />
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
+import Sidebar from "../../dashboard/components/Sidebar";
 
 const empleados = [
   { id: "1", nombre: "Juan Pérez" },
@@ -22,7 +23,11 @@ const DeleteMember: React.FC = () => {
     notas: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -35,10 +40,13 @@ const DeleteMember: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <Header userName="Fernando" userRole="administrador" hasNotifications={true} />
+      <Sidebar />
+      <Header hasNotifications={true} />
       <div className="flex flex-col items-center py-8 flex-1">
         <div className="w-full max-w-lg bg-white rounded-lg shadow p-8">
-          <h2 className="text-lg font-bold mb-6 text-gray-800 tracking-wide">Motivo de Baja</h2>
+          <h2 className="text-lg font-bold mb-6 text-gray-800 tracking-wide">
+            Motivo de Baja
+          </h2>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -53,7 +61,9 @@ const DeleteMember: React.FC = () => {
               >
                 <option value="">Seleccionar</option>
                 {empleados.map((emp) => (
-                  <option key={emp.id} value={emp.id}>{emp.nombre}</option>
+                  <option key={emp.id} value={emp.id}>
+                    {emp.nombre}
+                  </option>
                 ))}
               </select>
             </div>
@@ -70,13 +80,13 @@ const DeleteMember: React.FC = () => {
               >
                 <option value="">Seleccionar</option>
                 {tiposBaja.map((tipo) => (
-                  <option key={tipo} value={tipo}>{tipo}</option>
+                  <option key={tipo} value={tipo}>
+                    {tipo}
+                  </option>
                 ))}
               </select>
             </div>
-            <div>
-                          
-            </div>
+            <div></div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Motivo de salida <span className="text-red-500">*</span>
@@ -90,7 +100,9 @@ const DeleteMember: React.FC = () => {
               >
                 <option value="">Seleccionar</option>
                 {motivosSalida.map((motivo) => (
-                  <option key={motivo} value={motivo}>{motivo}</option>
+                  <option key={motivo} value={motivo}>
+                    {motivo}
+                  </option>
                 ))}
               </select>
             </div>

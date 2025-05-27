@@ -41,11 +41,7 @@ const Proveedores: React.FC<DashboardProps> = ({
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-      <Header
-        userName={userName}
-        userRole={userRole}
-        hasNotifications={hasNotifications}
-      />
+      <Header hasNotifications={hasNotifications}/>
 
       <button
         className="md:hidden absolute top-4 left-4 z-20"

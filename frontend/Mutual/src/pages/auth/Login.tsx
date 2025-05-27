@@ -1,8 +1,16 @@
 // src/components/Login.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { apiMutual } from "../../api/apiMutual";
 
+function parseJwt(token: string) {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch {
+    return null;
+  }
+}
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -17,8 +25,24 @@ const Login = () => {
     setError("");
 
     try {
-      await apiMutual.Login(username, password);
-      // Redirigir al dashboard después de login exitoso
+      const response = await apiMutual.Login(username, password);
+      console.log("Token recibido:", response);
+
+      // Guarda el token y el username del input
+      sessionStorage.setItem("token", response);
+      sessionStorage.setItem("username", username);
+
+      // Decodifica el JWT para obtener los datos del usuario
+      const payload = parseJwt(response);
+      console.log("Payload decodificado:", payload); // <-- Agrega esto
+
+      if (payload && payload.role) {
+        sessionStorage.setItem("userRole", payload.role);
+      }
+      if (payload && payload.username) {
+        sessionStorage.setItem("username", payload.username);
+      }
+
       navigate("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
@@ -57,7 +81,7 @@ const Login = () => {
               {error}
             </div>
           )}
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium mb-1">Usuario</label>
@@ -72,7 +96,9 @@ const Login = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Contraseña</label>
+              <label className="block text-sm font-medium mb-1">
+                Contraseña
+              </label>
               <input
                 type="password"
                 value={password}
@@ -86,7 +112,9 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full ${loading ? 'bg-blue-300' : 'bg-blue-400 hover:bg-blue-500'} text-white py-2 rounded-full font-semibold transition`}
+              className={`w-full ${
+                loading ? "bg-blue-300" : "bg-blue-400 hover:bg-blue-500"
+              } text-white py-2 rounded-full font-semibold transition`}
             >
               {loading ? "Iniciando sesión..." : "Iniciar sesión"}
             </button>

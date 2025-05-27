@@ -1,12 +1,32 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
+import Sidebar from "../../dashboard/components/Sidebar";
 
 const provincias = [
-  "Buenos Aires", "Catamarca", "Chaco", "Chubut", "Córdoba", "Corrientes",
-  "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja", "Mendoza",
-  "Misiones", "Neuquén", "Río Negro", "Salta", "San Juan", "San Luis",
-  "Santa Cruz", "Santa Fe", "Santiago del Estero", "Tierra del Fuego", "Tucumán"
+  "Buenos Aires",
+  "Catamarca",
+  "Chaco",
+  "Chubut",
+  "Córdoba",
+  "Corrientes",
+  "Entre Ríos",
+  "Formosa",
+  "Jujuy",
+  "La Pampa",
+  "La Rioja",
+  "Mendoza",
+  "Misiones",
+  "Neuquén",
+  "Río Negro",
+  "Salta",
+  "San Juan",
+  "San Luis",
+  "Santa Cruz",
+  "Santa Fe",
+  "Santiago del Estero",
+  "Tierra del Fuego",
+  "Tucumán",
 ];
 
 const datos = {
@@ -39,14 +59,19 @@ const ReadMember: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <Header userName="Fernando" userRole="administrador" hasNotifications={true} />
+      <Sidebar />
+      <Header hasNotifications={true} />
       <div className="flex flex-col items-center py-8 flex-1">
         <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8">
-          <h2 className="text-2xl font-bold mb-6 text-blue-900">Datos del Asociado</h2>
+          <h2 className="text-2xl font-bold mb-6 text-blue-900">
+            Datos del Asociado
+          </h2>
           <form className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Apellido y Nombre</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Apellido y Nombre
+                </label>
                 <input
                   type="text"
                   value={datos.apellidoNombre}
@@ -55,7 +80,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tipo de Documento
+                </label>
                 <input
                   type="text"
                   value={datos.tipoDocumento}
@@ -64,7 +91,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">N° Documento</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  N° Documento
+                </label>
                 <input
                   type="text"
                   value={datos.dni}
@@ -73,7 +102,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Extranjero</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Extranjero
+                </label>
                 <input
                   type="text"
                   value={datos.extranjero}
@@ -82,7 +113,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Estado Civil</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Estado Civil
+                </label>
                 <input
                   type="text"
                   value={datos.estadoCivil}
@@ -91,7 +124,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sexo</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sexo
+                </label>
                 <input
                   type="text"
                   value={datos.sexo}
@@ -100,7 +135,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fecha de Nacimiento
+                </label>
                 <input
                   type="date"
                   value={datos.fechaNacimiento}
@@ -109,7 +146,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Ingreso</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fecha de Ingreso
+                </label>
                 <input
                   type="date"
                   value={datos.fechaIngreso}
@@ -118,7 +157,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Categoría
+                </label>
                 <input
                   type="text"
                   value={datos.categoria}
@@ -127,7 +168,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Estado
+                </label>
                 <input
                   type="text"
                   value={datos.estado}
@@ -136,7 +179,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Organismo</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Organismo
+                </label>
                 <input
                   type="text"
                   value={datos.organismo}
@@ -145,7 +190,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Dirección
+                </label>
                 <input
                   type="text"
                   value={datos.direccion}
@@ -154,7 +201,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección Laboral (Piso y Letra)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Dirección Laboral (Piso y Letra)
+                </label>
                 <input
                   type="text"
                   value={datos.direccionLaboral}
@@ -163,7 +212,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Localidad</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Localidad
+                </label>
                 <input
                   type="text"
                   value={datos.localidad}
@@ -172,7 +223,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Provincia
+                </label>
                 <input
                   type="text"
                   value={datos.provincia}
@@ -181,7 +234,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Teléfono
+                </label>
                 <input
                   type="text"
                   value={datos.telefono}
@@ -190,7 +245,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
                 <input
                   type="email"
                   value={datos.email}
@@ -199,7 +256,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CBU</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  CBU
+                </label>
                 <input
                   type="text"
                   value={datos.cbu}
@@ -208,7 +267,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CUIL</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  CUIL
+                </label>
                 <input
                   type="text"
                   value={datos.cuil}
@@ -218,7 +279,9 @@ const ReadMember: React.FC = () => {
               </div>
               {/* Campos adicionales solo lectura */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nacionalidad</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nacionalidad
+                </label>
                 <input
                   type="text"
                   value={datos.nacionalidad}
@@ -227,7 +290,9 @@ const ReadMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Familiares asociados</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Familiares asociados
+                </label>
                 <input
                   type="text"
                   value={datos.familiares}
@@ -235,11 +300,11 @@ const ReadMember: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
                 />
               </div>
-            
-            
-              
+
               <div className="md:col-span-2 lg:col-span-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Observaciones
+                </label>
                 <textarea
                   value={datos.observaciones}
                   disabled

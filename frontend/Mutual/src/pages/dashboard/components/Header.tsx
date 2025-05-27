@@ -2,24 +2,21 @@ import React from 'react';
 import {  useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
-  userName: string;
-  userRole: 'administrador' | 'gestor' | 'consultante';
   hasNotifications?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ userName, userRole, hasNotifications = false }) => {
-    const navigate = useNavigate(); // Hook para navegación
+const Header: React.FC<HeaderProps> = ({ hasNotifications }) => {
+  const navigate = useNavigate();
+
+  // Obtén los datos del usuario desde sessionStorage
+  const userName = sessionStorage.getItem("username") || "Usuario";
+  const userRole = sessionStorage.getItem("userRole") || "consultante";
 
   return (
     <header className="bg-blue-500 text-white shadow-md">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center">
-          <img 
-            src="assets/logo-mutual.png" 
-            alt="Logo Mutual" 
-            className="h-10 w-10 rounded-full mr-3"
-          />
-          <h1 className="text-xl font-bold">Sistema de gestión de asociados</h1>
+          
         </div>
 
         <div className="flex items-center space-x-4">
@@ -37,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({ userName, userRole, hasNotifications = 
 
           {/* User Info */}
           <div className="flex items-center">
-            <span className="mr-2">Bienvenidx {userName}</span>
+            <span className="mr-2"> {userName}</span>
             <span className="bg-green-600 text-xs px-2 py-1 rounded-full">
               {userRole}
             </span>

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
+import Sidebar from "../../dashboard/components/Sidebar";
 
 const categorias = ["Oficial", "Suboficial", "Civil"];
 const estados = ["Activo", "Inactivo"];
@@ -9,10 +10,29 @@ const sexos = ["Masculino", "Femenino", "Otro"];
 const tipoDocumento = ["DNI", "Pasaporte", "CI", "LE", "LC"];
 const extranjero = ["No", "Sí"];
 const provincias = [
-  "Buenos Aires", "Catamarca", "Chaco", "Chubut", "Córdoba", "Corrientes",
-  "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja", "Mendoza",
-  "Misiones", "Neuquén", "Río Negro", "Salta", "San Juan", "San Luis",
-  "Santa Cruz", "Santa Fe", "Santiago del Estero", "Tierra del Fuego", "Tucumán"
+  "Buenos Aires",
+  "Catamarca",
+  "Chaco",
+  "Chubut",
+  "Córdoba",
+  "Corrientes",
+  "Entre Ríos",
+  "Formosa",
+  "Jujuy",
+  "La Pampa",
+  "La Rioja",
+  "Mendoza",
+  "Misiones",
+  "Neuquén",
+  "Río Negro",
+  "Salta",
+  "San Juan",
+  "San Luis",
+  "Santa Cruz",
+  "Santa Fe",
+  "Santiago del Estero",
+  "Tierra del Fuego",
+  "Tucumán",
 ];
 
 const EditMember: React.FC = () => {
@@ -40,7 +60,9 @@ const EditMember: React.FC = () => {
     cuil: "20-12345678-3",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -53,14 +75,19 @@ const EditMember: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <Header userName="Fernando" userRole="administrador" hasNotifications={true} />
+      <Sidebar />
+      <Header hasNotifications={true} />
       <div className="flex flex-col items-center py-8 flex-1">
         <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8">
-          <h2 className="text-2xl font-bold mb-6 text-blue-900">Editar Asociado</h2>
+          <h2 className="text-2xl font-bold mb-6 text-blue-900">
+            Editar Asociado
+          </h2>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Apellido y Nombre</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Apellido y Nombre
+                </label>
                 <input
                   type="text"
                   name="apellidoNombre"
@@ -71,7 +98,9 @@ const EditMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tipo de Documento
+                </label>
                 <select
                   name="tipoDocumento"
                   value={form.tipoDocumento}
@@ -79,12 +108,16 @@ const EditMember: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 >
                   {tipoDocumento.map((tipo) => (
-                    <option key={tipo} value={tipo}>{tipo}</option>
+                    <option key={tipo} value={tipo}>
+                      {tipo}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">N° Documento</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  N° Documento
+                </label>
                 <input
                   type="text"
                   name="dni"
@@ -95,7 +128,9 @@ const EditMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Extranjero</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Extranjero
+                </label>
                 <select
                   name="extranjero"
                   value={form.extranjero}
@@ -103,12 +138,16 @@ const EditMember: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 >
                   {extranjero.map((op) => (
-                    <option key={op} value={op}>{op}</option>
+                    <option key={op} value={op}>
+                      {op}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Estado Civil</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Estado Civil
+                </label>
                 <select
                   name="estadoCivil"
                   value={form.estadoCivil}
@@ -117,12 +156,16 @@ const EditMember: React.FC = () => {
                 >
                   <option value="">Seleccionar</option>
                   {estadoCivil.map((ec) => (
-                    <option key={ec} value={ec}>{ec}</option>
+                    <option key={ec} value={ec}>
+                      {ec}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sexo</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sexo
+                </label>
                 <select
                   name="sexo"
                   value={form.sexo}
@@ -131,12 +174,16 @@ const EditMember: React.FC = () => {
                 >
                   <option value="">Seleccionar</option>
                   {sexos.map((sx) => (
-                    <option key={sx} value={sx}>{sx}</option>
+                    <option key={sx} value={sx}>
+                      {sx}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fecha de Nacimiento
+                </label>
                 <input
                   type="date"
                   name="fechaNacimiento"
@@ -147,7 +194,9 @@ const EditMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Ingreso</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fecha de Ingreso
+                </label>
                 <input
                   type="date"
                   name="fechaIngreso"
@@ -157,7 +206,9 @@ const EditMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Categoría
+                </label>
                 <select
                   name="categoria"
                   value={form.categoria}
@@ -165,12 +216,16 @@ const EditMember: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 >
                   {categorias.map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Estado
+                </label>
                 <select
                   name="estado"
                   value={form.estado}
@@ -178,12 +233,16 @@ const EditMember: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 >
                   {estados.map((e) => (
-                    <option key={e} value={e}>{e}</option>
+                    <option key={e} value={e}>
+                      {e}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Organismo</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Organismo
+                </label>
                 <input
                   type="text"
                   name="organismo"
@@ -194,7 +253,9 @@ const EditMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Dirección
+                </label>
                 <input
                   type="text"
                   name="direccion"
@@ -205,7 +266,9 @@ const EditMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección Laboral (Piso y Letra)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Dirección Laboral (Piso y Letra)
+                </label>
                 <input
                   type="text"
                   name="direccionLaboral"
@@ -215,7 +278,9 @@ const EditMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Localidad</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Localidad
+                </label>
                 <input
                   type="text"
                   name="localidad"
@@ -225,7 +290,9 @@ const EditMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Provincia
+                </label>
                 <select
                   name="provincia"
                   value={form.provincia}
@@ -234,12 +301,16 @@ const EditMember: React.FC = () => {
                 >
                   <option value="">Seleccionar</option>
                   {provincias.map((prov) => (
-                    <option key={prov} value={prov}>{prov}</option>
+                    <option key={prov} value={prov}>
+                      {prov}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Teléfono
+                </label>
                 <input
                   type="text"
                   name="telefono"
@@ -249,7 +320,9 @@ const EditMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
                 <input
                   type="email"
                   name="email"
@@ -260,7 +333,9 @@ const EditMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CBU</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  CBU
+                </label>
                 <input
                   type="text"
                   name="cbu"
@@ -270,7 +345,9 @@ const EditMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CUIL</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  CUIL
+                </label>
                 <input
                   type="text"
                   name="cuil"

@@ -19,10 +19,12 @@ export const apiMutual = {
         headers: {
           "Content-Type": "application/json",
         },
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       }
     );
     const { token } = response.data as ILoginResponse;
     sessionStorage.setItem("token", token);
+    
     // axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     return token;
   },
