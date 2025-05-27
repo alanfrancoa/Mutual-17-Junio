@@ -1,7 +1,7 @@
 // src/components/Login.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthService } from "../../api/authservice";
+import { apiMutual } from "../../api/apiMutual";
 
 
 const Login = () => {
@@ -17,7 +17,7 @@ const Login = () => {
     setError("");
 
     try {
-      await AuthService.login(username, password);
+      await apiMutual.Login(username, password);
       // Redirigir al dashboard después de login exitoso
       navigate("/dashboard");
     } catch (err) {
