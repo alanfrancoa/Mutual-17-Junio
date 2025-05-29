@@ -16,29 +16,29 @@ const Sidebar: React.FC = () => {
       
       <nav className="flex-1 px-4 py-6 space-y-2">
         {/* Home */}
-        <h2 className="text-center">Menu [Rol]</h2>
+        <h2 className="text-center">MENU M17J</h2>
         <a
-          href=" "
+          href="/dashboard"
           className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
         >
           <span className="material-icons"></span>
-          INICIO
+          Inicio
         </a>
         {/* Asociados */}
         <a
-          href=" "
+          href="/asociados"
           className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700  transition font-medium"
         >
           <span className="material-icons"></span>
-          ASOCIADOS
+          Asociados
         </a>
         {/* Proveedores */}
         <a
-          href=" "
+          href="/proveedores"
           className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700  transition font-medium"
         >
           <span className="material-icons"></span>
-          PROVEEDORES
+          Proveedores
         </a>
         {/* Cobros y Morosidad */}
         <a
@@ -46,7 +46,7 @@ const Sidebar: React.FC = () => {
           className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700  transition font-medium"
         >
           <span className="material-icons"></span>
-          COBROS Y MOROSIDAD
+          Cobros y Morosidad
         </a>
         {/* Préstamos */}
         <a
@@ -54,7 +54,7 @@ const Sidebar: React.FC = () => {
           className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700  transition font-medium"
         >
           <span className="material-icons"></span>
-          PRÉSTAMOS
+          Prestamos
         </a>
         {/* Reportes y Normativas */}
         <a
@@ -62,7 +62,14 @@ const Sidebar: React.FC = () => {
           className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700  transition font-medium"
         >
           <span className="material-icons"> </span>
-          REPORTES Y NORMATIVAS
+          Reportes Y Normativas
+        </a>
+        <a
+          href="/usuarios"
+          className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700  transition font-medium"
+        >
+          <span className="material-icons"> </span>
+          Acceso Administrador
         </a>
       </nav>
     </aside>

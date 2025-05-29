@@ -25,7 +25,7 @@ export const apiMutual = {
     const { token } = response.data as ILoginResponse;
     sessionStorage.setItem("token", token);
     
-    // axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    //axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     return token;
   },
 };
