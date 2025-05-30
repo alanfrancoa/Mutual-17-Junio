@@ -29,8 +29,6 @@ interface DashboardProps {
 }
 
 const Proveedores: React.FC<DashboardProps> = ({
-  userName = "Fernando",
-  userRole = "administrador",
   hasNotifications = true,
   showOrderForm = false,
 }) => {

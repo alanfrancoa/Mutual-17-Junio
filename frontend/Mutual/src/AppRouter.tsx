@@ -6,7 +6,7 @@ import {
 } from "react-router-dom";
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
-import ForgotPassword from "./pages/auth/ForgotPassword";
+
 import Proveedores from "./pages/modules/suppliers/Suppliers";
 import Asociados from "./pages/modules/members/Members";
 import CreateMember from "./pages/modules/members/createMember";
@@ -25,7 +25,6 @@ const AppRouter: React.FC = () => {
       <Routes>
         {/* Rutas públicas */}
         <Route path="/auth/login" element={<Login />} />
-        <Route path="/auth/forgot-password" element={<ForgotPassword />} />
 
         {/* Rutas privadas */}
 

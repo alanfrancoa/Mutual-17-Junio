@@ -1,16 +1,28 @@
 // src/components/Login.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { apiMutual } from "../../api/apiMutual";
+import TermsModal from "../../components/ui/auth/modalTermsAndConditions";
+import PrivacyModal from "../../components/ui/auth/modalPrivacyPolitics";
 
 function parseJwt(token: string) {
   try {
-    return JSON.parse(atob(token.split('.')[1]));
+    return JSON.parse(atob(token.split(".")[1]));
   } catch {
     return null;
   }
 }
+
+const getUserAcceptanceKey = (username: string, type: "terms" | "privacy") => {
+  return `${username}_${type}_accepted`;
+};
+
+const checkUserAcceptance = (username: string, type: "terms" | "privacy") => {
+  return localStorage.getItem(getUserAcceptanceKey(username, type)) === "true";
+};
+const saveUserAcceptance = (username: string, type: "terms" | "privacy") => {
+  localStorage.setItem(getUserAcceptanceKey(username, type), "true");
+};
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -18,9 +30,36 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+
+  useEffect(() => {
+    if (username) {
+      // Verifica si por Username ya aceptó los términos y condiciones y la política de privacidad
+      const termsAccepted = checkUserAcceptance(username, "terms");
+      const privacyAccepted = checkUserAcceptance(username, "privacy");
+
+      if (!termsAccepted) setShowTermsModal(true);
+      if (!privacyAccepted) setShowPrivacyModal(true);
+    }
+  }, [username]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Condicional de aceptacion de terminos y condiciones y politica de privacidad
+    const termsAccepted = checkUserAcceptance(username, "terms");
+    const privacyAccepted = checkUserAcceptance(username, "privacy");
+
+    if (!termsAccepted || !privacyAccepted) {
+      setError(
+        "Debes aceptar los Términos y Condiciones y la Política de Privacidad"
+      );
+      if (!termsAccepted) setShowTermsModal(true);
+      if (!privacyAccepted) setShowPrivacyModal(true);
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -139,17 +178,42 @@ const Login = () => {
 
         {/* Footer */}
         <div className="mt-8 text-xs text-gray-400 text-center">
-          <a href="/terms" className="underline mr-4">
-            Terms of Use
-          </a>
-          <a href="/privacy" className="underline">
-            Privacy Policy
-          </a>
+          <button
+            onClick={() => setShowTermsModal(true)}
+            className="underline mr-4 hover:text-gray-300"
+          >
+            Términos y Condiciones
+          </button>
+          <button
+            onClick={() => setShowPrivacyModal(true)}
+            className="underline hover:text-gray-300"
+          >
+            Política de Privacidad
+          </button>
           <p className="mt-2">
             Todos los derechos reservados © 2025 Mutual 17 de Junio
           </p>
         </div>
       </div>
+
+      {/* importacion de modales */}
+      <TermsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAccept={() => {
+          saveUserAcceptance(username, "terms");
+          setShowTermsModal(false);
+        }}
+      />
+
+      <PrivacyModal
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+        onAccept={() => {
+          saveUserAcceptance(username, "privacy");
+          setShowPrivacyModal(false);
+        }}
+      />
     </div>
   );
 };
