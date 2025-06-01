@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
@@ -6,41 +6,44 @@ import Sidebar from "../../dashboard/components/Sidebar";
 type UserRole = "administrador" | "gestor" | "consultante";
 const userRole = (sessionStorage.getItem("userRole") || "consultante") as UserRole;
 
-// Simulación de datos de órdenes
-const mockOrders = [
-  {
-    id: 101,
-    supplier: "Proveedor A",
-    date: "2024-06-01",
-    total: 12000,
-    status: "Borrador",
-    type: "compra",
-  },
-  {
-    id: 102,
-    supplier: "Proveedor B",
-    date: "2024-06-03",
-    total: 8000,
-    status: "Aprobado",
-    type: "servicio",
-  },
-  {
-    id: 103,
-    supplier: "Proveedor C",
-    date: "2024-06-05",
-    total: 15000,
-    status: "Recibido",
-    type: "compra",
-  },
-  // ...agrega más órdenes simuladas aquí...
-].sort((a, b) => b.id - a.id).slice(0, 10); // Solo los últimos 10
+interface Order {
+  id: number;
+  supplier: string;
+  date: string;
+  total: number;
+  status: "Borrador" | "Aprobado" | "Recibido";
+  type: "compra" | "servicio";
+}
 
 const Orders: React.FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [orders] = useState(mockOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Llama al backend para obtener las órdenes
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch("/api/services");
+        if (response.ok) {
+          const data = await response.json();
+          // Solo toma las últimas 10 por id descendente
+          const sorted = data.sort((a: Order, b: Order) => b.id - a.id).slice(0, 10);
+          setOrders(sorted);
+        } else {
+          setOrders([]);
+        }
+      } catch {
+        setOrders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, []);
 
   // Filtro por ID, proveedor, fecha, tipo y estado
   const filteredOrders = orders.filter((order) =>
@@ -52,7 +55,7 @@ const Orders: React.FC = () => {
   );
 
   // Lógica de permisos para el botón Editar
-  const canEdit = (order: typeof mockOrders[0]) => {
+  const canEdit = (order: Order) => {
     if (order.status === "Borrador") {
       return userRole === "administrador" || userRole === "gestor";
     }
@@ -63,7 +66,7 @@ const Orders: React.FC = () => {
   };
 
   // Mensaje según el estado y rol
-  const handleEditClick = (order: typeof mockOrders[0]) => {
+  const handleEditClick = (order: Order) => {
     if (order.status === "Recibido") {
       alert('No se puede editar la orden porque está en estado "Recibido".');
       return;
