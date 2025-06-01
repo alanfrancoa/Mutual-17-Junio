@@ -7,7 +7,8 @@ import {
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
 
-import Proveedores from "./pages/modules/suppliers/Suppliers";
+import Suppliers from "./pages/modules/suppliers/Suppliers";
+import NewSupplier from "./pages/modules/suppliers/NewSupplier";
 import Asociados from "./pages/modules/members/Members";
 import CreateMember from "./pages/modules/members/createMember";
 import EditMember from "./pages/modules/members/editMember";
@@ -31,11 +32,12 @@ const AppRouter: React.FC = () => {
         <Route path="/dashboard" element={<Dashboard />} />
 
         {/* seccion provedores */}
-        <Route path="/proveedores" element={<Proveedores />} />
-        <Route
-          path="/proveedores/ordenes/nueva"
-          element={<Proveedores showOrderForm={true} />}
-        />
+        <Route path="/proveedores" element={<Suppliers />} />
+        <Route path="/proveedores/ordenes/nueva" element={<Suppliers showOrderForm={true} />} />
+        <Route path="/proveedores/nuevo" element={<NewSupplier />} />
+        {/*<Route path="/proveedores/editar" element={<NewSupplier />} />
+        <Route path="/proveedores/eliminar" element={<NewSupplier />} />
+        <Route path="/proveedores/detalle" element={<NewSupplier />} />*/}
 
         {/* Seccion asociados */}
         <Route path="/asociados" element={<Asociados />} />
