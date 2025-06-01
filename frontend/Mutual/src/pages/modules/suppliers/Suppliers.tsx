@@ -28,7 +28,7 @@ interface DashboardProps {
   showOrderForm?: boolean;
 }
 
-const Proveedores: React.FC<DashboardProps> = ({
+const Suppliers: React.FC<DashboardProps> = ({
   hasNotifications = true,
   showOrderForm = false,
 }) => {
@@ -90,4 +90,4 @@ const Proveedores: React.FC<DashboardProps> = ({
   );
 };
 
-export default Proveedores;
+export default Suppliers;
