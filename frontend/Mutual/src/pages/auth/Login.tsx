@@ -32,6 +32,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showForgotPassModal, setShowForgotPassModal] = useState(false);
 
   useEffect(() => {
     if (username) {
@@ -160,18 +161,13 @@ const Login = () => {
           </form>
 
           <div className="mt-4 flex flex-col items-center space-y-2">
-            <a
-              href="/auth/forgot-password"
-              className="text-blue-600 hover:underline text-sm"
-            >
-              ¿Olvidaste tu contraseña?
-            </a>
             <button
               type="button"
-              onClick={() => navigate("/dashboard")}
-              className="mt-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full font-semibold transition"
+              onClick={() => setShowForgotPassModal(true)}
+              className="text-blue-600 hover:underline text-sm bg-transparent border-none p-0"
+              style={{ background: "none" }}
             >
-              Ir al Dashboard
+              ¿Olvidaste tu contraseña?
             </button>
           </div>
         </div>
@@ -195,6 +191,25 @@ const Login = () => {
           </p>
         </div>
       </div>
+
+      {/* Modal de contacto admin para reseteo de pass */}
+      {showForgotPassModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center">
+            <h3 className="text-lg font-bold mb-4 text-red-700">Advertencia</h3>
+            <p className="mb-6 text-gray-700">
+              Para recuperar tu contraseña, por favor contacta al administrador
+              del sistema o revisa tu correo institucional para instrucciones.
+            </p>
+            <button
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-semibold"
+              onClick={() => setShowForgotPassModal(false)}
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* importacion de modales */}
       <TermsModal

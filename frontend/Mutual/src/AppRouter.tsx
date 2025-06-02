@@ -42,16 +42,16 @@ const AppRouter: React.FC = () => {
         {/* Seccion asociados */}
         <Route path="/asociados" element={<Asociados />} />
         <Route path="/asociados/crear" element={<CreateMember />} />
-        <Route path="/asociados/editar" element={<EditMember />} />
-        <Route path="/asociados/eliminar" element={<DeleteMember />} />
-        <Route path="/asociados/detalle" element={<ReadMember />} />
+        <Route path="/asociados/editar/:id" element={<EditMember />} />
+        <Route path="/asociados/eliminar/:id" element={<DeleteMember />} />
+        <Route path="/asociados/detalle/:id" element={<ReadMember />} />
 
         {/* seccion usuarios */}
         <Route path="/usuarios" element={<UsersTable />} />
         <Route path="/usuarios/crear" element={<CreateUser />} />
-        <Route path="/usuarios/editar" element={<EditUser />} />
-        <Route path="/usuarios/eliminar" element={<DeleteUser />} />
-        <Route path="/usuarios/detalle" element={<ReadUser />} />
+        <Route path="/usuarios/editar/:id" element={<EditUser />} />
+        <Route path="/usuarios/eliminar/:id" element={<DeleteUser />} />
+        <Route path="/usuarios/detalle/:id" element={<ReadUser />} />
 
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/auth/login" replace />} />

@@ -18,4 +18,8 @@ export default class Fetcher {
   static delete(path: string, config?: any) {
     return axios.delete(path, config);
   }
+
+  static patch(path: string, data?: any, config?: any) {
+    return axios.patch(path, data, config);
+  }
 }

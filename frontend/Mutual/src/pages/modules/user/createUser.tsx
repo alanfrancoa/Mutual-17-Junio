@@ -2,15 +2,16 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
+import { apiMutual } from "../../../api/apiMutual";
 
 const roles = ["Administrador", "Gestor", "Consultor"];
 
 const CreateUser: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    usuario: "",
-    email: "",
+    usuario: "",    
     password: "",
+    confirmPassword: "",
     rol: "Consultor",
   });
 
@@ -18,13 +19,21 @@ const CreateUser: React.FC = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Aquí iría la lógica para guardar el usuario
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  // Validacion simple contraseñas
+  if (form.password !== form.confirmPassword) {
+    alert("Las contraseñas no coinciden");
+    return;
+  }
+  try {
+    await apiMutual.CrearUsuario(form.usuario, form.password,form.confirmPassword, form.rol);
     alert("Usuario creado correctamente");
     navigate("/usuarios");
-  };
-
+  } catch (error) {
+    alert("Error al crear usuario");
+  }
+};
   return (
     <div className="min-h-screen bg-gray-100 flex">
       {/* Sidebar fija a la izquierda */}
@@ -52,23 +61,24 @@ const CreateUser: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                />
-              </div>
+            
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
                 <input
                   type="password"
                   name="password"
                   value={form.password}
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-gray-300 rounded px-3 py-2"
+                />
+              </div>
+                <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña</label>
+                <input
+                  type="confirmPassword"
+                  name="confirmPassword"
+                  value={form.confirmPassword}
                   onChange={handleChange}
                   required
                   className="w-full border border-gray-300 rounded px-3 py-2"
