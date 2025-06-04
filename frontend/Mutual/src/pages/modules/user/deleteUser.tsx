@@ -3,35 +3,21 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 
-const usuarios = [
-  { id: "1", nombre: "anabela1" },
-  { id: "2", nombre: "juanperez" },
-  { id: "3", nombre: "maria2" },
-  // ...agrega más usuarios si lo deseas
-];
-
-const motivosBaja = ["Renuncia", "Desempeño", "Reestructuración", "Otro"];
+const usuarioSeleccionado = [{ id: "1", nombre: "anabela1" }];
 
 const DeleteUser: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    usuario: "",
-    motivoBaja: "",
-    ultimoDia: "",
-    notas: "",
+    fechaEgreso: "",
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica para dar de baja al usuario
+
     alert("Usuario dado de baja correctamente");
     navigate("/usuarios");
   };
@@ -41,9 +27,8 @@ const DeleteUser: React.FC = () => {
       <Sidebar />
       <Header hasNotifications={true} />
       <div className="flex flex-col items-center py-8 flex-1">
-        {/* Título alineado al formulario, fuera del form */}
+        {/* Título form baja usuario */}
         <div className="w-full max-w-lg">
-          
           <h2 className="text-2xl font-bold mb-6 text-blue-900">
             Baja de Usuario
           </h2>
@@ -52,66 +37,26 @@ const DeleteUser: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Selecciona el Usuario <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="usuario"
-                value={form.usuario}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded px-3 py-2"
-              >
-                <option value="">Seleccionar</option>
-                {usuarios.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Motivo de baja <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="motivoBaja"
-                value={form.motivoBaja}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded px-3 py-2"
-              >
-                <option value="">Seleccionar</option>
-                {motivosBaja.map((motivo) => (
-                  <option key={motivo} value={motivo}>
-                    {motivo}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Último día activo <span className="text-red-500">*</span>
+                Nombre de usuario
               </label>
               <input
-                type="date"
-                name="ultimoDia"
-                value={form.ultimoDia}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded px-3 py-2"
+                type="text"
+                value={usuarioSeleccionado[0].nombre}
+                disabled
+                className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Notas
+                Fecha de egreso <span className="text-red-500">*</span>
               </label>
-              <textarea
-                name="notas"
-                value={form.notas}
+              <input
+                type="date"
+                name="fechaEgreso"
+                value={form.fechaEgreso}
                 onChange={handleChange}
+                required
                 className="w-full border border-gray-300 rounded px-3 py-2"
-                placeholder="Escribe un comentario que describa el motivo"
-                rows={2}
               />
             </div>
             <div className="flex justify-end gap-2 pt-4">
