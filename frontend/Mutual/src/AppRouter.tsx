@@ -9,7 +9,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 
 import Suppliers from "./pages/modules/suppliers/Suppliers";
 import NewSupplier from "./pages/modules/suppliers/NewSupplier";
-import Asociados from "./pages/modules/members/Members";
+import Asociados from "./pages/modules/members/members";
 import CreateMember from "./pages/modules/members/createMember";
 import EditMember from "./pages/modules/members/editMember";
 import DeleteMember from "./pages/modules/members/deleteMember";
