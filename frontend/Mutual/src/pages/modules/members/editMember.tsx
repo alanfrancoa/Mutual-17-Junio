@@ -3,12 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 
-const categorias = ["Oficial", "Suboficial", "Civil"];
-const estados = ["Activo", "Inactivo"];
 const estadoCivil = ["Soltero/a", "Casado/a", "Divorciado/a", "Viudo/a"];
-const sexos = ["Masculino", "Femenino", "Otro"];
-const tipoDocumento = ["DNI", "Pasaporte", "CI", "LE", "LC"];
-const extranjero = ["No", "Sí"];
+const generos = ["Masculino", "Femenino", "Otro"];
 const provincias = [
   "Buenos Aires",
   "Catamarca",
@@ -40,24 +36,18 @@ const EditMember: React.FC = () => {
   // Datos precargados de ejemplo
   const [form, setForm] = useState({
     apellidoNombre: "Juan Pérez",
-    tipoDocumento: "DNI",
     dni: "12345678",
-    extranjero: "No",
     estadoCivil: "Casado/a",
-    sexo: "Masculino",
+    genero: "Masculino",
     fechaNacimiento: "1985-04-12",
-    fechaIngreso: "2010-03-01",
-    categoria: "Oficial",
-    estado: "Activo",
     organismo: "Fuerza Aérea Argentina",
     direccion: "Av. Siempre Viva 123",
     direccionLaboral: "Piso 2 Letra B",
-    localidad: "CABA",
+    ciudad: "CABA",
     provincia: "Buenos Aires",
     telefono: "1122334455",
     email: "juan.perez@faa.gob.ar",
     cbu: "2850590940090418135201",
-    cuil: "20-12345678-3",
   });
 
   const handleChange = (
@@ -83,7 +73,7 @@ const EditMember: React.FC = () => {
             Editar Asociado
           </h2>
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Apellido y Nombre
@@ -97,26 +87,10 @@ const EditMember: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tipo de Documento
-                </label>
-                <select
-                  name="tipoDocumento"
-                  value={form.tipoDocumento}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                >
-                  {tipoDocumento.map((tipo) => (
-                    <option key={tipo} value={tipo}>
-                      {tipo}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  N° Documento
+                  Numero de Documento
                 </label>
                 <input
                   type="text"
@@ -127,23 +101,7 @@ const EditMember: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Extranjero
-                </label>
-                <select
-                  name="extranjero"
-                  value={form.extranjero}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                >
-                  {extranjero.map((op) => (
-                    <option key={op} value={op}>
-                      {op}
-                    </option>
-                  ))}
-                </select>
-              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Estado Civil
@@ -164,18 +122,18 @@ const EditMember: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Sexo
+                  Genero
                 </label>
                 <select
-                  name="sexo"
-                  value={form.sexo}
+                  name="generos"
+                  value={form.genero}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 >
                   <option value="">Seleccionar</option>
-                  {sexos.map((sx) => (
-                    <option key={sx} value={sx}>
-                      {sx}
+                  {generos.map((g) => (
+                    <option key={g} value={g}>
+                      {g}
                     </option>
                   ))}
                 </select>
@@ -193,52 +151,7 @@ const EditMember: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fecha de Ingreso
-                </label>
-                <input
-                  type="date"
-                  name="fechaIngreso"
-                  value={form.fechaIngreso}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Categoría
-                </label>
-                <select
-                  name="categoria"
-                  value={form.categoria}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                >
-                  {categorias.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Estado
-                </label>
-                <select
-                  name="estado"
-                  value={form.estado}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                >
-                  {estados.map((e) => (
-                    <option key={e} value={e}>
-                      {e}
-                    </option>
-                  ))}
-                </select>
-              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Organismo
@@ -279,12 +192,12 @@ const EditMember: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Localidad
+                  Ciudad
                 </label>
                 <input
                   type="text"
-                  name="localidad"
-                  value={form.localidad}
+                  name="ciudad"
+                  value={form.ciudad}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />
@@ -340,18 +253,6 @@ const EditMember: React.FC = () => {
                   type="text"
                   name="cbu"
                   value={form.cbu}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  CUIL
-                </label>
-                <input
-                  type="text"
-                  name="cuil"
-                  value={form.cuil}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />

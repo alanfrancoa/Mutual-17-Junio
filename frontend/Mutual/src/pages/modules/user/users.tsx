@@ -164,7 +164,15 @@ const UsersTable: React.FC = () => {
                                 (window.location.href = `/usuarios/eliminar/${user.id}`)
                               }
                             >
-                              Eliminar
+                              Baja
+                            </button>
+                            <button
+                              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                              onClick={() =>
+                                (window.location.href = `/usuarios/reactivar/${user.id}`)
+                              }
+                            >
+                              Activar
                             </button>
                             <button
                               className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded transition text-xs font-medium"

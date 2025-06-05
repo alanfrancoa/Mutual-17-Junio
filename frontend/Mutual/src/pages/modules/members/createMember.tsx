@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 
-const estados = ["Activo", "Inactivo"];
+
 const estadoCivil = ["Soltero/a", "Casado/a", "Divorciado/a", "Viudo/a"];
-const sexos = ["Masculino", "Femenino", "Otro"];
+const generos = ["Masculino", "Femenino", "Otro"];
 const provincias = [
   "Buenos Aires",
   "Catamarca",
@@ -39,7 +39,7 @@ const CreateMember: React.FC = () => {
     tipoDocumento: "DNI",
     dni: "",
     estadoCivil: "",
-    sexo: "",
+    genero: "",
     fechaNacimiento: "",
     estado: "Activo",
     organismo: "",
@@ -126,18 +126,18 @@ const CreateMember: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Sexo
+                 Genero
                 </label>
                 <select
-                  name="sexo"
-                  value={form.sexo}
+                  name="genero"
+                  value={form.genero}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 >
                   <option value="">Seleccionar</option>
-                  {sexos.map((sx) => (
-                    <option key={sx} value={sx}>
-                      {sx}
+                  {generos.map((g) => (
+                    <option key={g} value={g}>
+                      {g}
                     </option>
                   ))}
                 </select>
@@ -155,24 +155,7 @@ const CreateMember: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Estado
-                </label>
-                <select
-                  name="estado"
-                  value={form.estado}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                >
-                  {estados.map((e) => (
-                    <option key={e} value={e}>
-                      {e}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Organismo

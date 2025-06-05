@@ -19,6 +19,7 @@ import CreateUser from "./pages/modules/user/createUser";
 import EditUser from "./pages/modules/user/editUser";
 import ReadUser from "./pages/modules/user/readUser";
 import DeleteUser from "./pages/modules/user/deleteUser";
+import ReactivateUser from "./pages/modules/user/reactivateUser";
 
 const AppRouter: React.FC = () => {
   return (
@@ -33,7 +34,10 @@ const AppRouter: React.FC = () => {
 
         {/* seccion provedores */}
         <Route path="/proveedores" element={<Suppliers />} />
-        <Route path="/proveedores/ordenes/nueva" element={<Suppliers showOrderForm={true} />} />
+        <Route
+          path="/proveedores/ordenes/nueva"
+          element={<Suppliers showOrderForm={true} />}
+        />
         <Route path="/proveedores/nuevo" element={<NewSupplier />} />
         {/*<Route path="/proveedores/editar" element={<NewSupplier />} />
         <Route path="/proveedores/eliminar" element={<NewSupplier />} />
@@ -51,6 +55,7 @@ const AppRouter: React.FC = () => {
         <Route path="/usuarios/crear" element={<CreateUser />} />
         <Route path="/usuarios/editar/:id" element={<EditUser />} />
         <Route path="/usuarios/eliminar/:id" element={<DeleteUser />} />
+        <Route path="/usuarios/reactivar/:id" element={<ReactivateUser />} />
         <Route path="/usuarios/detalle/:id" element={<ReadUser />} />
 
         {/* Redirección por defecto */}
