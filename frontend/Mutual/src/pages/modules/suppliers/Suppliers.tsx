@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../dashboard/components/Header';
-import { PurchaseOrder } from './PurchaseOrder';
+import CreateOrder from './createOrder';
 
 const SuppliersSidebar: React.FC<{ navigate: (path: string) => void }> = ({ navigate }) => (
   <nav className="h-full flex flex-col p-4 bg-white">
@@ -72,7 +72,7 @@ const Suppliers: React.FC<DashboardProps> = ({
 
         <div className="flex-1 p-6">
           {showPurchaseOrder ? (
-            <PurchaseOrder onBack={() => navigate('/suppliers')} />
+            <CreateOrder onBack={() => navigate('/suppliers')} />
           ) : (
             <>
               <h1 className="text-2xl font-bold mb-4">Proveedores</h1>
