@@ -9,8 +9,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 
 import Suppliers from "./pages/modules/suppliers/Suppliers";
 import CreateSupplier from "./pages/modules/suppliers/createSupplier";
-import CreateOrder from "./pages/modules/suppliers/createOrder";
-import Asociados from "./pages/modules/members/Members";
+import CreateOrder from "./pages/modules/suppliers/createOrder";import Asociados from "./pages/modules/members/Members";
 import CreateMember from "./pages/modules/members/createMember";
 import EditMember from "./pages/modules/members/editMember";
 import DeleteMember from "./pages/modules/members/deleteMember";
@@ -20,6 +19,7 @@ import CreateUser from "./pages/modules/user/createUser";
 import EditUser from "./pages/modules/user/editUser";
 import ReadUser from "./pages/modules/user/readUser";
 import DeleteUser from "./pages/modules/user/deleteUser";
+import ReactivateUser from "./pages/modules/user/reactivateUser";
 
 const AppRouter: React.FC = () => {
   return (
@@ -34,8 +34,7 @@ const AppRouter: React.FC = () => {
 
         {/* seccion provedores */}
         <Route path="/proveedores" element={<Suppliers />} />
-        <Route path="/proveedores/ordenes/nueva" element={<Suppliers showOrderForm={true} />} />
-        <Route path="/proveedores/nuevo" element={<CreateSupplier />} />
+                <Route path="/proveedores/nuevo" element={<CreateSupplier />} />
         <Route path="/proveedores/nueva-orden" element={<CreateOrder />} />
         {/*<Route path="/proveedores/editar" element={<NewSupplier />} />
         <Route path="/proveedores/eliminar" element={<NewSupplier />} />
@@ -44,16 +43,17 @@ const AppRouter: React.FC = () => {
         {/* Seccion asociados */}
         <Route path="/asociados" element={<Asociados />} />
         <Route path="/asociados/crear" element={<CreateMember />} />
-        <Route path="/asociados/editar" element={<EditMember />} />
-        <Route path="/asociados/eliminar" element={<DeleteMember />} />
-        <Route path="/asociados/detalle" element={<ReadMember />} />
+        <Route path="/asociados/editar/:id" element={<EditMember />} />
+        <Route path="/asociados/eliminar/:id" element={<DeleteMember />} />
+        <Route path="/asociados/detalle/:id" element={<ReadMember />} />
 
         {/* seccion usuarios */}
         <Route path="/usuarios" element={<UsersTable />} />
         <Route path="/usuarios/crear" element={<CreateUser />} />
-        <Route path="/usuarios/editar" element={<EditUser />} />
-        <Route path="/usuarios/eliminar" element={<DeleteUser />} />
-        <Route path="/usuarios/detalle" element={<ReadUser />} />
+        <Route path="/usuarios/editar/:id" element={<EditUser />} />
+        <Route path="/usuarios/eliminar/:id" element={<DeleteUser />} />
+        <Route path="/usuarios/reactivar/:id" element={<ReactivateUser />} />
+        <Route path="/usuarios/detalle/:id" element={<ReadUser />} />
 
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/auth/login" replace />} />

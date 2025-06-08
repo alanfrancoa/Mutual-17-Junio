@@ -1,24 +1,18 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 
 const usuarioSeleccionado = [
-  { id: "1", nombre: "anabela1", rol: "Administrador", estado: "Activo" },
+  { id: "1", nombre: "anabela1", rol: "Administrador", estado: "Inactivo" },
 ];
 
-const DeleteUser: React.FC = () => {
+const ReactivateUser: React.FC = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({});
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    alert("Usuario dado de baja correctamente");
+    alert("Usuario reactivado correctamente");
     navigate("/usuarios");
   };
 
@@ -27,10 +21,9 @@ const DeleteUser: React.FC = () => {
       <Sidebar />
       <Header hasNotifications={true} />
       <div className="flex flex-col items-center py-8 flex-1">
-        {/* Título form baja usuario */}
         <div className="w-full max-w-lg">
           <h2 className="text-2xl font-bold mb-6 text-blue-900">
-            Baja de Usuario
+            Reactivar Usuario
           </h2>
         </div>
         <div className="w-full max-w-lg bg-white rounded-lg shadow p-8">
@@ -68,7 +61,6 @@ const DeleteUser: React.FC = () => {
                 className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
               />
             </div>
-
             <div className="flex justify-end gap-2 pt-4">
               <button
                 type="button"
@@ -79,9 +71,9 @@ const DeleteUser: React.FC = () => {
               </button>
               <button
                 type="submit"
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded font-semibold"
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-semibold"
               >
-                Dar de Baja
+                Reactivar
               </button>
             </div>
           </form>
@@ -91,4 +83,4 @@ const DeleteUser: React.FC = () => {
   );
 };
 
-export default DeleteUser;
+export default ReactivateUser;

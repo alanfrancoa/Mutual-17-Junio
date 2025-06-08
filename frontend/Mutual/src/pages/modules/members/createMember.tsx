@@ -3,17 +3,33 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 
-const categorias = ["Oficial", "Suboficial", "Civil"];
-const estados = ["Activo", "Inactivo"];
+
 const estadoCivil = ["Soltero/a", "Casado/a", "Divorciado/a", "Viudo/a"];
-const sexos = ["Masculino", "Femenino", "Otro"];
-const tipoDocumento = ["DNI", "Pasaporte", "CI", "LE", "LC"];
-const extranjero = ["No", "Sí"];
+const generos = ["Masculino", "Femenino", "Otro"];
 const provincias = [
-  "Buenos Aires", "Catamarca", "Chaco", "Chubut", "Córdoba", "Corrientes",
-  "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja", "Mendoza",
-  "Misiones", "Neuquén", "Río Negro", "Salta", "San Juan", "San Luis",
-  "Santa Cruz", "Santa Fe", "Santiago del Estero", "Tierra del Fuego", "Tucumán"
+  "Buenos Aires",
+  "Catamarca",
+  "Chaco",
+  "Chubut",
+  "Córdoba",
+  "Corrientes",
+  "Entre Ríos",
+  "Formosa",
+  "Jujuy",
+  "La Pampa",
+  "La Rioja",
+  "Mendoza",
+  "Misiones",
+  "Neuquén",
+  "Río Negro",
+  "Salta",
+  "San Juan",
+  "San Luis",
+  "Santa Cruz",
+  "Santa Fe",
+  "Santiago del Estero",
+  "Tierra del Fuego",
+  "Tucumán",
 ];
 
 const CreateMember: React.FC = () => {
@@ -22,50 +38,50 @@ const CreateMember: React.FC = () => {
     apellidoNombre: "",
     tipoDocumento: "DNI",
     dni: "",
-    extranjero: "No",
     estadoCivil: "",
-    sexo: "",
+    genero: "",
     fechaNacimiento: "",
-    fechaIngreso: "",
-    categoria: "Oficial",
     estado: "Activo",
     organismo: "",
     direccion: "",
     direccionLaboral: "",
-    localidad: "",
+    ciudad: "",
     provincia: "",
     telefono: "",
     email: "",
     cbu: "",
-    cuil: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica para guardar el asociado
     alert("Asociado creado correctamente");
     navigate("/asociados");
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      
       {/* Sidebar fija a la izquierda */}
       <Sidebar />
       {/* Header agregado */}
       <Header hasNotifications={true} />
       <div className="flex flex-col items-center py-8 flex-1">
         <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8">
-          <h2 className="text-2xl font-bold mb-6 text-blue-900">Nuevo Asociado</h2>
+          <h2 className="text-2xl font-bold mb-6 text-blue-900">
+            Nuevo Asociado
+          </h2>
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Cambia a 3 columnas en desktop */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Apellido y Nombre</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Apellido y Nombre
+                </label>
                 <input
                   type="text"
                   name="apellidoNombre"
@@ -75,21 +91,11 @@ const CreateMember: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento</label>
-                <select
-                  name="tipoDocumento"
-                  value={form.tipoDocumento}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                >
-                  {tipoDocumento.map((tipo) => (
-                    <option key={tipo} value={tipo}>{tipo}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">N° Documento</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  N° Documento
+                </label>
                 <input
                   type="text"
                   name="dni"
@@ -99,21 +105,11 @@ const CreateMember: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Extranjero</label>
-                <select
-                  name="extranjero"
-                  value={form.extranjero}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                >
-                  {extranjero.map((op) => (
-                    <option key={op} value={op}>{op}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Estado Civil</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Estado Civil
+                </label>
                 <select
                   name="estadoCivil"
                   value={form.estadoCivil}
@@ -122,26 +118,34 @@ const CreateMember: React.FC = () => {
                 >
                   <option value="">Seleccionar</option>
                   {estadoCivil.map((ec) => (
-                    <option key={ec} value={ec}>{ec}</option>
+                    <option key={ec} value={ec}>
+                      {ec}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sexo</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                 Genero
+                </label>
                 <select
-                  name="sexo"
-                  value={form.sexo}
+                  name="genero"
+                  value={form.genero}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 >
                   <option value="">Seleccionar</option>
-                  {sexos.map((sx) => (
-                    <option key={sx} value={sx}>{sx}</option>
+                  {generos.map((g) => (
+                    <option key={g} value={g}>
+                      {g}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fecha de Nacimiento
+                </label>
                 <input
                   type="date"
                   name="fechaNacimiento"
@@ -151,44 +155,11 @@ const CreateMember: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />
               </div>
+              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Ingreso</label>
-                <input
-                  type="date"
-                  name="fechaIngreso"
-                  value={form.fechaIngreso}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                <select
-                  name="categoria"
-                  value={form.categoria}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                >
-                  {categorias.map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                <select
-                  name="estado"
-                  value={form.estado}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                >
-                  {estados.map((e) => (
-                    <option key={e} value={e}>{e}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Organismo</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Organismo
+                </label>
                 <input
                   type="text"
                   name="organismo"
@@ -199,7 +170,9 @@ const CreateMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Dirección
+                </label>
                 <input
                   type="text"
                   name="direccion"
@@ -210,7 +183,9 @@ const CreateMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección Laboral (Piso y Letra)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Dirección Laboral (Piso y Letra)
+                </label>
                 <input
                   type="text"
                   name="direccionLaboral"
@@ -219,18 +194,11 @@ const CreateMember: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />
               </div>
+              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Localidad</label>
-                <input
-                  type="text"
-                  name="localidad"
-                  value={form.localidad}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Provincia
+                </label>
                 <select
                   name="provincia"
                   value={form.provincia}
@@ -239,12 +207,16 @@ const CreateMember: React.FC = () => {
                 >
                   <option value="">Seleccionar</option>
                   {provincias.map((prov) => (
-                    <option key={prov} value={prov}>{prov}</option>
+                    <option key={prov} value={prov}>
+                      {prov}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Teléfono
+                </label>
                 <input
                   type="text"
                   name="telefono"
@@ -254,7 +226,9 @@ const CreateMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
                 <input
                   type="email"
                   name="email"
@@ -265,21 +239,13 @@ const CreateMember: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CBU</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  CBU
+                </label>
                 <input
                   type="text"
                   name="cbu"
                   value={form.cbu}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CUIL</label>
-                <input
-                  type="text"
-                  name="cuil"
-                  value={form.cuil}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />

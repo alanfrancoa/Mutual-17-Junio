@@ -152,7 +152,7 @@ const Asociados: React.FC<DashboardProps> = ({
   userRole = "administrador",
   hasNotifications = true,
 }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [estadoFiltro, setEstadoFiltro] = useState<"Todos" | "Activo" | "Inactivo">("Todos"); // Nuevo estado
@@ -314,14 +314,14 @@ const Asociados: React.FC<DashboardProps> = ({
                           <button
                             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
                             onClick={() =>
-                              navigate(`/asociados/editar/`)
+                              navigate(`/asociados/editar/id`)
                             }
                           >
                             Editar
                           </button>
                           <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded transition text-xs font-medium"
                           onClick={() =>
-                            navigate(`/asociados/eliminar/`)
+                            navigate(`/asociados/eliminar/id`)
                           }                          
                           >                            
                             Eliminar
@@ -329,7 +329,7 @@ const Asociados: React.FC<DashboardProps> = ({
                           <button className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded transition text-xs font-medium"
                           
                             onClick={() =>
-                            navigate(`/asociados/detalle/`)
+                            navigate(`/asociados/detalle/id`)
                           }
                           >
                             Ver
