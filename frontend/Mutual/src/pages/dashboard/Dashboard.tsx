@@ -28,6 +28,7 @@ const Dashboard: React.FC<DashboardProps> = ({ hasNotifications = true }) => {
 
         <div className="flex-1 p-6">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+
             {/* Proveedores */}
             <div className="bg-blue-50 p-6 rounded-lg shadow">
               <div className="flex flex-col items-center">
@@ -51,16 +52,10 @@ const Dashboard: React.FC<DashboardProps> = ({ hasNotifications = true }) => {
                   PROVEEDORES
                 </h3>
                 <button
-                  onClick={() => navigate("/proveedores/ordenes/nueva")}
+                  onClick={() => navigate("/proveedores")}
                   className="mt-2 px-4 py-3 bg-blue-600 text-white rounded-full text-lg font-semibold hover:bg-blue-700 transition"
                 >
                   Proveedores
-                </button>
-                <button
-                  onClick={() => navigate("/proveedores/ordenes/nueva")}
-                  className="mt-2 px-4 py-3 bg-blue-600 text-white rounded-full text-lg font-semibold hover:bg-blue-700 transition"
-                >
-                  Ordenes de Compra
                 </button>
               </div>
             </div>
