@@ -4,11 +4,13 @@ import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 
 interface Supplier {
-  id: number;
-  nombre_razon_social: string;
-  dni_cuit: string;
-  telefono: string;
-  email: string;
+  Id: number;
+  CUIT: string;
+  LegalName: string;
+  Address: string;
+  Phone: string;
+  Email: string;
+  Active: boolean;
 }
 
 const AllSuppliers: React.FC = () => {
@@ -21,7 +23,7 @@ const AllSuppliers: React.FC = () => {
     // Llama al backend para obtener los proveedores
     const fetchSuppliers = async () => {
       try {
-        const response = await fetch("/api/suppliers");
+        const response = await fetch("/api/suppliers/providers");
         if (response.ok) {
           const data = await response.json();
           setSuppliers(data);
@@ -40,11 +42,12 @@ const AllSuppliers: React.FC = () => {
   // Filtro por nombre, cuit, teléfono o email
   const filteredSuppliers = suppliers.filter(
     (s) =>
-      s.nombre_razon_social.toLowerCase().includes(search.toLowerCase()) ||
-      s.dni_cuit.includes(search) ||
-      s.telefono.includes(search) ||
-      s.email.toLowerCase().includes(search.toLowerCase())
-  );
+     s.LegalName.toLowerCase().includes(search.toLowerCase()) ||
+        s.CUIT.includes(search) ||
+        (s.Address && s.Address.toLowerCase().includes(search.toLowerCase())) ||
+        (s.Phone && s.Phone.includes(search)) ||
+        (s.Email && s.Email.toLowerCase().includes(search.toLowerCase()))
+    );
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -82,30 +85,31 @@ const AllSuppliers: React.FC = () => {
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredSuppliers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-4 text-gray-500">
+                    <td colSpan={7} className="text-center py-4 text-gray-500">
                       No se encontraron proveedores.
                     </td>
                   </tr>
                 ) : (
                   filteredSuppliers.map((s) => (
-                    <tr key={s.id}>
-                      <td className="px-4 py-2">{s.id}</td>
-                      <td className="px-4 py-2">{s.nombre_razon_social}</td>
-                      <td className="px-4 py-2">{s.dni_cuit}</td>
-                      <td className="px-4 py-2">{s.telefono}</td>
-                      <td className="px-4 py-2">{s.email}</td>
+                    <tr key={s.Id}>
+                      <td className="px-4 py-2">{s.Id}</td>
+                      <td className="px-4 py-2">{s.LegalName}</td>
+                      <td className="px-4 py-2">{s.CUIT}</td>
+                      <td className="px-4 py-2">{s.Address}</td>
+                      <td className="px-4 py-2">{s.Phone}</td>
+                      <td className="px-4 py-2">{s.Email}</td>
                       <td className="px-4 py-2">
                         <button
-                          onClick={() => navigate(`/proveedores/editar/${s.id}`)}
+                          onClick={() => navigate(`/proveedores/editar/${s.Id}`)}
                           className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm mr-2"
                         >
                           Editar
                         </button>
                         <button
-                          onClick={() => navigate(`/proveedores/ver/${s.id}`)}
+                          onClick={() => navigate(`/proveedores/ver/${s.Id}`)}
                           className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
                         >
                           Ver
