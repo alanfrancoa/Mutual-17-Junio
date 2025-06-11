@@ -5,11 +5,12 @@ import Header from "../../dashboard/components/Header";
 
 interface Supplier {
   id: number;
-  cuit: string;
-  legal_name: string;
-  address: string;
-  phone: string;
-  email: string;
+  CUIT: string;
+  LegalName: string;
+  Address: string;
+  Phone: string;
+  Email: string;
+  Active?: boolean;
 }
 
 const EditSupplier: React.FC = () => {
@@ -18,11 +19,11 @@ const EditSupplier: React.FC = () => {
 
   const [form, setForm] = useState<Supplier>({
     id: 0,
-    cuit: "",
-    legal_name: "",
-    address: "",
-    phone: "",
-    email: "",
+    CUIT: "",
+    LegalName: "",
+    Address: "",
+    Phone: "",
+    Email: "",
   });
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState("");
@@ -35,12 +36,14 @@ const EditSupplier: React.FC = () => {
         if (!response.ok) throw new Error("No se pudo obtener el proveedor");
         const data = await response.json();
         setForm({
-          id: data.id,
-          cuit: data.cuit,
-          legal_name: data.legal_name,
-          address: data.address,
-          phone: data.phone,
-          email: data.email,
+
+          id: data.Id,
+          CUIT: data.CUIT,
+          LegalName: data.LegalName,
+          Address: data.Address,
+          Phone: data.Phone,
+          Email: data.Email,
+          Active: data.Active !== undefined ? data.Active : true,
         });
       } catch {
         setError("Error al cargar el proveedor");
@@ -91,7 +94,7 @@ const EditSupplier: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               name="cuit"
-              value={form.cuit}
+              value={form.CUIT}
               onChange={handleChange}
               placeholder="CUIT"
               required
@@ -99,7 +102,7 @@ const EditSupplier: React.FC = () => {
             />
             <input
               name="legal_name"
-              value={form.legal_name}
+              value={form.LegalName}
               onChange={handleChange}
               placeholder="Razón Social"
               required
@@ -107,25 +110,34 @@ const EditSupplier: React.FC = () => {
             />
             <input
               name="address"
-              value={form.address}
+              value={form.Address}
               onChange={handleChange}
               placeholder="Dirección"
               className="w-full border px-2 py-1"
-            />
+            />los 
             <input
               name="phone"
-              value={form.phone}
+              value={form.Phone}
               onChange={handleChange}
               placeholder="Teléfono"
               className="w-full border px-2 py-1"
             />
             <input
               name="email"
-              value={form.email}
+              value={form.Email}
               onChange={handleChange}
               placeholder="Email"
               className="w-full border px-2 py-1"
             />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+              <input
+                type="text"
+                value={form.Active ? "Activo" : "Inactivo"}
+                disabled
+                className="w-full border px-2 py-1 bg-gray-100 text-gray-700"
+              />
+            </div>
             <div className="flex gap-2">
               <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
                 Guardar Cambios
