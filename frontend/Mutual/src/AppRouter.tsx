@@ -11,7 +11,8 @@ import Suppliers from "./pages/modules/suppliers/Suppliers";
 import CreateSupplier from "./pages/modules/suppliers/createSupplier";
 import CreateOrder from "./pages/modules/suppliers/createOrder";
 import EditSupplier from "./pages/modules/suppliers/editSuppliers";
-import Asociados from "./pages/modules/members/members";
+import DeleteSupplier from "./pages/modules/suppliers/editSuppliers";
+import Asociados from "./pages/modules/members/Members";
 import CreateMember from "./pages/modules/members/createMember";
 import EditMember from "./pages/modules/members/editMember";
 import DeleteMember from "./pages/modules/members/deleteMember";
@@ -36,11 +37,11 @@ const AppRouter: React.FC = () => {
 
         {/* seccion provedores */}
         <Route path="/proveedores" element={<Suppliers />} />
-        <Route path="/proveedores/nuevo" element={<CreateSupplier />} />
-        <Route path="/proveedores/nueva-orden" element={<CreateOrder />} />
+        <Route path="/proveedores/nuevo" element={<CreateSupplier />} />      
         <Route path="/proveedores/editar" element={<EditSupplier />} />
-        {/*<Route path="/proveedores/eliminar" element={<NewSupplier />} />
-        <Route path="/proveedores/detalle" element={<NewSupplier />} />*/}
+        <Route path="/proveedores/eliminar" element={<DeleteSupplier />} />
+        {/*<Route path="/proveedores/detalle" element={<ReadSupplier />} />*/}
+        <Route path="/proveedores/nueva-orden" element={<CreateOrder />} />
 
         {/* Seccion asociados */}
         <Route path="/asociados" element={<Asociados />} />
