@@ -4,16 +4,15 @@ import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
 
-
-const roles = ["Administrador", "Gestor", "Consultor"];
+const roles = ["Admin", "Gestor", "Consultor"];
 
 const EditUser: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [form, setForm] = useState({
-    usuario: "",
-    password: "",
-    rol: "",
+    user: "",
+    Newpassword: "",
+    role: "",
   });
   const [loading, setLoading] = useState(true);
 
@@ -21,11 +20,11 @@ const EditUser: React.FC = () => {
     const fetchUser = async () => {
       if (!id) return;
       try {
-        const data = await apiMutual.ObtenerUsuarioPorId(Number(id));
+        const data = await apiMutual.GetUserById(Number(id));
         setForm({
-          usuario: data.username,
-          password: "", // No mostrar la contraseña por seguridad
-          rol: data.role,
+          user: data.username,
+          Newpassword: "",
+          role: data.role,
         });
       } catch (error) {
         alert("Error al obtener el usuario");
@@ -43,12 +42,14 @@ const EditUser: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const passwordToSend = form.Newpassword === "" ? null : form.Newpassword;
     try {
-      await apiMutual.EditarUsuario(
+      await apiMutual.EditUser(
         Number(id),
-        form.usuario,
-        form.password,
-        form.rol
+        form.user,
+        passwordToSend as string | null,
+
+        form.role
       );
       alert("Usuario actualizado correctamente");
       navigate("/usuarios");
@@ -78,8 +79,8 @@ const EditUser: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  name="usuario"
-                  value={form.usuario}
+                  name="user"
+                  value={form.user}
                   onChange={handleChange}
                   required
                   className="w-full border border-gray-300 rounded px-3 py-2"
@@ -87,12 +88,12 @@ const EditUser: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Contraseña
+                  Nueva contraseña
                 </label>
                 <input
                   type="password"
-                  name="password"
-                  value={form.password}
+                  name="Newpassword"
+                  value={form.Newpassword}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
                   placeholder="Nueva contraseña"
@@ -103,8 +104,8 @@ const EditUser: React.FC = () => {
                   Rol
                 </label>
                 <select
-                  name="rol"
-                  value={form.rol}
+                  name="role"
+                  value={form.role}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 >

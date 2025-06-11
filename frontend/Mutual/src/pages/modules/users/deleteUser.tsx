@@ -3,20 +3,19 @@ import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
-import { User } from "../../../types/user";
 
-const ReadUser: React.FC = () => {
+const DeleteUser: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [user, setUser] = useState<User | null>(null);
+  const [usuario, setUsuario] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
       if (!id) return;
       try {
-        const data = await apiMutual.ObtenerUsuarioPorId(Number(id));
-        setUser(data);
+        const data = await apiMutual.GetUserById(Number(id));
+        setUsuario(data);
       } catch (error) {
         alert("Error al obtener el usuario");
       }
@@ -25,28 +24,69 @@ const ReadUser: React.FC = () => {
     fetchUser();
   }, [id]);
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id) {
+      alert("El ID de usuario no está disponible para la baja.");
+      return;
+    }
+
+    /* ----------------------- Validacion operacion eliminacion + msj del BE ----------------------- */
+
+    try {
+      const result = await apiMutual.DeleteUser(Number(id));
+
+      // Verificamos si la respuesta exitosa tiene un mensaje y lo mostramos.
+      if (result && result.message) {
+        alert(result.message);
+
+        // Si el usuario ya estaba inactivo según el backend, no navegamos.
+        if (result.message.includes("ya se encuentra inactivo")) {
+          return;
+        }
+      } else {
+        alert("Usuario dado de baja correctamente.");
+      }
+      // Navegamos solo si la baja fue exitosa
+      navigate("/usuarios");
+    } catch (error: any) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        alert(error.response.data.message);
+      } else {
+        alert(
+          error?.message ||
+            "Ocurrió un error inesperado al dar de baja el usuario."
+        );
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Sidebar />
       <Header hasNotifications={true} />
       <div className="flex flex-col items-center py-8 flex-1">
-        <div className="w-full max-w-xl">
+        <div className="w-full max-w-lg">
           <h2 className="text-2xl font-bold mb-6 text-blue-900">
-            Detalles del Usuario
+            Baja de Usuario
           </h2>
         </div>
-        <div className="w-full max-w-xl bg-white rounded-lg shadow p-8">
-          {loading ? (
+        <div className="w-full max-w-lg bg-white rounded-lg shadow p-8">
+          {loading || !usuario ? (
             <div className="text-center text-gray-500 py-8">Cargando...</div>
-          ) : user ? (
-            <form className="space-y-5">
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Nombre de usuario
                 </label>
                 <input
                   type="text"
-                  value={user.username}
+                  value={usuario.username}
                   disabled
                   className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
                 />
@@ -57,7 +97,7 @@ const ReadUser: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  value={user.role}
+                  value={usuario.role}
                   disabled
                   className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
                 />
@@ -68,60 +108,33 @@ const ReadUser: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  value={user.active ? "Activo" : "Inactivo"}
+                  value={usuario.status}
                   disabled
                   className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fecha de creación
-                </label>
-                <input
-                  type="text"
-                  value={user.createdAt ? new Date(user.createdAt).toLocaleString() : ""}
-                  disabled
-                  className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Última actualización
-                </label>
-                <input
-                  type="text"
-                  value={user.updatedAt ? new Date(user.updatedAt).toLocaleString() : ""}
-                  disabled
-                  className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
-                />
-              </div>
-              {user.deletedAt && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Eliminado el
-                  </label>
-                  <input
-                    type="text"
-                    value={new Date(user.deletedAt).toLocaleString()}
-                    disabled
-                    className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
-                  />
+              {usuario.status === "Inactivo" && (
+                <div className="text-red-600 font-semibold">
+                  El usuario ya está inactivo y no puede darse de baja
+                  nuevamente.
                 </div>
               )}
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-end gap-2 pt-4">
                 <button
                   type="button"
                   onClick={() => navigate("/usuarios")}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-semibold"
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded"
                 >
-                  Volver
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded font-semibold"
+                >
+                  Dar de Baja
                 </button>
               </div>
             </form>
-          ) : (
-            <div className="text-center text-red-500 py-8">
-              Usuario no encontrado
-            </div>
           )}
         </div>
       </div>
@@ -129,4 +142,4 @@ const ReadUser: React.FC = () => {
   );
 };
 
-export default ReadUser;
+export default DeleteUser;

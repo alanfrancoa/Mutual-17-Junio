@@ -1,10 +1,11 @@
-import { AppConfig } from "../helper/config";
 import Fetcher from "../helper/fetcher";
 import { ILoginData } from "../types/loginData";
 
 import { ILoginResponse } from "../types/loginResponse";
 import { User } from "../types/user";
+/* -----------------------Llamadas API----------------------- */
 
+/* -----------------------Mod. AUTH login usuarios---------------------- */
 export const apiMutual = {
   Login: async (username: string, password: string): Promise<string> => {
     const url = `https://localhost:7256/api/login`;
@@ -28,21 +29,24 @@ export const apiMutual = {
     //axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     return token;
   },
+  /* -----------------------Modulo usuarios---------------------- */
 
-  CrearUsuario: async (
-    usuario: string,
+  /* ----------------------- 1. Crear Usuarios ----------------------- */
+
+  CreateUser: async (
+    user: string,
     password: string,
     confirmPassword: string,
-    rol: string
+    role: string
   ): Promise<any> => {
     const url = `https://localhost:7256/api/users`;
     const response = await Fetcher.post(
       url,
       {
-        Username: usuario,
+        Username: user,
         PasswordHash: password,
         ConfirmPassword: confirmPassword,
-        Role: rol,
+        Role: role,
       },
       {
         headers: {
@@ -54,7 +58,8 @@ export const apiMutual = {
     return response.data;
   },
 
-  ObtenerUsuarios: async (): Promise<User[]> => {
+  /* ----------------------- 2. Listar Usuarios ----------------------- */
+  GetUsers: async (): Promise<User[]> => {
     const url = `https://localhost:7256/api/users`;
     const response = await Fetcher.get(url, {
       headers: {
@@ -65,7 +70,9 @@ export const apiMutual = {
     return response.data as User[];
   },
 
-  ObtenerUsuarioPorId: async (id: number): Promise<User> => {
+  /* ----------------------- 3. Detalle Usuarios ----------------------- */
+
+  GetUserById: async (id: number): Promise<User> => {
     const url = `https://localhost:7256/api/users/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
@@ -76,31 +83,50 @@ export const apiMutual = {
     return response.data as User;
   },
 
-  BajaUsuario: async (id: number): Promise<void> => {
-    const url = `https://localhost:7256/api/users/${id}/state`;
+  /* ----------------------- 4. Baja Usuarios ----------------------- */
 
-    await Fetcher.patch(url, {
+  DeleteUser: async (id: number): Promise<any> => {
+    const url = `https://localhost:7256/api/users/${id}/state`;
+    const response = await Fetcher.put(
+      url,
+      {},
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+        },
+      }
+    );
+    return response.data;
+  },
+
+  /* ----------------------- 5. Reactivar alta Usuarios ----------------------- */
+
+  ReactivateUser: async (id: number): Promise<void> => {
+    const url = `https://localhost:7256/api/users/${id}/reactivate`;
+    await Fetcher.put(url, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
   },
+  /* ----------------------- 6. Actualizar Usuarios ----------------------- */
 
-  EditarUsuario: async (
+  EditUser: async (
     id: number,
-    usuario: string,
-    Newpassword: string,
-    rol: string
+    user: string,
+    Newpassword: string | null,
+    role: string
   ): Promise<any> => {
     const url = `https://localhost:7256/api/users/${id}`;
     const response = await Fetcher.put(
       url,
       {
         id: id,
-        Username: usuario,
+        Username: user,
         NewPassword: Newpassword,
-        Role: rol,
+        Role: role,
       },
       {
         headers: {

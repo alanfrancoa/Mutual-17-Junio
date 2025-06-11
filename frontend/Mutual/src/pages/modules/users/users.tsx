@@ -21,7 +21,7 @@ const UsersTable: React.FC = () => {
     const fetchUsuarios = async () => {
       setLoading(true);
       try {
-        const data = await apiMutual.ObtenerUsuarios();
+        const data = await apiMutual.GetUsers();
         setUsuarios(data);
       } catch (error) {
         alert("Error al obtener usuarios");
@@ -35,8 +35,8 @@ const UsersTable: React.FC = () => {
   const filtered = usuarios.filter(
     (u) =>
       (estadoFiltro === "Todos" ||
-        (estadoFiltro === "Activo" && u.active) ||
-        (estadoFiltro === "Inactivo" && !u.active)) &&
+        (estadoFiltro === "Activo" && u.status) ||
+        (estadoFiltro === "Inactivo" && !u.status)) &&
       ((u.username?.toLowerCase() || "").includes(search.toLowerCase()) ||
         (u.role?.toLowerCase() || "").includes(search.toLowerCase()))
   );
@@ -136,19 +136,19 @@ const UsersTable: React.FC = () => {
                           <td>
                             <span
                               className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                user.active
+                                user.status === "Activo"
                                   ? "bg-green-100 text-green-800"
                                   : "bg-yellow-100 text-yellow-800"
                               }`}
                             >
-                              {user.active ? "Activo" : "Inactivo"}
+                              {user.status}
                             </span>
                           </td>
                           <td>
                             {user.createdAt &&
                               new Date(user.createdAt).toLocaleDateString()}
                           </td>
-                          
+
                           <td className="px-4 py-4 border-b text-right space-x-2 whitespace-nowrap">
                             <button
                               className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
@@ -177,7 +177,7 @@ const UsersTable: React.FC = () => {
                             <button
                               className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded transition text-xs font-medium"
                               onClick={() =>
-                               (window.location.href = `/usuarios/detalle/${user.id}`)
+                                (window.location.href = `/usuarios/detalle/${user.id}`)
                               }
                             >
                               Ver

@@ -11,17 +11,17 @@ import Suppliers from "./pages/modules/suppliers/Suppliers";
 import CreateSupplier from "./pages/modules/suppliers/createSupplier";
 import CreateOrder from "./pages/modules/suppliers/createOrder";
 import EditSupplier from "./pages/modules/suppliers/editSuppliers";
-import Asociados from "./pages/modules/members/Members";
+import Asociados from "./pages/modules/members/members";
 import CreateMember from "./pages/modules/members/createMember";
 import EditMember from "./pages/modules/members/editMember";
 import DeleteMember from "./pages/modules/members/deleteMember";
 import ReadMember from "./pages/modules/members/readMember";
-import UsersTable from "./pages/modules/user/users";
-import CreateUser from "./pages/modules/user/createUser";
-import EditUser from "./pages/modules/user/editUser";
-import ReadUser from "./pages/modules/user/readUser";
-import DeleteUser from "./pages/modules/user/deleteUser";
-import ReactivateUser from "./pages/modules/user/reactivateUser";
+import UsersTable from "./pages/modules/users/users";
+import CreateUser from "./pages/modules/users/createUser";
+import EditUser from "./pages/modules/users/editUser";
+import ReadUser from "./pages/modules/users/readUser";
+import DeleteUser from "./pages/modules/users/deleteUser";
+import ReactivateUser from "./pages/modules/users/reactivateUser";
 
 const AppRouter: React.FC = () => {
   return (

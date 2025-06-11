@@ -27,7 +27,7 @@ const CreateUser: React.FC = () => {
     return;
   }
   try {
-    await apiMutual.CrearUsuario(form.usuario, form.password,form.confirmPassword, form.rol);
+    await apiMutual.CreateUser(form.usuario, form.password,form.confirmPassword, form.rol);
     alert("Usuario creado correctamente");
     navigate("/usuarios");
   } catch (error) {
