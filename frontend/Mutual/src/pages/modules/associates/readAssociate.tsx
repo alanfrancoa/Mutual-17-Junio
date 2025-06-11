@@ -3,31 +3,6 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 
-const provincias = [
-  "Buenos Aires",
-  "Catamarca",
-  "Chaco",
-  "Chubut",
-  "Córdoba",
-  "Corrientes",
-  "Entre Ríos",
-  "Formosa",
-  "Jujuy",
-  "La Pampa",
-  "La Rioja",
-  "Mendoza",
-  "Misiones",
-  "Neuquén",
-  "Río Negro",
-  "Salta",
-  "San Juan",
-  "San Luis",
-  "Santa Cruz",
-  "Santa Fe",
-  "Santiago del Estero",
-  "Tierra del Fuego",
-  "Tucumán",
-];
 
 const datos = {
   apellidoNombre: "Juan Pérez",
@@ -54,7 +29,7 @@ const datos = {
   observaciones: "Sin observaciones",
 };
 
-const ReadMember: React.FC = () => {
+const ReadAssociate: React.FC = () => {
   const navigate = useNavigate();
 
   return (
@@ -329,4 +304,4 @@ const ReadMember: React.FC = () => {
   );
 };
 
-export default ReadMember;
+export default ReadAssociate;

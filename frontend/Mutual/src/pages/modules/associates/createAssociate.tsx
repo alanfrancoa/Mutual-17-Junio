@@ -32,7 +32,7 @@ const provincias = [
   "Tucumán",
 ];
 
-const CreateMember: React.FC = () => {
+const CreateAssociate: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     apellidoNombre: "",
@@ -273,4 +273,4 @@ const CreateMember: React.FC = () => {
   );
 };
 
-export default CreateMember;
+export default CreateAssociate;

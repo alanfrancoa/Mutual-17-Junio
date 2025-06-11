@@ -12,7 +12,7 @@ const empleados = [
 const tiposBaja = ["Renuncia", "Despido", "Jubilación", "Fallecimiento"];
 const motivosSalida = ["Personal", "Desempeño", "Reestructuración", "Otro"];
 
-const DeleteMember: React.FC = () => {
+const DeleteAssociate: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     empleado: "",
@@ -154,4 +154,4 @@ const DeleteMember: React.FC = () => {
   );
 };
 
-export default DeleteMember;
+export default DeleteAssociate;

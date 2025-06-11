@@ -31,7 +31,7 @@ const provincias = [
   "Tucumán",
 ];
 
-const EditMember: React.FC = () => {
+const EditAssociate: React.FC = () => {
   const navigate = useNavigate();
   // Datos precargados de ejemplo
   const [form, setForm] = useState({
@@ -280,4 +280,4 @@ const EditMember: React.FC = () => {
   );
 };
 
-export default EditMember;
+export default EditAssociate;
