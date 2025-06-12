@@ -147,27 +147,27 @@ interface DashboardProps {
   hasNotifications?: boolean;
 }
 
-const Asociados: React.FC<DashboardProps> = ({
+const Associates: React.FC<DashboardProps> = ({
   userName = "Fernando",
   userRole = "administrador",
   hasNotifications = true,
 }) => {
-  
+
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [estadoFiltro, setEstadoFiltro] = useState<"Todos" | "Activo" | "Inactivo">("Todos"); // Nuevo estado
+  const [estadoFiltro, setEstadoFiltro] = useState<
+    "Todos" | "Activo" | "Inactivo"
+  >("Todos"); // Nuevo estado
 
   // Filtrado por búsqueda y estado
   const filtered = asociadosFuerzaAerea.filter(
     (a) =>
       (estadoFiltro === "Todos" || a.estado === estadoFiltro) &&
-      (
-        a.dni.includes(search) ||
+      (a.dni.includes(search) ||
         a.nombreCompleto.toLowerCase().includes(search.toLowerCase()) ||
         a.organismo.toLowerCase().includes(search.toLowerCase()) ||
         a.categoria.toLowerCase().includes(search.toLowerCase()) ||
-        a.email.toLowerCase().includes(search.toLowerCase())
-      )
+        a.email.toLowerCase().includes(search.toLowerCase()))
   );
 
   // Paginación
@@ -182,7 +182,10 @@ const Asociados: React.FC<DashboardProps> = ({
       <Sidebar />
 
       {/* Contenido principal desplazado a la derecha */}
-      <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" /* w-72 = 288px */ }}>
+      <div
+        className="flex-1 flex flex-col"
+        style={{ marginLeft: "18rem" /* w-72 = 288px */ }}
+      >
         {/* Header */}
         <Header hasNotifications={hasNotifications} />
 
@@ -210,7 +213,9 @@ const Asociados: React.FC<DashboardProps> = ({
                     name="estadoFiltro"
                     value={estadoFiltro}
                     onChange={(e) => {
-                      setEstadoFiltro(e.target.value as "Todos" | "Activo" | "Inactivo");
+                      setEstadoFiltro(
+                        e.target.value as "Todos" | "Activo" | "Inactivo"
+                      );
                       setPage(1);
                     }}
                     className="px-3 py-2 border border-gray-300 rounded bg-white text-gray-700"
@@ -313,24 +318,19 @@ const Asociados: React.FC<DashboardProps> = ({
                         <td className="px-4 py-4 border-b text-right space-x-2 whitespace-nowrap">
                           <button
                             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
-                            onClick={() =>
-                              navigate(`/asociados/editar/id`)
-                            }
+                            onClick={() => navigate(`/asociados/editar/id`)}
                           >
                             Editar
                           </button>
-                          <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded transition text-xs font-medium"
-                          onClick={() =>
-                            navigate(`/asociados/eliminar/id`)
-                          }                          
-                          >                            
+                          <button
+                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                            onClick={() => navigate(`/asociados/eliminar/id`)}
+                          >
                             Eliminar
                           </button>
-                          <button className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded transition text-xs font-medium"
-                          
-                            onClick={() =>
-                            navigate(`/asociados/detalle/id`)
-                          }
+                          <button
+                            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                            onClick={() => navigate(`/asociados/detalle/id`)}
                           >
                             Ver
                           </button>
@@ -374,5 +374,4 @@ const Asociados: React.FC<DashboardProps> = ({
     </div>
   );
 };
-
-export default Asociados;
+export default Associates;
