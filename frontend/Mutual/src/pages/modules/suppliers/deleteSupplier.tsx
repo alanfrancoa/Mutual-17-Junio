@@ -13,7 +13,7 @@ interface Supplier {
   active?: boolean; 
 }
 
-const EditSupplier: React.FC = () => {
+const DeleteSupplier: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -76,7 +76,7 @@ const EditSupplier: React.FC = () => {
     }
   };
 
-  // Función para inactivar el proveedor (borrado lógico)
+  // Función para inactivar
   const handleInactivate = async () => {
     setSuccess("");
     setError("");
@@ -176,4 +176,4 @@ const EditSupplier: React.FC = () => {
   );
 };
 
-export default EditSupplier;
+export default DeleteSupplier;
