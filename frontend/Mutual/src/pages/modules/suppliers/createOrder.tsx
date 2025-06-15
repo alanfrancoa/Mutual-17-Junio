@@ -50,7 +50,7 @@ const CreateOrder: React.FC<PurchaseOrderProps> = ({ onBack }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-const [selectedSupplierId, setSelectedSupplierId] = useState<number | null>(null);
+  const [selectedSupplierId, setSelectedSupplierId] = useState<number | null>(null);
 
 useEffect(() => {
   const fetchSuppliers = async () => {
@@ -58,7 +58,7 @@ useEffect(() => {
       const response = await fetch("/api/suppliers");
       if (response.ok) {
         const data = await response.json();
-        setSuppliers(data.filter((s: Supplier) => s.Active));
+        setSuppliers(data.filter((s: Supplier) => s.Active)); // Filtrar por proveedores activos
       }
     } catch {
       setSuppliers([]);
@@ -114,20 +114,13 @@ useEffect(() => {
     alert('Orden guardada correctamente');
   };
 
-  const handleApprove = () => {
-    setStatus('Aprobado');
-    alert('Orden aprobada correctamente');
-  };
-
-  const isEditable = status === 'Borrador';
-
   return (
     <div className="min-h-screen bg-gray-100 flex">
       {/* Sidebar fija a la izquierda */}
       <Sidebar />
 
       {/* Contenido principal desplazado a la derecha */}
-      <div className="flex-1" style={{ marginLeft: '18rem' /* w-72 = 288px */ }}>
+      <div className="flex-1" style={{ marginLeft: '18rem'}}>
         <div className="container mx-auto px-4 py-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800">
@@ -158,7 +151,6 @@ useEffect(() => {
                 <select
                   value={orderType}
                   onChange={(e) => setOrderType(e.target.value as OrderType)}
-                  disabled={!isEditable}
                   className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="compra">Orden de compra</option>
@@ -189,8 +181,7 @@ useEffect(() => {
                         setSelectedSupplier(supplier);
                         setSupplierSearch(supplier ? `${supplier.LegalName} (${supplier.CUIT})` : '');
                   }}
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
-                  disabled={!isEditable}>
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                 <option value="">Seleccione un proveedor...</option>
                   {suppliers.map((supplier) => (
                     <option key={supplier.Id} value={supplier.Id}>
@@ -206,7 +197,6 @@ useEffect(() => {
                   type="date"
                   value={fechaEmision}
                   onChange={(e) => setFechaEmision(e.target.value)}
-                  disabled={!isEditable}
                   className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -217,7 +207,6 @@ useEffect(() => {
                   type="date"
                   value={fechaEntrega}
                   onChange={(e) => setFechaEntrega(e.target.value)}
-                  disabled={!isEditable}
                   className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -234,7 +223,7 @@ useEffect(() => {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-gray-800">Líneas</h2>
-              {isEditable && (
+              {(
                 <button
                   onClick={addLine}
                   className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition flex items-center"
@@ -272,7 +261,6 @@ useEffect(() => {
                             type="text"
                             value={line.descripcion}
                             onChange={(e) => updateLine(index, 'descripcion', e.target.value)}
-                            disabled={!isEditable}
                             className="p-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 w-full"
                           />
                         </td>
@@ -283,7 +271,6 @@ useEffect(() => {
                             step="0.01"
                             value={line.precio_unitario}
                             onChange={(e) => updateLine(index, 'precio_unitario', parseFloat(e.target.value))}
-                            disabled={!isEditable}
                             className="p-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 w-full"
                           />
                         </td>
@@ -293,7 +280,6 @@ useEffect(() => {
                             min="1"
                             value={line.cantidad}
                             onChange={(e) => updateLine(index, 'cantidad', parseInt(e.target.value))}
-                            disabled={!isEditable}
                             className="p-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 w-full"
                           />
                         </td>
@@ -301,7 +287,7 @@ useEffect(() => {
                           ${line.subtotal.toFixed(2)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          {isEditable && (
+                          {(
                             <button
                               onClick={() => removeLine(index)}
                               className="text-red-600 hover:text-red-900"
