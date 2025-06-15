@@ -143,12 +143,12 @@ useEffect(() => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
                 <div className="p-2 bg-gray-100 rounded">
-                  <span className={`font-medium ${
+                  {/* <span className={`font-medium ${
                     status === 'Borrador' ? 'text-yellow-600' : 
                     status === 'Aprobado' ? 'text-green-600' : 'text-blue-600'
                   }`}>
                     {status}
-                  </span>
+                  </span> */}
                 </div>
               </div>
 

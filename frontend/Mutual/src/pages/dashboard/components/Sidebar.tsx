@@ -1,6 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
+import { ChevronDownIcon, ShoppingCartIcon } from "@heroicons/react/24/solid"; // Esta es la versión sólida
+
+import {
+  HomeIcon,
+  UsersIcon,
+  CreditCardIcon,
+  BanknotesIcon,
+  ChartBarIcon,
+  Cog6ToothIcon,
+  UserGroupIcon,
+  ClipboardDocumentListIcon,
+} from "@heroicons/react/24/outline";
 
 const Sidebar: React.FC = () => {
+  const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
+
+  const toggleAdminMenu = () => {
+    setIsAdminMenuOpen(!isAdminMenuOpen);
+  };
+
   return (
     <aside
       className="fixed top-0 left-0 h-screen w-72 shadow-2xl text-white flex flex-col z-50"
@@ -13,64 +31,89 @@ const Sidebar: React.FC = () => {
           className="h-20 w-20 object-contain"
         />
       </div>
-      
+
       <nav className="flex-1 px-4 py-6 space-y-2">
-        {/* Home */}
         <h2 className="text-center">MENU M17J</h2>
+
         <a
           href="/dashboard"
           className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
         >
-          <span className="material-icons"></span>
+          <HomeIcon className="h-5 w-5" />
           Inicio
         </a>
-        {/* Asociados */}
+
         <a
           href="/asociados"
-          className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700  transition font-medium"
+          className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
         >
-          <span className="material-icons"></span>
+          <UsersIcon className="h-5 w-5" />
           Asociados
         </a>
-        {/* Proveedores */}
+
         <a
           href="/proveedores"
-          className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700  transition font-medium"
+          className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
         >
-          <span className="material-icons"></span>
-          Proveedores
+          <ShoppingCartIcon className="h-5 w-5" /> Proveedores
         </a>
-        {/* Cobros y Morosidad */}
+
         <a
           href=" "
-          className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700  transition font-medium"
+          className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
         >
-          <span className="material-icons"></span>
+          <CreditCardIcon className="h-5 w-5" />
           Cobros y Morosidad
         </a>
-        {/* Préstamos */}
         <a
           href=" "
-          className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700  transition font-medium"
+          className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
         >
-          <span className="material-icons"></span>
+          <BanknotesIcon className="h-5 w-5" />
           Prestamos
         </a>
-        {/* Reportes y Normativas */}
+
         <a
           href=" "
-          className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700  transition font-medium"
+          className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
         >
-          <span className="material-icons"> </span>
-          Reportes Y Normativas
+          <ChartBarIcon className="h-5 w-5" /> Reportes Y Normativas
         </a>
-        <a
-          href="/usuarios"
-          className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700  transition font-medium"
-        >
-          <span className="material-icons"> </span>
-          Acceso Administrador
-        </a>
+
+        <div className="relative">
+          <button
+            onClick={toggleAdminMenu}
+            className="flex items-center justify-between w-full gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
+          >
+            <div className="flex items-center gap-3">
+              <Cog6ToothIcon className="h-5 w-5" />
+              Acceso Administrador
+            </div>
+
+            <ChevronDownIcon
+              className={`h-5 w-5 transition-transform duration-300 ${
+                isAdminMenuOpen ? "rotate-0" : "-rotate-90"
+              }`}
+            />
+          </button>
+          {isAdminMenuOpen && (
+            <div className="pl-8 pt-2 pb-1 space-y-1">
+              <a
+                href="/usuarios"
+                className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+              >
+                <UserGroupIcon className="h-4 w-4" />
+                Usuarios
+              </a>
+              <a
+                href="/auditoria"
+                className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+              >
+                <ClipboardDocumentListIcon className="h-4 w-4" /> Auditorías
+              </a>
+            </div>
+          )}
+        </div>
       </nav>
     </aside>
   );
