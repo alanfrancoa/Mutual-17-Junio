@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../dashboard/components/Sidebar';
 
@@ -6,9 +6,21 @@ type OrderType = 'compra' | 'servicio';
 type OrderStatus = 'Borrador' | 'Aprobado' | 'Recibido';
 
 interface Supplier {
-  persona_id: number;
-  nombre_razon_social: string;
-  dni_cuit: string;
+  Id: number;
+  CUIT: string;
+  LegalName: string;
+  Address: string;
+  Phone?: string;
+  Email?: string;
+  Active: boolean;
+  CreatedAt: string;
+}
+
+interface SupplierDropdown {
+  Id: number;
+  LegalName: string;
+  CUIT: string;
+  Active: boolean;
 }
 
 interface OrderLine {
@@ -37,26 +49,27 @@ const CreateOrder: React.FC<PurchaseOrderProps> = ({ onBack }) => {
   const [lines, setLines] = useState<OrderLine[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const handleSupplierSearch = (value: string) => {
-    setSupplierSearch(value);
-    if (value.length > 2) {
-      setTimeout(() => {
-        setSupplierSuggestions([
-          { persona_id: 1, nombre_razon_social: 'Proveedor Ejemplo 1', dni_cuit: '20-12345678-9' },
-          { persona_id: 2, nombre_razon_social: 'Proveedor Ejemplo 2', dni_cuit: '23-98765432-1' },
-          { persona_id: 3, nombre_razon_social: 'Proveedor Ejemplo 3', dni_cuit: '27-45678912-3' },
-        ]);
-        setShowSuggestions(true);
-      }, 500);
-    } else {
-      setSupplierSuggestions([]);
-      setShowSuggestions(false);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+const [selectedSupplierId, setSelectedSupplierId] = useState<number | null>(null);
+
+useEffect(() => {
+  const fetchSuppliers = async () => {
+    try {
+      const response = await fetch("/api/suppliers");
+      if (response.ok) {
+        const data = await response.json();
+        setSuppliers(data.filter((s: Supplier) => s.Active));
+      }
+    } catch {
+      setSuppliers([]);
     }
   };
+  fetchSuppliers();
+}, []);
 
   const selectSupplier = (supplier: Supplier) => {
     setSelectedSupplier(supplier);
-    setSupplierSearch(`${supplier.nombre_razon_social} (${supplier.dni_cuit})`);
+    setSupplierSearch(`${supplier.LegalName} (${supplier.CUIT})`);
     setShowSuggestions(false);
   };
 
@@ -129,14 +142,6 @@ const CreateOrder: React.FC<PurchaseOrderProps> = ({ onBack }) => {
                   Guardar
                 </button>
               )}
-              {isAdmin && status === 'Borrador' && (
-                <button
-                  onClick={handleApprove}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-                >
-                  Aprobar
-                </button>
-              )}
               <button
                 onClick={onBack}
                 className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
@@ -173,30 +178,26 @@ const CreateOrder: React.FC<PurchaseOrderProps> = ({ onBack }) => {
                 </div>
               </div>
 
-              <div className="relative">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
-                <input
-                  type="text"
-                  value={supplierSearch}
-                  onChange={(e) => handleSupplierSearch(e.target.value)}
-                  disabled={!isEditable}
+                <select
+                  value={selectedSupplier?.Id ?? ""}
+                  onChange={(e) => {
+                        const id = Number(e.target.value);
+                        setSelectedSupplierId(id);
+                        const supplier = suppliers.find((s) => s.Id === id) || null;
+                        setSelectedSupplier(supplier);
+                        setSupplierSearch(supplier ? `${supplier.LegalName} (${supplier.CUIT})` : '');
+                  }}
                   className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Buscar proveedor..."
-                />
-                {showSuggestions && supplierSuggestions.length > 0 && (
-                  <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-auto">
-                    {supplierSuggestions.map((supplier) => (
-                      <li
-                        key={supplier.persona_id}
-                        className="p-2 hover:bg-blue-50 cursor-pointer"
-                        onClick={() => selectSupplier(supplier)}
-                      >
-                        <div className="font-medium">{supplier.nombre_razon_social}</div>
-                        <div className="text-sm text-gray-600">{supplier.dni_cuit}</div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                  disabled={!isEditable}>
+                <option value="">Seleccione un proveedor...</option>
+                  {suppliers.map((supplier) => (
+                    <option key={supplier.Id} value={supplier.Id}>
+                      {supplier.LegalName} ({supplier.CUIT})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
