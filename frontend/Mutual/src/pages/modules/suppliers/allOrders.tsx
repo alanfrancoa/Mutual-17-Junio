@@ -11,7 +11,6 @@ interface AllOrders {
   supplier: string;
   date: string;
   total: number;
-  status: "Borrador" | "Aprobado" | "Recibido";
   type: "compra" | "servicio";
 }
 
@@ -19,7 +18,6 @@ const Orders: React.FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
   const [orders, setOrders] = useState<AllOrders[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,36 +48,15 @@ const Orders: React.FC = () => {
     (order.id.toString().includes(search) ||
       order.supplier.toLowerCase().includes(search.toLowerCase()) ||
       order.date.includes(search)) &&
-    (typeFilter ? order.type === typeFilter : true) &&
-    (statusFilter ? order.status === statusFilter : true)
-  );
-
-  // Lógica de permisos para el botón Editar
-  const canEdit = (order: AllOrders) => {
-    if (order.status === "Borrador") {
-      return userRole === "administrador" || userRole === "gestor";
-    }
-    if (order.status === "Aprobado") {
-      return userRole === "administrador";
-    }
-    return false; // Recibido
-  };
+    (typeFilter ? order.type === typeFilter : true)  );
 
   // Mensaje según el estado y rol
   const handleEditClick = (order: AllOrders) => {
-    if (order.status === "Recibido") {
-      alert('No se puede editar la orden porque está en estado "Recibido".');
-      return;
-    }
-    if (order.status === "Aprobado" && userRole !== "administrador") {
+    if (userRole !== "administrador") {
       alert('Solo un usuario con rol "Administrador" puede editar una orden en estado "Aprobado".');
       return;
     }
-    if (order.status === "Borrador" && !(userRole === "administrador" || userRole === "gestor")) {
-      alert('Solo usuarios con rol "Administrador" o "Gestor" pueden editar una orden en estado "Borrador".');
-      return;
-    }
-    // Si pasa los permisos, navega a la edición
+    // Pasó el permiso
     navigate(`/suppliers/orders/edit/${order.id}`);
   };
 
@@ -115,16 +92,6 @@ const Orders: React.FC = () => {
               <option value="compra">Compra</option>
               <option value="servicio">Servicio</option>
             </select>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 rounded px-3 py-2"
-            >
-              <option value="">Estado</option>
-              <option value="Borrador">Borrador</option>
-              <option value="Aprobado">Aprobado</option>
-              <option value="Recibido">Recibido</option>
-            </select>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -154,7 +121,6 @@ const Orders: React.FC = () => {
                       <td className="px-4 py-2">{order.date}</td>
                       <td className="px-4 py-2 capitalize">{order.type}</td>
                       <td className="px-4 py-2">${order.total.toLocaleString()}</td>
-                      <td className="px-4 py-2">{order.status}</td>
                       <td className="px-4 py-2 flex gap-2">
                         <button
                           onClick={() => navigate(`/suppliers/orders/view/${order.id}`)}
@@ -162,17 +128,14 @@ const Orders: React.FC = () => {
                         >
                           Ver
                         </button>
-                        <button
-                          onClick={() => canEdit(order) ? handleEditClick(order) : handleEditClick(order)}
-                          className={`px-3 py-1 rounded text-sm ${
-                            canEdit(order)
-                              ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-                              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          }`}
-                          disabled={order.status === "Recibido" || !canEdit(order)}
-                        >
-                          Editar
-                        </button>
+                        {userRole === "administrador" && (
+                          <button
+                            onClick={() => handleEditClick(order)}
+                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
+                          >
+                            Editar
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))

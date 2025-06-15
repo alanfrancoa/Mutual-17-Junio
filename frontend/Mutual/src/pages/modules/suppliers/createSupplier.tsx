@@ -32,7 +32,7 @@ const CreateSupplier: React.FC = () => {
     setSuccess("");
     setError("");
     try {
-      const response = await fetch("/api/suppliers/provider", {
+      const response = await fetch("/api/suppliers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -41,6 +41,8 @@ const CreateSupplier: React.FC = () => {
         const data = await response.json();
         throw new Error(data.mensaje || "No se pudo registrar el proveedor");
       }
+      setSuccess("Proveedor ingresado correctamente.");
+      setTimeout(() => navigate("/proveedores"), 1200);
     } catch {
       setError("Error de red o servidor.");
     }
@@ -54,11 +56,11 @@ const CreateSupplier: React.FC = () => {
         <div className="w-full max-w-lg bg-white rounded-lg shadow p-8">
           <h2 className="text-2xl font-bold text-blue-900 mb-6">Nuevo Proveedor</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <input name="cuit" value={form.CUIT} onChange={handleChange} placeholder="CUIT" required className="w-full border px-2 py-1" />
-            <input name="legal_name" value={form.LegalName} onChange={handleChange} placeholder="Razon Social" required className="w-full border px-2 py-1" />
-            <input name="address" value={form.Address} onChange={handleChange} placeholder="Dirección" className="w-full border px-2 py-1" />
-            <input name="phone" value={form.Phone} onChange={handleChange} placeholder="Telefono" className="w-full border px-2 py-1" />
-            <input name="email" value={form.Email} onChange={handleChange} placeholder="Email" className="w-full border px-2 py-1" />
+            <input name="CUIT" value={form.CUIT} onChange={handleChange} placeholder="CUIT" required maxLength={11} className="w-full border px-2 py-1" />
+            <input name="LegalName" value={form.LegalName} onChange={handleChange} placeholder="Razon Social" required className="w-full border px-2 py-1" />
+            <input name="Address" value={form.Address} onChange={handleChange} placeholder="Dirección" required className="w-full border px-2 py-1" />
+            <input name="Phone" value={form.Phone} onChange={handleChange} placeholder="Telefono" required maxLength={14} className="w-full border px-2 py-1" /> {/*tener en cuenta caracteres de mas para prefijo*/}
+            <input name="Email" value={form.Email} onChange={handleChange} placeholder="Email" required className="w-full border px-2 py-1" />
             <div className="flex gap-2">
               <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Guardar</button>
               <button type="button" onClick={() => navigate("/suppliers/allsuppliers")} className="bg-gray-400 text-white px-4 py-2 rounded">Cancelar</button>

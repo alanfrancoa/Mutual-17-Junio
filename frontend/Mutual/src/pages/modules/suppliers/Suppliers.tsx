@@ -72,7 +72,7 @@ const Suppliers: React.FC<DashboardProps> = ({
 
         <div className="flex-1 p-6">
           {showPurchaseOrder ? (
-            <CreateOrder onBack={() => navigate('/suppliers')} />
+            <CreateOrder onBack={() => navigate('/proveedores')} />
           ) : (
             <>
               <h1 className="text-2xl font-bold mb-4">Proveedores</h1>

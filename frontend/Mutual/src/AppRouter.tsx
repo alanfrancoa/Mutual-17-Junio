@@ -23,6 +23,7 @@ import EditAssociate from "./pages/modules/associates/editAssociate";
 import DeleteAssociate from "./pages/modules/associates/deleteAssociate";
 import ReadAssociate from "./pages/modules/associates/readAssociate";
 import Associates from "./pages/modules/associates/ListAssociates";
+import AllSuppliers from "./pages/modules/suppliers/allSuppliers";
 
 const AppRouter: React.FC = () => {
   return (
@@ -36,7 +37,7 @@ const AppRouter: React.FC = () => {
         <Route path="/dashboard" element={<Dashboard />} />
 
         {/* seccion provedores */}
-        <Route path="/proveedores" element={<Suppliers />} />
+        <Route path="/proveedores" element={<AllSuppliers />} />
         <Route path="/proveedores/nuevo" element={<CreateSupplier />} />
         <Route path="/proveedores/editar" element={<EditSupplier />} />
         <Route path="/proveedores/eliminar" element={<DeleteSupplier />} />
