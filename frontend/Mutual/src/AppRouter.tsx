@@ -7,7 +7,7 @@ import {
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
 
-import Suppliers from "./pages/modules/suppliers/Suppliers";
+import AllSuppliers from "./pages/modules/suppliers/allSuppliers";
 import CreateSupplier from "./pages/modules/suppliers/createSupplier";
 import CreateOrder from "./pages/modules/suppliers/createOrder";
 import EditSupplier from "./pages/modules/suppliers/editSuppliers";
@@ -23,7 +23,8 @@ import EditAssociate from "./pages/modules/associates/editAssociate";
 import DeleteAssociate from "./pages/modules/associates/deleteAssociate";
 import ReadAssociate from "./pages/modules/associates/readAssociate";
 import Associates from "./pages/modules/associates/ListAssociates";
-import AllSuppliers from "./pages/modules/suppliers/allSuppliers";
+import AuditTable from "./pages/modules/audit/audit";
+import ReactivateAssociate from "./pages/modules/associates/reactivateAssociate";
 
 const AppRouter: React.FC = () => {
   return (
@@ -49,15 +50,22 @@ const AppRouter: React.FC = () => {
         <Route path="/asociados/crear" element={<CreateAssociate />} />
         <Route path="/asociados/editar/:id" element={<EditAssociate />} />
         <Route path="/asociados/eliminar/:id" element={<DeleteAssociate />} />
+        <Route
+          path="/asociados/reactivar/:id"
+          element={<ReactivateAssociate />}
+        />
         <Route path="/asociados/detalle/:id" element={<ReadAssociate />} />
 
-        {/* seccion usuarios */}
+        {/* seccion usuarios -- ADMIN ONLY*/}
         <Route path="/usuarios" element={<UsersTable />} />
         <Route path="/usuarios/crear" element={<CreateUser />} />
         <Route path="/usuarios/editar/:id" element={<EditUser />} />
         <Route path="/usuarios/eliminar/:id" element={<DeleteUser />} />
         <Route path="/usuarios/reactivar/:id" element={<ReactivateUser />} />
         <Route path="/usuarios/detalle/:id" element={<ReadUser />} />
+
+        {/* seccion auditoria-- ADMIN ONLY */}
+        <Route path="/auditoria" element={<AuditTable />} />
 
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/auth/login" replace />} />
