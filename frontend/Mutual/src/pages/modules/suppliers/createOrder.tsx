@@ -16,13 +16,6 @@ interface Supplier {
   CreatedAt: string;
 }
 
-interface SupplierDropdown {
-  Id: number;
-  LegalName: string;
-  CUIT: string;
-  Active: boolean;
-}
-
 interface OrderLine {
   id?: number;
   descripcion: string;
@@ -39,16 +32,11 @@ const CreateOrder: React.FC<PurchaseOrderProps> = ({ onBack }) => {
   const [orderType, setOrderType] = useState<OrderType>('compra');
   const [orderId, setOrderId] = useState<number | null>(null);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
-  const [supplierSearch, setSupplierSearch] = useState('');
   const [supplierSuggestions, setSupplierSuggestions] = useState<Supplier[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [fechaEmision, setFechaEmision] = useState<string>('');
   const [fechaEntrega, setFechaEntrega] = useState<string>('');
   const [total, setTotal] = useState<number>(0);
-  const [status, setStatus] = useState<OrderStatus>('Borrador');
   const [lines, setLines] = useState<OrderLine[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
-
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [selectedSupplierId, setSelectedSupplierId] = useState<number | null>(null);
 
@@ -66,12 +54,6 @@ useEffect(() => {
   };
   fetchSuppliers();
 }, []);
-
-  const selectSupplier = (supplier: Supplier) => {
-    setSelectedSupplier(supplier);
-    setSupplierSearch(`${supplier.LegalName} (${supplier.CUIT})`);
-    setShowSuggestions(false);
-  };
 
   const addLine = () => {
     const newLine: OrderLine = {
@@ -127,7 +109,7 @@ useEffect(() => {
               {orderId ? `Orden de ${orderType} #${orderId}` : `Nueva Orden de ${orderType}`}
             </h1>
             <div className="flex space-x-2">
-              {status === 'Borrador' && (
+              { (
                 <button
                   onClick={handleSave}
                   className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
@@ -179,7 +161,6 @@ useEffect(() => {
                         setSelectedSupplierId(id);
                         const supplier = suppliers.find((s) => s.Id === id) || null;
                         setSelectedSupplier(supplier);
-                        setSupplierSearch(supplier ? `${supplier.LegalName} (${supplier.CUIT})` : '');
                   }}
                   className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                 <option value="">Seleccione un proveedor...</option>
