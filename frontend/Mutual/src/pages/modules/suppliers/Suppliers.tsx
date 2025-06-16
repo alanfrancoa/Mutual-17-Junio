@@ -14,7 +14,12 @@ const SuppliersSidebar: React.FC<{ navigate: (path: string) => void }> = ({ navi
       </li>
       <li>
         <button onClick={() => navigate('/suppliers/orders/new')} className="text-blue-700 hover:underline text-left w-full">
-          Nueva Orden
+          Nuevo Servicio
+        </button>
+      </li>
+      <li>
+      <button onClick={() => navigate('/suppliers/service-types')} className="text-blue-700 hover:underline text-left w-full">
+          Tipos de servicio
         </button>
       </li>
     </ul>
