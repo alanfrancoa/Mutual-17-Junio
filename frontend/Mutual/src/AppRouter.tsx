@@ -12,6 +12,7 @@ import CreateSupplier from "./pages/modules/suppliers/createSupplier";
 import CreateOrder from "./pages/modules/suppliers/createOrder";
 import EditSupplier from "./pages/modules/suppliers/editSuppliers";
 import DeleteSupplier from "./pages/modules/suppliers/editSuppliers";
+import ServiceTypeList from "./pages/modules/suppliers/serviceType";
 import UsersTable from "./pages/modules/users/users";
 import CreateUser from "./pages/modules/users/createUser";
 import EditUser from "./pages/modules/users/editUser";
@@ -27,7 +28,7 @@ import AuditTable from "./pages/modules/audit/audit";
 import ReactivateAssociate from "./pages/modules/associates/reactivateAssociate";
 import CreateAssociateRelative from "./pages/modules/associates/relatives/createRelativeAssociate";
 import EditRelativeAssociate from "./pages/modules/associates/relatives/editRelativeAssociate";
-import AllSuppliers from "./pages/modules/suppliers/AllSuppliers";
+import AllSuppliers from "./pages/modules/suppliers/allSuppliers";
 
 const AppRouter: React.FC = () => {
   return (
@@ -46,7 +47,12 @@ const AppRouter: React.FC = () => {
         <Route path="/proveedores/editar" element={<EditSupplier />} />
         <Route path="/proveedores/eliminar" element={<DeleteSupplier />} />
         {/*<Route path="/proveedores/detalle" element={<ReadSupplier />} />*/}
+        <Route path="/proveedores/tipos-servicio" element={<ServiceTypeList />} />
+        
+        {/* Seccion ordenes de compra */}
         <Route path="/proveedores/nueva-orden" element={<CreateOrder />} />
+        <Route path="/proveedores/ordenes" element={<Suppliers />} />
+        <Route path="/proveedores/ordenes/nueva" element={<CreateOrder />} /> 
 
         {/* Seccion asociados */}
         <Route path="/asociados" element={<Associates />} />
