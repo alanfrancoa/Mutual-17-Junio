@@ -7,7 +7,7 @@ import {
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
 
-import AllSuppliers from "./pages/modules/suppliers/allSuppliers";
+import Suppliers from "./pages/modules/suppliers/Suppliers";
 import CreateSupplier from "./pages/modules/suppliers/createSupplier";
 import CreateOrder from "./pages/modules/suppliers/createOrder";
 import EditSupplier from "./pages/modules/suppliers/editSuppliers";
@@ -25,6 +25,9 @@ import ReadAssociate from "./pages/modules/associates/readAssociate";
 import Associates from "./pages/modules/associates/ListAssociates";
 import AuditTable from "./pages/modules/audit/audit";
 import ReactivateAssociate from "./pages/modules/associates/reactivateAssociate";
+import CreateAssociateRelative from "./pages/modules/associates/relatives/createRelativeAssociate";
+import EditRelativeAssociate from "./pages/modules/associates/relatives/editRelativeAssociate";
+import AllSuppliers from "./pages/modules/suppliers/AllSuppliers";
 
 const AppRouter: React.FC = () => {
   return (
@@ -50,11 +53,13 @@ const AppRouter: React.FC = () => {
         <Route path="/asociados/crear" element={<CreateAssociate />} />
         <Route path="/asociados/editar/:id" element={<EditAssociate />} />
         <Route path="/asociados/eliminar/:id" element={<DeleteAssociate />} />
-        <Route
-          path="/asociados/reactivar/:id"
-          element={<ReactivateAssociate />}
-        />
+        <Route path="/asociados/reactivar/:id" element={<ReactivateAssociate />}/>
         <Route path="/asociados/detalle/:id" element={<ReadAssociate />} />
+        
+        {/* Seccion asociados-familiares */}
+        <Route path="/asociados/crear/familiar/:associateId" element={<CreateAssociateRelative />}/>
+        <Route path="/asociados/:associateId/familiar/editar/:relativeId" element={<EditRelativeAssociate/>}
+        />
 
         {/* seccion usuarios -- ADMIN ONLY*/}
         <Route path="/usuarios" element={<UsersTable />} />

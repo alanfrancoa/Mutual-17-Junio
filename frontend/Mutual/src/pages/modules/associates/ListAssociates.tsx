@@ -220,6 +220,7 @@ const Associates: React.FC<DashboardProps> = ({
                           </td>
                           <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
                             <div className="space-x-2 flex justify-end">
+                              
                               <button
                                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
                                 onClick={() =>
@@ -262,7 +263,7 @@ const Associates: React.FC<DashboardProps> = ({
                 </table>
               )}
 
-              {/* Paginación centrada debajo de la tabla */}
+              {/* Paginacion */}
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-2">
                 <div className="flex justify-center items-center gap-4 flex-1">
                   <button

@@ -1,12 +1,12 @@
 import Fetcher from "../helper/fetcher";
 import { AuditLog } from "../types/auditLog";
-
 import { IAssociateRegister } from "../types/IAssociateRegister";
 import { ILoginData } from "../types/loginData";
 import { IAssociateList } from "../../src/types/IAssociateList";
-
 import { ILoginResponse } from "../types/loginResponse";
 import { User } from "../types/user";
+import { IRelativeList, IRelativeRegister, IRelativeUpdate } from "../types/IRelative";
+
 /* -----------------------Llamadas API----------------------- */
 
 /* -----------------------Mod. AUTH login usuarios---------------------- */
@@ -246,6 +246,53 @@ export const apiMutual = {
     const response = await Fetcher.patch(url, newStatus, {
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    return response.data as { mensaje: string };
+  },
+
+  /* ----------------------- MODULO ASOCIADOS FAMILIARES ----------------------- */
+
+  /* ----------------------- 1. Crear familiar del Asociado ----------------------- */
+  CreateRelativeAssociate: async (
+    associateId: number,
+    relativeData: IRelativeRegister
+  ): Promise<{ mensaje: string }> => {
+    const url = `https://localhost:7256/api/asociate/${associateId}/relative`;
+    const response = await Fetcher.post(url, relativeData);
+    return response.data as { mensaje: string };
+  },
+
+  /* ----------------------- 2. Obtener familiar del Asociado/ tabla familiares ----------------------- */
+  GetRelativesByAssociateId: async (
+    associateId: number
+  ): Promise<IRelativeList[]> => {
+    const url = `https://localhost:7256/api/asociate/${associateId}/relative`;
+    const response = await Fetcher.get(url);
+    return response.data as IRelativeList[];
+  },
+
+  /* ----------------------- 3. Actualizar familiar del Asociado ----------------------- */
+  UpdateRelative: async (
+    relativeId: number,
+    relativeData: IRelativeUpdate
+  ): Promise<{ mensaje: string }> => {
+    const url = `https://localhost:7256/api/relative/${relativeId}`;
+    const response = await Fetcher.put(url, relativeData);
+    return response.data as { mensaje: string };
+  },
+
+ 
+  /* ----------------------- 3. Baja-reactivar familiar del Asociado ----------------------- */
+  ChangeRelativeStatus: async (
+    relativeId: number,
+    newStatus: boolean
+  ): Promise<{ mensaje: string }> => {
+    const url = `https://localhost:7256/api/relative/${relativeId}/status`;
+    const response = await Fetcher.patch(url, newStatus, {
+      headers: {
+        "Content-Type": "application/json", 
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
