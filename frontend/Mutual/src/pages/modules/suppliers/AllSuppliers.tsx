@@ -23,7 +23,7 @@ const AllSuppliers: React.FC = () => {
     // Llama al backend para obtener los proveedores
     const fetchSuppliers = async () => {
       try {
-        const response = await fetch("/api/suppliers/providers");
+        const response = await fetch("/api/suppliers");
         if (response.ok) {
           const data = await response.json();
           setSuppliers(data);
