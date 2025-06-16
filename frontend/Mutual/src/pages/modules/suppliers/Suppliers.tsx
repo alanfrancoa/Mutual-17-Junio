@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../dashboard/components/Header';
-import CreateOrder from './createOrder';
+import CreateOrder from './createService';
 
 const SuppliersSidebar: React.FC<{ navigate: (path: string) => void }> = ({ navigate }) => (
   <nav className="h-full flex flex-col p-4 bg-white">
