@@ -7,9 +7,9 @@ import {
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
 
-import Suppliers from "./pages/modules/suppliers/Suppliers";
+import AllServices from "./pages/modules/suppliers/allServices";
 import CreateSupplier from "./pages/modules/suppliers/createSupplier";
-import CreateOrder from "./pages/modules/suppliers/createOrder";
+import CreateService from "./pages/modules/suppliers/createService";
 import EditSupplier from "./pages/modules/suppliers/editSuppliers";
 import DeleteSupplier from "./pages/modules/suppliers/editSuppliers";
 import ServiceTypeList from "./pages/modules/suppliers/serviceType";
@@ -49,10 +49,9 @@ const AppRouter: React.FC = () => {
         {/*<Route path="/proveedores/detalle" element={<ReadSupplier />} />*/}
         <Route path="/proveedores/tipos-servicio" element={<ServiceTypeList />} />
         
-        {/* Seccion ordenes de compra */}
-        <Route path="/proveedores/nueva-orden" element={<CreateOrder />} />
-        <Route path="/proveedores/ordenes" element={<Suppliers />} />
-        <Route path="/proveedores/ordenes/nueva" element={<CreateOrder />} /> 
+        {/* Seccion servicios */}
+        <Route path="/proveedores/servicios" element={<AllServices />} />
+        <Route path="/proveedores/servicios/nueva" element={<CreateService />} />
 
         {/* Seccion asociados */}
         <Route path="/asociados" element={<Associates />} />
