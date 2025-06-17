@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../dashboard/components/Header';
-import CreateOrder from './createService';
+import CreateService from './createService';
 
 const SuppliersSidebar: React.FC<{ navigate: (path: string) => void }> = ({ navigate }) => (
   <nav className="h-full flex flex-col p-4 bg-white">
@@ -13,12 +13,12 @@ const SuppliersSidebar: React.FC<{ navigate: (path: string) => void }> = ({ navi
         </button>
       </li>
       <li>
-        <button onClick={() => navigate('/suppliers/orders/new')} className="text-blue-700 hover:underline text-left w-full">
+        <button onClick={() => navigate('/suppliers/services/new')} className="text-blue-700 hover:underline text-left w-full">
           Nuevo Servicio
         </button>
       </li>
       <li>
-      <button onClick={() => navigate('/suppliers/service-types')} className="text-blue-700 hover:underline text-left w-full">
+        <button onClick={() => navigate('/suppliers/service-types')} className="text-blue-700 hover:underline text-left w-full">
           Tipos de servicio
         </button>
       </li>
@@ -30,18 +30,18 @@ interface DashboardProps {
   userName?: string;
   userRole?: "administrador" | "gestor" | "consultante";
   hasNotifications?: boolean;
-  showOrderForm?: boolean;
+  showServiceForm?: boolean;
 }
 
 const Suppliers: React.FC<DashboardProps> = ({
   hasNotifications = true,
-  showOrderForm = false,
+  showServiceForm = false,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const pathname = window.location.pathname;
-  const showPurchaseOrder = pathname.includes('/suppliers/orders') || showOrderForm;
-  
+  const showCreateService = pathname.includes('/suppliers/services') || showServiceForm;
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <Header hasNotifications={hasNotifications}/>
@@ -76,16 +76,16 @@ const Suppliers: React.FC<DashboardProps> = ({
         )}
 
         <div className="flex-1 p-6">
-          {showPurchaseOrder ? (
-            <CreateOrder onBack={() => navigate('/proveedores')} />
+          {showCreateService ? (
+            <CreateService onBack={() => navigate('/suppliers')} />
           ) : (
             <>
               <h1 className="text-2xl font-bold mb-4">Proveedores</h1>
               <button 
-                onClick={() => navigate('/suppliers/orders/new')}
+                onClick={() => navigate('/suppliers/services/new')}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mb-4"
               >
-                Crear Nueva Orden
+                Crear Nuevo Servicio
               </button>
             </>
           )}
