@@ -3,72 +3,72 @@ import { useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../../dashboard/components/Sidebar";
 import Header from "../../dashboard/components/Header";
 
-interface ServiceOrder {
+export interface Service {
   Id: number;
-  TipoServicio: string;
   Description: string;
   MonthlyCost: number;
-  Proveedor: string;
   Active: boolean;
+  Supplier: string;
+  ServiceType: string;
 }
 
-const DeleteOrder: React.FC = () => {
+const DeleteService: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [order, setOrder] = useState<ServiceOrder | null>(null);
+  const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    const fetchOrder = async () => {
+    const fetchService = async () => {
       try {
         const response = await fetch(`/services`);
-        if (!response.ok) throw new Error("No se pudo obtener la orden");
+        if (!response.ok) throw new Error("No se pudo obtener el servicio");
         const data = await response.json();
-        const found = data.find((o: ServiceOrder) => o.Id === Number(id));
-        if (!found) throw new Error("Orden no encontrada");
-        setOrder(found);
+        const found = data.find((o: Service) => o.Id === Number(id));
+        if (!found) throw new Error("Servicio no encontrado");
+        setService(found);
       } catch (err: any) {
-        setError(err.message || "Error al cargar la orden");
+        setError(err.message || "Error al cargar el servicio");
       } finally {
         setLoading(false);
       }
     };
-    if (id) fetchOrder();
+    if (id) fetchService();
   }, [id]);
 
   const handleInactivate = async () => {
     setError("");
     setSuccess("");
-    if (!window.confirm("¿Seguro que deseas desactivar esta orden de servicio?")) return;
+    if (!window.confirm("¿Seguro que deseas desactivar este servicio?")) return;
     try {
       const response = await fetch(`/services/${id}/state`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(false),
       });
-      if (!response.ok) throw new Error("No se pudo desactivar la orden");
-      setSuccess("Orden de servicio desactivada correctamente");
-      setTimeout(() => navigate("/proveedores/ordenes"), 1200);
+      if (!response.ok) throw new Error("No se pudo desactivar el servicio");
+      setSuccess("Servicio desactivado correctamente");
+      setTimeout(() => navigate("/proveedores/servicios"), 1200);
     } catch {
-      setError("Error al desactivar la orden");
+      setError("Error al desactivar el servicio");
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <span>Cargando orden...</span>
+        <span>Cargando servicio...</span>
       </div>
     );
   }
 
-  if (error || !order) {
+  if (error || !service) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <span className="text-red-600">{error || "Orden no encontrada"}</span>
+        <span className="text-red-600">{error || "Servicio no encontrado"}</span>
       </div>
     );
   }
@@ -81,15 +81,15 @@ const DeleteOrder: React.FC = () => {
         <div className="w-full max-w-lg bg-white rounded-lg shadow p-8">
           <h2 className="text-2xl font-bold mb-6 text-red-700">Desactivar Orden de Servicio</h2>
           <div className="mb-4">
-            <div><b>ID:</b> {order.Id}</div>
-            <div><b>Tipo de Servicio:</b> {order.TipoServicio}</div>
-            <div><b>Descripción:</b> {order.Description}</div>
-            <div><b>Costo Mensual:</b> ${order.MonthlyCost}</div>
-            <div><b>Proveedor:</b> {order.Proveedor}</div>
+            <div><b>ID:</b> {service.Id}</div>
+            <div><b>Tipo de Servicio:</b> {service.ServiceType}</div>
+            <div><b>Descripción:</b> {service.Description}</div>
+            <div><b>Costo Mensual:</b> ${service.MonthlyCost}</div>
+            <div><b>Proveedor:</b> {service.Supplier}</div>
             <div>
               <b>Estado:</b>{" "}
-              <span className={order.Active ? "text-green-600" : "text-red-600"}>
-                {order.Active ? "Activo" : "Inactivo"}
+              <span className={service.Active ? "text-green-600" : "text-red-600"}>
+                {service.Active ? "Activo" : "Inactivo"}
               </span>
             </div>
           </div>
@@ -98,9 +98,9 @@ const DeleteOrder: React.FC = () => {
               type="button"
               onClick={handleInactivate}
               className="bg-red-600 text-white px-4 py-2 rounded"
-              disabled={!order.Active}
+              disabled={!service.Active}
             >
-              Desactivar Orden
+              Desactivar Servicio
             </button>
             <button
               type="button"
@@ -118,4 +118,4 @@ const DeleteOrder: React.FC = () => {
   );
 };
 
-export default DeleteOrder;
+export default DeleteService;
