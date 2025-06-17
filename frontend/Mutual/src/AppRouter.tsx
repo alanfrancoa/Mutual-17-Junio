@@ -10,6 +10,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import AllServices from "./pages/modules/suppliers/allServices";
 import CreateSupplier from "./pages/modules/suppliers/createSupplier";
 import CreateService from "./pages/modules/suppliers/createService";
+import EditService from "./pages/modules/suppliers/editService";
 import EditSupplier from "./pages/modules/suppliers/editSuppliers";
 import DeleteSupplier from "./pages/modules/suppliers/editSuppliers";
 import ServiceTypeList from "./pages/modules/suppliers/serviceType";
@@ -46,12 +47,12 @@ const AppRouter: React.FC = () => {
         <Route path="/proveedores/nuevo" element={<CreateSupplier />} />
         <Route path="/proveedores/editar" element={<EditSupplier />} />
         <Route path="/proveedores/eliminar" element={<DeleteSupplier />} />
-        {/*<Route path="/proveedores/detalle" element={<ReadSupplier />} />*/}
         <Route path="/proveedores/tipos-servicio" element={<ServiceTypeList />} />
         
         {/* Seccion servicios */}
         <Route path="/proveedores/servicios" element={<AllServices />} />
         <Route path="/proveedores/servicios/nueva" element={<CreateService />} />
+        <Route path="/proveedores/servicios/editar/:id" element={<EditService />} />
 
         {/* Seccion asociados */}
         <Route path="/asociados" element={<Associates />} />
