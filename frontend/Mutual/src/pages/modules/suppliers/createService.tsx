@@ -27,7 +27,11 @@ interface CreateServiceForm {
   MonthlyCost: string;
 }
 
-const CreateService: React.FC = () => {
+interface CreateServiceProps {
+  onBack?: () => void;
+}
+
+const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
   const navigate = useNavigate();
 
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
