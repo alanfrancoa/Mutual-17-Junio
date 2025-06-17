@@ -14,6 +14,7 @@ import EditService from "./pages/modules/suppliers/editService";
 import EditSupplier from "./pages/modules/suppliers/editSuppliers";
 import DeleteSupplier from "./pages/modules/suppliers/editSuppliers";
 import ServiceTypeList from "./pages/modules/suppliers/serviceType";
+import PaymentMethodsList from "./pages/modules/suppliers/paymentMethods";
 import UsersTable from "./pages/modules/users/users";
 import CreateUser from "./pages/modules/users/createUser";
 import EditUser from "./pages/modules/users/editUser";
@@ -42,14 +43,15 @@ const AppRouter: React.FC = () => {
 
         <Route path="/dashboard" element={<Dashboard />} />
 
-        {/* seccion provedores */}
+        {/* seccion proveedores */}
         <Route path="/proveedores" element={<AllSuppliers />} />
         <Route path="/proveedores/nuevo" element={<CreateSupplier />} />
         <Route path="/proveedores/editar" element={<EditSupplier />} />
         <Route path="/proveedores/eliminar" element={<DeleteSupplier />} />
         <Route path="/proveedores/tipos-servicio" element={<ServiceTypeList />} />
-        
-        {/* Seccion servicios */}
+        <Route path="/proveedores/metodos-pago" element={<PaymentMethodsList />} />
+
+        {/* Seccion proveedores - servicios */}
         <Route path="/proveedores/servicios" element={<AllServices />} />
         <Route path="/proveedores/servicios/nueva" element={<CreateService />} />
         <Route path="/proveedores/servicios/editar/:id" element={<EditService />} />
