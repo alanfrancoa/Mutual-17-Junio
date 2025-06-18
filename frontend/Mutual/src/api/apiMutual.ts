@@ -6,6 +6,7 @@ import { IAssociateList } from "../../src/types/IAssociateList";
 import { ILoginResponse } from "../types/loginResponse";
 import { User } from "../types/user";
 import { IRelativeList, IRelativeRegister, IRelativeUpdate } from "../types/IRelative";
+import { ISupplierRegister } from "../types/ISupplierRegister";
 
 /* -----------------------Llamadas API----------------------- */
 
@@ -298,4 +299,24 @@ export const apiMutual = {
     });
     return response.data as { mensaje: string };
   },
+
+  /* -----------------------Modulo proveedores---------------------- */
+  /* ----------------------- 1. Registrar Proveedor ----------------------- */
+  RegisterSupplier: async (
+    supplierData: ISupplierRegister
+    ): Promise<{ mensaje: string }> => {
+      const url = `https://localhost:7256/api/suppliers`;
+      const response = await Fetcher.post(url, supplierData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+        },
+      });
+      if (response.status && response.status >= 400) {
+        // Si Fetcher devuelve un status de error
+        const data = response.data as { mensaje?: string };
+        throw new Error(data?.mensaje || "No se pudo registrar el proveedor");
+    }
+      return response.data as { mensaje: string };
+    },
 };
