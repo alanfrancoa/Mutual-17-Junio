@@ -32,6 +32,7 @@ import CreateAssociateRelative from "./pages/modules/associates/relatives/create
 import EditRelativeAssociate from "./pages/modules/associates/relatives/editRelativeAssociate";
 import AllSuppliers from "./pages/modules/suppliers/allSuppliers";
 import Loans from "./pages/modules/loans/listLoans";
+import CreateLoan from "./pages/modules/loans/createLoan";
 
 const AppRouter: React.FC = () => {
   return (
@@ -102,7 +103,11 @@ const AppRouter: React.FC = () => {
         <Route path="/auditoria" element={<AuditTable />} />
 
         {/* seccion prestamos */}
-        <Route path="/prestamos" element={<Loans/>} />
+        <Route path="/prestamos" element={<Loans />} />
+        <Route path="/prestamos/crear" element={<CreateLoan  />} /> 
+        {/* <Route path="/prestamos/detalle/:id" element={<  />} /> */}
+        {/* <Route path="/prestamos/aprobacion/:id" element={<  />} /> */}
+        {/* <Route path="/prestamos/rechazo/:id" element={<  />} /> */}
 
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/auth/login" replace />} />
