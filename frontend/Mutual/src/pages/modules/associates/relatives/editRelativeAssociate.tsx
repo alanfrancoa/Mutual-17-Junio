@@ -5,10 +5,12 @@ import { apiMutual } from "../../../../api/apiMutual";
 import Sidebar from "../../../dashboard/components/Sidebar";
 import Header from "../../../dashboard/components/Header";
 
-
 const EditRelativeAssociate: React.FC = () => {
   const navigate = useNavigate();
-  const { associateId, relativeId } = useParams<{ associateId: string; relativeId: string }>();
+  const { associateId, relativeId } = useParams<{
+    associateId: string;
+    relativeId: string;
+  }>();
 
   const parsedAssociateId = associateId ? parseInt(associateId, 10) : null;
   const parsedRelativeId = relativeId ? parseInt(relativeId, 10) : null;
@@ -16,21 +18,23 @@ const EditRelativeAssociate: React.FC = () => {
   const [formData, setFormData] = useState<IRelativeUpdate>({
     dni: "",
     legalName: "",
-    phone: "", 
+    phone: "",
     relation: "",
-    active: true, 
+    active: true,
   });
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Opciones para el campo parentesco 
+  // Opciones para el campo parentesco
   const relationOptions = [
     "Hijo/a",
-    "Cónyuge",
     "Padre/Madre",
     "Hermano/a",
-    "Otro",
+    "Nieto/a",
+    "Abuelo/a",
+    "Esposo/a",
+    "Conyuge",
   ];
 
   useEffect(() => {
@@ -45,7 +49,9 @@ const EditRelativeAssociate: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const relatives = await apiMutual.GetRelativesByAssociateId(parsedAssociateId);
+        const relatives = await apiMutual.GetRelativesByAssociateId(
+          parsedAssociateId
+        );
         const relativeToEdit = relatives.find(
           (rel: IRelativeList) => rel.id === parsedRelativeId
         );
@@ -109,12 +115,9 @@ const EditRelativeAssociate: React.FC = () => {
       );
       alert(response.mensaje || "Familiar actualizado correctamente.");
       navigate(`/asociados/detalle/${parsedAssociateId}`);
-      
     } catch (err: any) {
       console.error("Error al actualizar familiar:", err);
-      alert(
-        err.response?.data?.mensaje || "Error al actualizar el familiar."
-      );
+      alert(err.response?.data?.mensaje || "Error al actualizar el familiar.");
     }
   };
 
@@ -130,7 +133,9 @@ const EditRelativeAssociate: React.FC = () => {
             </h2>
 
             {loading ? (
-              <div className="text-center py-8 text-gray-500">Cargando datos del familiar...</div>
+              <div className="text-center py-8 text-gray-500">
+                Cargando datos del familiar...
+              </div>
             ) : error ? (
               <div className="text-center py-8 text-red-600">{error}</div>
             ) : (
@@ -184,7 +189,7 @@ const EditRelativeAssociate: React.FC = () => {
                     type="text"
                     id="phone"
                     name="phone"
-                    value={formData.phone || ""} 
+                    value={formData.phone || ""}
                     onChange={handleChange}
                     className="w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                     maxLength={20}
@@ -206,7 +211,6 @@ const EditRelativeAssociate: React.FC = () => {
                     className="w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                     required
                   >
-                    <option value="">Seleccione un parentesco</option>
                     {relationOptions.map((option) => (
                       <option key={option} value={option}>
                         {option}
@@ -235,7 +239,9 @@ const EditRelativeAssociate: React.FC = () => {
                 <div className="flex justify-end gap-4">
                   <button
                     type="button"
-                    onClick={() => navigate(`/asociados/detalle/${parsedAssociateId}`)}
+                    onClick={() =>
+                      navigate(`/asociados/detalle/${parsedAssociateId}`)
+                    }
                     className="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     Cancelar

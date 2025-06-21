@@ -31,6 +31,10 @@ import ReactivateAssociate from "./pages/modules/associates/reactivateAssociate"
 import CreateAssociateRelative from "./pages/modules/associates/relatives/createRelativeAssociate";
 import EditRelativeAssociate from "./pages/modules/associates/relatives/editRelativeAssociate";
 import AllSuppliers from "./pages/modules/suppliers/allSuppliers";
+import Loans from "./pages/modules/loans/listLoans";
+import ReadLoan from "./pages/modules/loans/readLoan";
+import RequestLoan from "./pages/modules/loans/requestLoan";
+import CreateLoan from "./pages/modules/loans/createLoan";
 
 const AppRouter: React.FC = () => {
   return (
@@ -53,7 +57,7 @@ const AppRouter: React.FC = () => {
 
         {/* Seccion proveedores - servicios */}
         <Route path="/proveedores/servicios" element={<AllServices />} />
-        <Route path="/proveedores/servicios/crear" element={<CreateService />} />
+        <Route path="/proveedores/servicios/nueva" element={<CreateService />} />
         <Route path="/proveedores/servicios/editar/:id" element={<EditService />} />
 
         {/* Seccion asociados */}
@@ -61,12 +65,20 @@ const AppRouter: React.FC = () => {
         <Route path="/asociados/crear" element={<CreateAssociate />} />
         <Route path="/asociados/editar/:id" element={<EditAssociate />} />
         <Route path="/asociados/eliminar/:id" element={<DeleteAssociate />} />
-        <Route path="/asociados/reactivar/:id" element={<ReactivateAssociate />}/>
+        <Route
+          path="/asociados/reactivar/:id"
+          element={<ReactivateAssociate />}
+        />
         <Route path="/asociados/detalle/:id" element={<ReadAssociate />} />
-        
-        {/* Seccion asociados-familiares */}
-        <Route path="/asociados/crear/familiar/:associateId" element={<CreateAssociateRelative />}/>
-        <Route path="/asociados/:associateId/familiar/editar/:relativeId" element={<EditRelativeAssociate/>}
+
+        {/* Seccion asociados-familiares Gestor */}
+        <Route
+          path="/asociados/crear/familiar/:associateId"
+          element={<CreateAssociateRelative />}
+        />
+        <Route
+          path="/asociados/:associateId/familiar/editar/:relativeId"
+          element={<EditRelativeAssociate />}
         />
 
         {/* seccion usuarios -- ADMIN ONLY*/}
@@ -79,6 +91,14 @@ const AppRouter: React.FC = () => {
 
         {/* seccion auditoria-- ADMIN ONLY */}
         <Route path="/auditoria" element={<AuditTable />} />
+
+        {/* seccion prestamos Admin y Gestor*/}
+        <Route path="/prestamos" element={<Loans />} />
+        <Route path="/prestamos/solicitar" element={<RequestLoan/>} /> 
+        <Route path="/prestamos/detalle/:id" element={< ReadLoan/>}  />
+        <Route path="/prestamos/crear" element={<CreateLoan />} /> 
+
+        
 
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/auth/login" replace />} />

@@ -98,7 +98,7 @@ const Sidebar: React.FC = () => {
           Cobros y Morosidad
         </a>
         <a
-          href=" "
+          href="/prestamos"
           className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
         >
           <BanknotesIcon className="h-5 w-5" />

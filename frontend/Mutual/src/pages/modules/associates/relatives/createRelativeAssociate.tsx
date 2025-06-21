@@ -12,7 +12,9 @@ const relationshipsOptions = [
   "Padre/Madre",
   "Hermano/a",
   "Nieto/a", 
-  "Abuelo/a"
+  "Abuelo/a",
+  "Esposo/a",
+  "Conyuge"
 ];
 
 const CreateAssociateRelative: React.FC = () => {
@@ -137,7 +139,7 @@ const CreateAssociateRelative: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Teléfono del Familiar (opcional)
+                  Teléfono del Familiar
                 </label>
                 <input
                   type="text"

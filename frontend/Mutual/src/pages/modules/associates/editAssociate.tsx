@@ -210,7 +210,6 @@ const EditAssociate: React.FC = () => {
                     onChange={handleChange}
                     className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">Seleccionar</option>
                     {estadoCivilOpciones.map((ec) => (
                       <option key={ec.value} value={ec.value}>
                         {ec.label}
@@ -228,7 +227,6 @@ const EditAssociate: React.FC = () => {
                     onChange={handleChange}
                     className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">Seleccionar</option>
                     {generosOpciones.map((g) => (
                       <option key={g.value} value={g.value}>
                         {g.label}
@@ -312,7 +310,6 @@ const EditAssociate: React.FC = () => {
                     required
                     className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">Seleccionar</option>
                     {provincias.map((prov) => (
                       <option key={prov} value={prov}>
                         {prov}
