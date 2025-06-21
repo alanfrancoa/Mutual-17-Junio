@@ -15,7 +15,6 @@ const AllSuppliers: React.FC = () => {
   const fetchSuppliers = async () => {
     try {
       const data = await apiMutual.GetAllSuppliers();
-      console.log("Datos crudos del backend:", data); //debugging
 
       const mapped = data.map((s: any) => ({
         id: s.id,
