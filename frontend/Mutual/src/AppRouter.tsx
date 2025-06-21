@@ -32,6 +32,8 @@ import CreateAssociateRelative from "./pages/modules/associates/relatives/create
 import EditRelativeAssociate from "./pages/modules/associates/relatives/editRelativeAssociate";
 import AllSuppliers from "./pages/modules/suppliers/allSuppliers";
 import Loans from "./pages/modules/loans/listLoans";
+import ReadLoan from "./pages/modules/loans/readLoan";
+import RequestLoan from "./pages/modules/loans/requestLoan";
 import CreateLoan from "./pages/modules/loans/createLoan";
 
 const AppRouter: React.FC = () => {
@@ -81,7 +83,7 @@ const AppRouter: React.FC = () => {
         />
         <Route path="/asociados/detalle/:id" element={<ReadAssociate />} />
 
-        {/* Seccion asociados-familiares */}
+        {/* Seccion asociados-familiares Gestor */}
         <Route
           path="/asociados/crear/familiar/:associateId"
           element={<CreateAssociateRelative />}
@@ -102,12 +104,13 @@ const AppRouter: React.FC = () => {
         {/* seccion auditoria-- ADMIN ONLY */}
         <Route path="/auditoria" element={<AuditTable />} />
 
-        {/* seccion prestamos */}
+        {/* seccion prestamos Admin y Gestor*/}
         <Route path="/prestamos" element={<Loans />} />
-        <Route path="/prestamos/crear" element={<CreateLoan  />} /> 
-        {/* <Route path="/prestamos/detalle/:id" element={<  />} /> */}
-        {/* <Route path="/prestamos/aprobacion/:id" element={<  />} /> */}
-        {/* <Route path="/prestamos/rechazo/:id" element={<  />} /> */}
+        <Route path="/prestamos/solicitar" element={<RequestLoan/>} /> 
+        <Route path="/prestamos/detalle/:id" element={< ReadLoan/>}  />
+        <Route path="/prestamos/crear" element={<CreateLoan />} /> 
+
+        
 
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/auth/login" replace />} />
