@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import Sidebar from "../../dashboard/components/Sidebar";
+import Modal from "../../../components/modal";
 
-// Datos de prueba para el maquetado
-const mockLoans = [
+const initialLoans = [
   {
     id: 1,
     associateDni: "30123456",
@@ -15,7 +15,7 @@ const mockLoans = [
     loanDate: "2024-01-15T00:00:00Z",
     dueDate: "2025-01-15T00:00:00Z",
     category: "Ayudas",
-    status: "Aprobado",
+    status: "Finalizado",
     active: true,
   },
   {
@@ -26,7 +26,7 @@ const mockLoans = [
     interestRate: 12.0,
     loanDate: "2024-02-20T00:00:00Z",
     dueDate: "2025-02-20T00:00:00Z",
-    status: "Pendiente",
+    status: "Vigente",
     category: "Electrodomesticos",
     active: true,
   },
@@ -156,23 +156,25 @@ const Loans: React.FC<DashboardProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  // Estados para busqueda y filtrado
+  // Cambia mockLoans a estado para poder modificarlo
+  const [loans, setLoans] = useState(initialLoans);
   const [search, setSearch] = useState<string>("");
   const [estadoFiltro, setEstadoFiltro] = useState<string>("Todos");
-
-
-  // Estados de paginacion mock
+  const [showModal, setShowModal] = useState(false);
+  const [modalAction, setModalAction] = useState<"aprobar" | "rechazar" | null>(null);
+  const [selectedLoan, setSelectedLoan] = useState<any>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(1);
   const [filteredAndSearchedLoans, setFilteredAndSearchedLoans] =
-    useState(mockLoans);
+    useState(loans);
 
   // const simuladas para enmaquetado
-  const loading = false; 
-  const error = null; 
+  const loading = false;
+  const error = null;
 
   // useEffect para aplicar los filtrado y busqueda
   useEffect(() => {
-    let currentFiltered = mockLoans;
+    let currentFiltered = loans;
 
     // filtrar por estado
     if (estadoFiltro !== "Todos") {
@@ -194,8 +196,8 @@ const Loans: React.FC<DashboardProps> = ({
     }
 
     setFilteredAndSearchedLoans(currentFiltered);
-    setPage(1); 
-  }, [search, estadoFiltro]); 
+    setPage(1);
+  }, [search, estadoFiltro, loans]);
 
   // Calculo de paginacion segun filtrado
   const totalPages = Math.ceil(filteredAndSearchedLoans.length / PAGE_SIZE);
@@ -208,6 +210,53 @@ const Loans: React.FC<DashboardProps> = ({
     if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
     }
+  };
+
+  // Funciones para abrir el modal
+  const handleOpenModal = (loan: any, action: "aprobar" | "rechazar") => {
+    setSelectedLoan(loan);
+    setModalAction(action);
+    setModalError(null);
+    setShowModal(true);
+  };
+
+  // Confirmacion de accion
+  const handleConfirm = () => {
+    if (!selectedLoan) return;
+
+    // Validaciones
+    if (modalAction === "aprobar" && selectedLoan.status === "Aprobado") {
+      setModalError("El préstamo ya está aprobado.");
+      return;
+    }
+    if (modalAction === "rechazar" && selectedLoan.status === "Rechazado") {
+      setModalError("El préstamo ya está rechazado.");
+      return;
+    }
+
+    // Actualizar estado del préstamo
+    setLoans((prevLoans) =>
+      prevLoans.map((loan) =>
+        loan.id === selectedLoan.id
+          ? {
+              ...loan,
+              status: modalAction === "aprobar" ? "Aprobado" : "Rechazado",
+            }
+          : loan
+      )
+    );
+
+    setShowModal(false);
+    setSelectedLoan(null);
+    setModalAction(null);
+    setModalError(null);
+  };
+
+  const handleCancel = () => {
+    setShowModal(false);
+    setSelectedLoan(null);
+    setModalAction(null);
+    setModalError(null);
   };
 
   return (
@@ -223,7 +272,6 @@ const Loans: React.FC<DashboardProps> = ({
             <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
                 <div className="flex gap-2 w-full md:w-auto flex-wrap">
-                 
                   <input
                     type="text"
                     placeholder="Buscar"
@@ -231,17 +279,19 @@ const Loans: React.FC<DashboardProps> = ({
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
-                  {/* Filtro por Estado */}
+                  {/* Filtrado estado del prestamo */}
                   <select
                     name="estadoFiltro"
                     value={estadoFiltro}
-                    onChange={(e) => setEstadoFiltro(e.target.value)} 
+                    onChange={(e) => setEstadoFiltro(e.target.value)}
                     className="px-3 py-2 border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="Todos">Todos </option>
                     <option value="Pendiente">Pendiente</option>
                     <option value="Aprobado">Aprobado</option>
                     <option value="Rechazado">Rechazado</option>
+                    <option value="Rechazado">Vigente</option>
+                    <option value="Rechazado">Finalizado</option>
                   </select>
                 </div>
 
@@ -324,7 +374,13 @@ const Loans: React.FC<DashboardProps> = ({
                                   ? "bg-green-100 text-green-800"
                                   : loan.status === "Pendiente"
                                   ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-red-100 text-red-800"
+                                  : loan.status === "Rechazado"
+                                  ? "bg-red-100 text-red-800"
+                                  : loan.status === "Vigente"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : loan.status === "Finalizado"
+                                  ? "bg-orange-100 text-orange-800"
+                                  : "bg-gray-100 text-gray-800"
                               }`}
                             >
                               {loan.status}
@@ -342,16 +398,14 @@ const Loans: React.FC<DashboardProps> = ({
                               <button
                                 className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded transition text-xs font-medium"
                                 onClick={() =>
-                                  alert(`Rechazar préstamo ${loan.id}`)
+                                  handleOpenModal(loan, "rechazar")
                                 }
                               >
                                 Rechazar
                               </button>
                               <button
                                 className="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded transition text-xs font-medium"
-                                onClick={() =>
-                                  alert(`Aprobar préstamo ${loan.id}`)
-                                }
+                                onClick={() => handleOpenModal(loan, "aprobar")}
                               >
                                 Aprobar
                               </button>
@@ -377,7 +431,7 @@ const Loans: React.FC<DashboardProps> = ({
                 <div className="flex justify-center items-center gap-4 flex-1">
                   <button
                     className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
-                    onClick={() => handlePageChange(page - 1)} 
+                    onClick={() => handlePageChange(page - 1)}
                     disabled={page === 1}
                     aria-label="Anterior"
                   >
@@ -388,7 +442,7 @@ const Loans: React.FC<DashboardProps> = ({
                   </span>
                   <button
                     className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
-                    onClick={() => handlePageChange(page + 1)} 
+                    onClick={() => handlePageChange(page + 1)}
                     disabled={page === totalPages}
                     aria-label="Siguiente"
                   >
@@ -401,6 +455,31 @@ const Loans: React.FC<DashboardProps> = ({
               </div>
             </div>
           </div>
+          {/* Importacion de modales segun accion */}
+          <Modal
+            isOpen={showModal}
+            title={
+              modalAction === "aprobar"
+                ? "Aprobar Préstamo"
+                : "Rechazar Préstamo"
+            }
+            message={
+              <>
+                {modalAction === "aprobar"
+                  ? `¿Está seguro de que desea aprobar el préstamo COD: ${selectedLoan?.id}?`
+                  : `¿Está seguro de que desea rechazar el préstamo COD: ${selectedLoan?.id}?`}
+                {modalError && (
+                  <div className="mt-3 text-red-600 font-semibold">
+                    {modalError}
+                  </div>
+                )}
+              </>
+            }
+            confirmText={modalAction === "aprobar" ? "Aprobar" : "Rechazar"}
+            cancelText="Cancelar"
+            onConfirm={handleConfirm}
+            onCancel={handleCancel}
+          />
         </main>
       </div>
     </div>
