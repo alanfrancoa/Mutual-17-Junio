@@ -15,14 +15,16 @@ const AllSuppliers: React.FC = () => {
   const fetchSuppliers = async () => {
     try {
       const data = await apiMutual.GetAllSuppliers();
+      console.log("Datos crudos del backend:", data); //debugging
+
       const mapped = data.map((s: any) => ({
-        Id: s.Id,
-        CUIT: s.CUIT ?? "",
-        LegalName: s.LegalName ?? "",
-        Address: s.Address ?? "",
-        Phone: s.Phone ?? "",
-        Email: s.Email ?? "",
-        Active: s.Active,
+        id: s.id,
+        cuit: s.cuit ?? "",
+        legalName: s.legalName ?? "",
+        address: s.address ?? "",
+        phone: s.phone ?? "",
+        email: s.email ?? "",
+        active: s.active,
       }));
       setSuppliers(mapped);
     } catch (err: any) {
@@ -37,11 +39,11 @@ const AllSuppliers: React.FC = () => {
   // Filtro por nombre, cuit, teléfono o email
   const filteredSuppliers = suppliers.filter(
     (s) =>
-     s.LegalName.toLowerCase().includes(search.toLowerCase()) ||
-        s.CUIT.includes(search) ||
-        (s.Address && s.Address.toLowerCase().includes(search.toLowerCase())) ||
-        (s.Phone && s.Phone.includes(search)) ||
-        (s.Email && s.Email.toLowerCase().includes(search.toLowerCase()))
+     s.legalName.toLowerCase().includes(search.toLowerCase()) ||
+        s.cuit.includes(search) ||
+        (s.address && s.address.toLowerCase().includes(search.toLowerCase())) ||
+        (s.phone && s.phone.includes(search)) ||
+        (s.email && s.email.toLowerCase().includes(search.toLowerCase()))
     );
 
   return (
@@ -53,7 +55,7 @@ const AllSuppliers: React.FC = () => {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-blue-900">Proveedores</h2>
             <button
-              onClick={() => navigate("/proveedores/nuevo")}
+              onClick={() => navigate("/proveedores/crear")}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold"
             >
               Nuevo Proveedor
@@ -89,21 +91,21 @@ const AllSuppliers: React.FC = () => {
                   </tr>
                 ) : (
                  filteredSuppliers.map((s) => (
-                    <tr key={s.Id}>
-                      <td className="px-4 py-2">{s.Id}</td>
-                      <td className="px-4 py-2">{s.LegalName}</td>
-                      <td className="px-4 py-2">{s.CUIT}</td>
-                      <td className="px-4 py-2">{s.Phone}</td>
-                      <td className="px-4 py-2">{s.Email}</td>
+                    <tr key={s.id}>
+                      <td className="px-4 py-2">{s.id}</td>
+                      <td className="px-4 py-2">{s.legalName}</td>
+                      <td className="px-4 py-2">{s.cuit}</td>
+                      <td className="px-4 py-2">{s.phone}</td>
+                      <td className="px-4 py-2">{s.email}</td>
                       <td className="px-4 py-2">
                         <button
-                          onClick={() => navigate(`/proveedores/editar/${s.Id}`)}
+                          onClick={() => navigate(`/proveedores/editar/${s.id}`)}
                           className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm mr-2"
                         >
                           Editar
                         </button>
                         <button
-                          onClick={() => navigate(`/proveedores/desactivar/${s.Id}`)}
+                          onClick={() => navigate(`/proveedores/desactivar/${s.id}`)}
                           className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
                         >
                           Desactivar

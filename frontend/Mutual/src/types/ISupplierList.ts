@@ -1,9 +1,9 @@
 export interface ISupplierList {
-  Id: number;
-  CUIT: string;
-  LegalName: string;
-  Address: string;
-  Phone: string;
-  Email: string;
-  Active: boolean;
+  id: number;
+  cuit: string;
+  legalName: string;
+  address: string;
+  phone: string;
+  email: string;
+  active: boolean;
 }
