@@ -57,7 +57,7 @@ const AppRouter: React.FC = () => {
 
         {/* Seccion proveedores - servicios */}
         <Route path="/proveedores/servicios" element={<AllServices />} />
-        <Route path="/proveedores/servicios/nueva" element={<CreateService />} />
+        <Route path="/proveedores/servicios/crear" element={<CreateService />} />
         <Route path="/proveedores/servicios/editar/:id" element={<EditService />} />
 
         {/* Seccion asociados */}
