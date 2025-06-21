@@ -98,13 +98,19 @@ const AllSuppliers: React.FC = () => {
                       <td className="px-4 py-2">{s.email}</td>
                       <td className="px-4 py-2">
                         <button
-                          onClick={() => navigate(`/proveedores/editar/${s.id}`)}
+                          onClick={() => {
+                            console.log("editar proveedor:", s.id);
+                            navigate(`/proveedores/editar/${s.id}`);
+                          }}
                           className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm mr-2"
                         >
                           Editar
                         </button>
                         <button
-                          onClick={() => navigate(`/proveedores/desactivar/${s.id}`)}
+                          onClick={() => {
+                            console.log("desactivar proveedor:", s.id);
+                            navigate(`/proveedores/desactivar/${s.id}`);
+                          }}
                           className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
                         >
                           Desactivar

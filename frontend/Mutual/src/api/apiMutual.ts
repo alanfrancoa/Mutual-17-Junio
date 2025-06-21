@@ -337,23 +337,23 @@ export const apiMutual = {
 },
   /* ----------------------- 3. Editar Proveedor ----------------------- */
 
-    UpdateSupplier: async (
-    id: number,
-    supplierData: ISupplierRegister
-    ): Promise<{ mensaje: string }> => {
-      const url = `https://localhost:7256/api/suppliers/${id}`;
-      const response = await Fetcher.put(url, supplierData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-        },
-      });
-      if (response.status && response.status >= 400) {
-        // Si Fetcher devuelve un status de error
-        const data = response.data as { mensaje?: string };
-        throw new Error(data?.mensaje || "No se pudo registrar el proveedor");
-    }
-      return response.data as { mensaje: string };
-    },
-};
+    GetSupplierById: async (id: number): Promise<ISupplierList> => {
+    const url = `https://localhost:7256/api/suppliers/${id}`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    return response.data as ISupplierList;
+  },
 
+UpdateSupplier: async (
+    supplierId: number,
+    supplierData: ISupplierRegister
+  ): Promise<{ mensaje: string }> => {
+    const url = `https://localhost:7256/api/suppliers/${supplierId}`;
+    const response = await Fetcher.put(url, supplierData);
+    return response.data as { mensaje: string };
+  },
+};

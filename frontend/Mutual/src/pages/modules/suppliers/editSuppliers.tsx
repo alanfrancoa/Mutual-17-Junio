@@ -3,18 +3,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../../dashboard/components/Sidebar";
 import Header from "../../dashboard/components/Header";
 import { apiMutual } from "../../../api/apiMutual";
-import { ISupplierRegister } from "../../../types/ISupplierRegister";
-
-interface Supplier extends ISupplierRegister {
-  id: number;
-  Active?: boolean;
-}
+import { ISupplierUpdate } from "../../../types/ISupplierRegister";
 
 const EditSupplier: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState<Supplier>({
+  const [form, setForm] = useState<ISupplierUpdate>({
     id: 0,
     CUIT: "",
     LegalName: "",
@@ -28,26 +23,29 @@ const EditSupplier: React.FC = () => {
 
   useEffect(() => {
     const fetchSupplier = async () => {
+      if (!id) {
+        setLoading(false);
+        setMessage({ type: "error", text: "ID de proveedor no válido" });
+        return;
+      }
       try {
-        const response = await fetch(`/api/suppliers/${id}`);
-        if (!response.ok) throw new Error("No se pudo obtener el proveedor");
-        const data = await response.json();
+        const supplier = await apiMutual.GetSupplierById(Number(id));
         setForm({
-          id: data.Id,
-          CUIT: data.CUIT,
-          LegalName: data.LegalName,
-          Address: data.Address,
-          Phone: data.Phone,
-          Email: data.Email,
-          Active: data.Active !== undefined ? data.Active : true,
+          id: supplier.id,
+          CUIT: supplier.cuit ?? "",
+          LegalName: supplier.legalName ?? "",
+          Address: supplier.address ?? "",
+          Phone: supplier.phone ?? "",
+          Email: supplier.email ?? "",
+          Active: supplier.active ?? true,
         });
-      } catch {
-        setMessage({ type: "error", text: "Error al cargar el proveedor" });
+      } catch (error: any) {
+        setMessage({ type: "error", text: error.message });
       } finally {
         setLoading(false);
       }
     };
-    if (id) fetchSupplier();
+    fetchSupplier();
   }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,30 +67,21 @@ const EditSupplier: React.FC = () => {
     }
     setLoading(true);
     try {
-      // Usamos apiMutual para actualizar el proveedor
-      const response = await apiMutual.UpdateSupplier(form.id, {
+      await apiMutual.UpdateSupplier(form.id, {
         CUIT: form.CUIT,
         LegalName: form.LegalName,
         Address: form.Address,
         Phone: form.Phone,
         Email: form.Email,
       });
-      setMessage({ type: "success", text: response.mensaje });
-      setTimeout(() => navigate("/proveedores/allsuppliers"), 1500);
+      setMessage({ type: "success", text: "Proveedor actualizado correctamente" });
+      setTimeout(() => navigate("/proveedores/allsuppliers"), 1200);
     } catch (error: any) {
       setMessage({ type: "error", text: error.message });
     } finally {
       setLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <span>Cargando proveedor...</span>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
