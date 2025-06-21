@@ -45,15 +45,15 @@ const AppRouter: React.FC = () => {
 
         {/* seccion proveedores */}
         <Route path="/proveedores" element={<AllSuppliers />} />
-        <Route path="/proveedores/nuevo" element={<CreateSupplier />} />
+        <Route path="/proveedores/crear" element={<CreateSupplier />} />
         <Route path="/proveedores/editar" element={<EditSupplier />} />
-        <Route path="/proveedores/eliminar" element={<DeleteSupplier />} />
+        <Route path="/proveedores/desactivar" element={<DeleteSupplier />} />
         <Route path="/proveedores/tipos-servicio" element={<ServiceTypeList />} />
         <Route path="/proveedores/metodos-pago" element={<PaymentMethodsList />} />
 
         {/* Seccion proveedores - servicios */}
         <Route path="/proveedores/servicios" element={<AllServices />} />
-        <Route path="/proveedores/servicios/nueva" element={<CreateService />} />
+        <Route path="/proveedores/servicios/crear" element={<CreateService />} />
         <Route path="/proveedores/servicios/editar/:id" element={<EditService />} />
 
         {/* Seccion asociados */}

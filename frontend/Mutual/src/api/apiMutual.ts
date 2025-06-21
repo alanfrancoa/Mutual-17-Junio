@@ -6,6 +6,7 @@ import { IAssociateList } from "../../src/types/IAssociateList";
 import { ILoginResponse } from "../types/loginResponse";
 import { User } from "../types/user";
 import { IRelativeList, IRelativeRegister, IRelativeUpdate } from "../types/IRelative";
+import { ISupplierList } from "../types/ISupplierList";
 import { ISupplierRegister } from "../types/ISupplierRegister";
 
 /* -----------------------Llamadas API----------------------- */
@@ -319,4 +320,40 @@ export const apiMutual = {
     }
       return response.data as { mensaje: string };
     },
+  /* ----------------------- 2. Obtener lista de Proveedores ----------------------- */
+  GetAllSuppliers: async (): Promise<any[]> => {
+    const url = "https://localhost:7256/api/suppliers";
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const data = response.data as { mensaje?: string };
+      throw new Error(data?.mensaje || "No se pudieron obtener los proveedores");
+    }
+    return response.data as any[];
+},
+  /* ----------------------- 3. Editar Proveedor ----------------------- */
+
+    UpdateSupplier: async (
+    id: number,
+    supplierData: ISupplierRegister
+    ): Promise<{ mensaje: string }> => {
+      const url = `https://localhost:7256/api/suppliers/${id}`;
+      const response = await Fetcher.put(url, supplierData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+        },
+      });
+      if (response.status && response.status >= 400) {
+        // Si Fetcher devuelve un status de error
+        const data = response.data as { mensaje?: string };
+        throw new Error(data?.mensaje || "No se pudo registrar el proveedor");
+    }
+      return response.data as { mensaje: string };
+    },
 };
+

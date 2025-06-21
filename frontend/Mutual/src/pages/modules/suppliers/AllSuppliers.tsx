@@ -2,43 +2,38 @@ import React, { useEffect,useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
-
-interface Supplier {
-  Id: number;
-  CUIT: string;
-  LegalName: string;
-  Address: string;
-  Phone: string;
-  Email: string;
-  Active: boolean;
-}
+import { apiMutual } from "../../../api/apiMutual";
+import { ISupplierList } from "../../../types/ISupplierList";
 
 const AllSuppliers: React.FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [suppliers, setSuppliers] = useState<ISupplierList[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Llama al backend para obtener los proveedores
-    const fetchSuppliers = async () => {
-      try {
-        const response = await fetch("/api/suppliers");
-        if (response.ok) {
-          const data = await response.json();
-          setSuppliers(data);
-        } else {
-          setSuppliers([]);
-        }
-      } catch {
-        setSuppliers([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSuppliers();
-  }, []);
+  const fetchSuppliers = async () => {
+    try {
+      const data = await apiMutual.GetAllSuppliers();
+      const mapped = data.map((s: any) => ({
+        Id: s.Id,
+        CUIT: s.CUIT ?? "",
+        LegalName: s.LegalName ?? "",
+        Address: s.Address ?? "",
+        Phone: s.Phone ?? "",
+        Email: s.Email ?? "",
+        Active: s.Active,
+      }));
+      setSuppliers(mapped);
+    } catch (err: any) {
+      setSuppliers([]);
 
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchSuppliers();
+}, []);
   // Filtro por nombre, cuit, teléfono o email
   const filteredSuppliers = suppliers.filter(
     (s) =>
@@ -93,21 +88,14 @@ const AllSuppliers: React.FC = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredSuppliers.map((s) => (
+                 filteredSuppliers.map((s) => (
                     <tr key={s.Id}>
                       <td className="px-4 py-2">{s.Id}</td>
                       <td className="px-4 py-2">{s.LegalName}</td>
                       <td className="px-4 py-2">{s.CUIT}</td>
-                      <td className="px-4 py-2">{s.Address}</td>
                       <td className="px-4 py-2">{s.Phone}</td>
                       <td className="px-4 py-2">{s.Email}</td>
                       <td className="px-4 py-2">
-                        <button
-                          onClick={() => navigate(`/proveedores/ver/${s.Id}`)}
-                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm ml-2"
-                        >
-                          Ver
-                        </button>
                         <button
                           onClick={() => navigate(`/proveedores/editar/${s.Id}`)}
                           className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm mr-2"
