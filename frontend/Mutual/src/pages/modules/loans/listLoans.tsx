@@ -17,6 +17,7 @@ const initialLoans = [
     category: "Ayudas",
     status: "Finalizado",
     active: true,
+    installments: { current: 12, total: 12 },
   },
   {
     id: 2,
@@ -29,6 +30,7 @@ const initialLoans = [
     status: "Vigente",
     category: "Electrodomesticos",
     active: true,
+    installments: { current: 5, total: 6 },
   },
   {
     id: 3,
@@ -41,6 +43,7 @@ const initialLoans = [
     status: "Rechazado",
     category: "Electrodomesticos",
     active: false,
+    installments: { current: 0, total: 6 },
   },
   {
     id: 4,
@@ -53,6 +56,7 @@ const initialLoans = [
     status: "Aprobado",
     category: "Ayudas",
     active: true,
+    installments: { current: 1, total: 3 },
   },
   {
     id: 5,
@@ -65,6 +69,7 @@ const initialLoans = [
     status: "Pendiente",
     category: "Ayudas",
     active: true,
+    installments: { current: 3, total: 6 },
   },
   {
     id: 6,
@@ -77,6 +82,7 @@ const initialLoans = [
     status: "Rechazado",
     category: "Ayudas",
     active: false,
+    installments: { current: 0, total: 0 },
   },
   {
     id: 7,
@@ -89,6 +95,7 @@ const initialLoans = [
     status: "Aprobado",
     active: true,
     category: "Ayudas",
+    installments: { current: 1, total: 6 },
   },
   {
     id: 8,
@@ -101,6 +108,7 @@ const initialLoans = [
     status: "Pendiente",
     active: true,
     category: "Electrodomesticos",
+    installments: { current: 0, total: 0},
   },
   {
     id: 9,
@@ -113,6 +121,7 @@ const initialLoans = [
     status: "Aprobado",
     active: true,
     category: "Electrodomesticos",
+    installments: { current: 5, total: 12 },
   },
   {
     id: 10,
@@ -125,6 +134,7 @@ const initialLoans = [
     status: "Aprobado",
     active: true,
     category: "Electrodomesticos",
+    installments: { current: 5, total: 12 },
   },
   {
     id: 11,
@@ -137,6 +147,7 @@ const initialLoans = [
     status: "Pendiente",
     active: true,
     category: "Ayudas",
+    installments: { current: 0, total: 0 },
   },
 ];
 
@@ -334,6 +345,9 @@ const Loans: React.FC<DashboardProps> = ({
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Categoría
                       </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Cuotas
+                      </th>
                       <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Acciones
                       </th>
@@ -343,7 +357,7 @@ const Loans: React.FC<DashboardProps> = ({
                     {paginatedLoans.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={8}
+                          colSpan={9}
                           className="text-center py-8 text-gray-400"
                         >
                           No hay préstamos registrados para mostrar.
@@ -391,6 +405,11 @@ const Loans: React.FC<DashboardProps> = ({
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                             {loan.category}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                            {loan.installments
+                              ? `${loan.installments.current}/${loan.installments.total}`
+                              : "-"}
                           </td>
                           <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
                             <div className="space-x-2 flex justify-end">
