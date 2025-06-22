@@ -335,7 +335,7 @@ export const apiMutual = {
     }
     return response.data as any[];
 },
-  /* ----------------------- 3. Editar Proveedor ----------------------- */
+  /* ----------------------- 3. Obtener Proveedor por ID ----------------------- */
 
     GetSupplierById: async (id: number): Promise<ISupplierList> => {
     const url = `https://localhost:7256/api/suppliers/${id}`;
@@ -348,12 +348,29 @@ export const apiMutual = {
     return response.data as ISupplierList;
   },
 
+ /* ----------------------- 4. Editar Proveedor ----------------------- */
+
 UpdateSupplier: async (
     supplierId: number,
     supplierData: ISupplierRegister
   ): Promise<{ mensaje: string }> => {
     const url = `https://localhost:7256/api/suppliers/${supplierId}`;
     const response = await Fetcher.put(url, supplierData);
+    return response.data as { mensaje: string };
+  },
+
+  /* ----------------------- 5. Cambiar Estado del Proveedor (Activo/Inactivo) ----------------------- */
+  ChangeSupplierStatus: async (
+    supplierId: number,
+    newStatus: boolean
+  ): Promise<{ mensaje: string }> => {
+    const url = `https://localhost:7256/api/suppliers/${supplierId}/status`;
+    const response = await Fetcher.patch(url, JSON.stringify(newStatus), {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
     return response.data as { mensaje: string };
   },
 };

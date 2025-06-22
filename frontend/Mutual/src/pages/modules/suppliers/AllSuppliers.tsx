@@ -111,9 +111,13 @@ const AllSuppliers: React.FC = () => {
                             console.log("desactivar proveedor:", s.id);
                             navigate(`/proveedores/desactivar/${s.id}`);
                           }}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                        >
-                          Desactivar
+                          className={(
+                            s.active
+                            ? "bg-red-600 hover:bg-red-700"
+                            : "bg-green-600 hover:bg-green-700") +
+                          " text-white px-3 py-1 rounded text-sm"
+                          }>
+                          {s.active ? "Inactivar" : "Activar"}
                         </button>
                       </td>
                     </tr>

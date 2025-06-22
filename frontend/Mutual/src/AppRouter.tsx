@@ -12,7 +12,7 @@ import CreateSupplier from "./pages/modules/suppliers/createSupplier";
 import CreateService from "./pages/modules/suppliers/createService";
 import EditService from "./pages/modules/suppliers/editService";
 import EditSupplier from "./pages/modules/suppliers/editSuppliers";
-import DeleteSupplier from "./pages/modules/suppliers/editSuppliers";
+import DeleteSupplier from "./pages/modules/suppliers/deleteSupplier";
 import ServiceTypeList from "./pages/modules/suppliers/serviceType";
 import PaymentMethodsList from "./pages/modules/suppliers/paymentMethods";
 import UsersTable from "./pages/modules/users/users";
