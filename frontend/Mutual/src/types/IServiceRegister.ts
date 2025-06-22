@@ -1,9 +1,8 @@
 export interface IServiceRegister {
     supplierId: string;
-    legalName: string;
-    address: string;
-    phone: string;
-    email: string;
+    serviceType: string;
+    description: string;
+    monthlyCost: number;
 }
 
 export interface IServiceUpdate {

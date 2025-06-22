@@ -8,6 +8,7 @@ import { User } from "../types/user";
 import { IRelativeList, IRelativeRegister, IRelativeUpdate } from "../types/IRelative";
 import { ISupplierList } from "../types/ISupplierList";
 import { ISupplierRegister } from "../types/ISupplierRegister";
+import { IServiceRegister } from "../types/IServiceRegister";
 
 /* -----------------------Llamadas API----------------------- */
 
@@ -373,4 +374,23 @@ UpdateSupplier: async (
     });
     return response.data as { mensaje: string };
   },
+
+ /* ----------------------- Crear servicio ----------------------- */
+  RegisterService: async (
+    supplierData: IServiceRegister
+    ): Promise<{ mensaje: string }> => {
+      const url = `https://localhost:7256/api/services`;
+      const response = await Fetcher.post(url, supplierData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+        },
+      });
+      if (response.status && response.status >= 400) {
+        const data = response.data as { mensaje?: string };
+        throw new Error(data?.mensaje || "No se pudo registrar el servicio");
+    }
+      return response.data as { mensaje: string };
+    },
+
 };

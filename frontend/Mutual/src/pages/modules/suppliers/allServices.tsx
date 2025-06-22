@@ -73,11 +73,12 @@ const AllServicesPage: React.FC = () => {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-blue-900">Servicios</h2>
             <button
-              onClick={() => navigate("/suppliers/allsuppliers")}
+              onClick={() => navigate("/proveedores/servicios/crear/")}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold"
             >
-              Proveedores
+              Nuevo Servicio
             </button>
+
           </div>
           <div className="mb-4 flex flex-col md:flex-row gap-2">
             <input

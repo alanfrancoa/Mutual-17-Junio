@@ -1,30 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../dashboard/components/Sidebar';
+import { apiMutual } from "../../../api/apiMutual";
 
 interface Supplier {
-  Id: number;
-  CUIT: string;
-  LegalName: string;
-  Address: string;
-  Phone?: string;
-  Email?: string;
-  Active: boolean;
-  CreatedAt: string;
+  id: number;
+  cuit: string;
+  legalName: string;
+  address: string;
+  phone?: string;
+  email?: string;
+  active: boolean;
+  createdAt: string;
 }
 
 interface ServiceType {
-  Id: number;
-  Code: string;
-  Name: string;
-  Active: boolean;
+  id: number;
+  code: string;
+  name: string;
+  active: boolean;
 }
 
 interface CreateServiceForm {
-  ServiceTypeId: number | "";
-  SupplierId: number | "";
-  Description: string;
-  MonthlyCost: string;
+  serviceTypeId: number | "";
+  supplierId: number | "";
+  description: string;
+  monthlyCost: string;
 }
 
 interface CreateServiceProps {
@@ -37,36 +38,35 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
   const [form, setForm] = useState<CreateServiceForm>({
-    ServiceTypeId: "",
-    SupplierId: "",
-    Description: "",
-    MonthlyCost: "",
+    serviceTypeId: "",
+    supplierId: "",
+    description: "",
+    monthlyCost: "",
   });
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchSuppliers = async () => {
-      try {
-        const response = await fetch("/api/suppliers");
-        if (response.ok) {
-          const data = await response.json();
-          setSuppliers(data.filter((s: Supplier) => s.Active)); // Filtrar por proveedores activos
-        }
-      } catch {
-        setSuppliers([]);
-      }
-    };
-    fetchSuppliers();
-  }, []);
+    useEffect(() => {
+      const fetchSuppliers = async () => {
+    try {
+      const data = await apiMutual.GetAllSuppliers();
+      console.log("Proveedores recibidos:", data);
 
-     useEffect(() => {
+      setSuppliers(data.filter((s: Supplier) => s.active));
+    } catch {
+      setSuppliers([]);
+    }
+  };
+  fetchSuppliers();
+}, []);
+
+  useEffect(() => {
     const fetchServiceTypes = async () => {
       try {
         const response = await fetch("/services-type");
         if (response.ok) {
           const data = await response.json();
-          setServiceTypes(data.filter((t: ServiceType) => t.Active));
+          setServiceTypes(data.filter((t: ServiceType) => t.active));
         }
       } catch {
         setServiceTypes([]);
@@ -84,37 +84,28 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
   };
 
   const handleSave = async () => {
-    setSuccess("");
-    setError("");
-    if (!form.ServiceTypeId || !form.SupplierId || !form.Description || !form.MonthlyCost) {
-      setError("Completa todos los campos obligatorios.");
-      return;
-    }
-    try {
-      const response = await fetch("/services", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ServiceTypeId: Number(form.ServiceTypeId),
-          SupplierId: Number(form.SupplierId),
-          Description: form.Description,
-          MonthlyCost: Number(form.MonthlyCost),
-        }),
-      });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.mensaje || "No se pudo registrar el servicio");
-      }
-      setSuccess("Servicio registrado correctamente.");
-      setTimeout(() => navigate("/servicios"), 1200);
-    } catch (err: any) {
-      setError(err.message || "Error de red o servidor.");
-    }
-  };
+  setSuccess("");
+  setError("");
+  if (!form.serviceTypeId || !form.supplierId || !form.description || !form.monthlyCost) {
+    setError("Completa todos los campos obligatorios.");
+    return;
+  }
+  try {
+    await apiMutual.RegisterService({
+      serviceType: String(form.serviceTypeId),
+      supplierId: String(form.supplierId),
+      description: form.description,
+      monthlyCost: Number(form.monthlyCost),
+    });
+    setSuccess("Servicio registrado correctamente.");
+    setTimeout(() => navigate("/servicios"), 1200);
+  } catch (err: any) {
+    setError(err.message || "Error de red o servidor.");
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar fija a la izquierda */}
       <Sidebar />
       <div className="flex-1" style={{ marginLeft: '18rem' }}>
         <div className="container mx-auto px-4 py-6">
@@ -144,15 +135,15 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Servicio</label>
                 <select
                   name="ServiceTypeId"
-                  value={form.ServiceTypeId}
+                  value={form.serviceTypeId}
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
                   required
                 >
                   <option value="">Seleccione un tipo de servicio...</option>
                   {serviceTypes.map((type) => (
-                    <option key={type.Id} value={type.Id}>
-                      {type.Name}
+                    <option key={type.id} value={type.id}>
+                      {type.name}
                     </option>
                   ))}
                 </select>
@@ -162,15 +153,15 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
                 <select
                   name="SupplierId"
-                  value={form.SupplierId}
+                  value={form.supplierId}
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
                   required
                 >
                   <option value="">Seleccione un proveedor...</option>
                   {suppliers.map((supplier) => (
-                    <option key={supplier.Id} value={supplier.Id}>
-                      {supplier.LegalName} ({supplier.CUIT})
+                    <option key={supplier.id} value={supplier.id}>
+                      {supplier.legalName} ({supplier.cuit})
                     </option>
                   ))}
                 </select>
@@ -180,7 +171,7 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
                 <textarea
                   name="Description"
-                  value={form.Description}
+                  value={form.description}
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded"
                   maxLength={255}
@@ -192,7 +183,7 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
                 <input
                   type="number"
                   name="MonthlyCost"
-                  value={form.MonthlyCost}
+                  value={form.monthlyCost}
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded"
                   min={0}
