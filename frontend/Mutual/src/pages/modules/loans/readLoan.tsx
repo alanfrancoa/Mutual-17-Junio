@@ -5,14 +5,9 @@ import Sidebar from "../../dashboard/components/Sidebar";
 import { initialLoans } from "./listLoans";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
 
-const mockAssociate = {
-  email: "juan.perez@ejemplo.com",
-  telefono: "1155551234",
-  direccion: "Calle Falsa 123, Ciudad, Provincia, Código Postal",
-};
 
 const mockLoanDetails = {
-  tipo: "Ayudas Economicas",
+  tipo: "Ayudas Economicas 10 tasa 60mil",
   frecuencia: "Mensual",
 };
 
@@ -93,8 +88,6 @@ const ReadLoan: React.FC = () => {
                       : loan.status === "Pendiente"
                       ? "bg-yellow-100 text-yellow-800"
                       : loan.status === "Rechazado"
-                      ? "bg-red-100 text-red-800"
-                      : loan.status === "Vigente"
                       ? "bg-blue-100 text-blue-800"
                       : loan.status === "Finalizado"
                       ? "bg-orange-100 text-orange-800"
@@ -116,9 +109,8 @@ const ReadLoan: React.FC = () => {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">Cuotas:</span>
                 <span className="font-semibold text-gray-800">
-                  {loan.installments
-                    ? `${loan.installments.current} de ${loan.installments.total}`
-                    : "-"}
+                  {loan.installments}
+                    
                 </span>
               </div>
             </div>
@@ -136,20 +128,10 @@ const ReadLoan: React.FC = () => {
                 <span className="text-gray-800">{loan.associateLegalName}</span>
               </div>
               <div className="mb-1">
-                <span className="text-sm font-semibold text-gray-500">DNI:</span>{" "}
+                <span className="text-sm font-semibold text-gray-500">
+                  DNI:
+                </span>{" "}
                 <span className="text-gray-800">{loan.associateDni}</span>
-              </div>
-              <div className="mb-1">
-                <span className="text-sm font-semibold text-gray-500">Email:</span>{" "}
-                <span className="text-gray-800">{mockAssociate.email}</span>
-              </div>
-              <div className="mb-1">
-                <span className="text-sm font-semibold text-gray-500">Teléfono:</span>{" "}
-                <span className="text-gray-800">{mockAssociate.telefono}</span>
-              </div>
-              <div>
-                <span className="text-sm font-semibold text-gray-500">Dirección:</span>{" "}
-                <span className="text-gray-800">{mockAssociate.direccion}</span>
               </div>
             </div>
             <hr className="my-6" />
@@ -173,40 +155,17 @@ const ReadLoan: React.FC = () => {
                   {new Date(loan.loanDate).toLocaleDateString()}
                 </span>
               </div>
-              <div className="mb-1">
-                <span className="text-sm font-semibold text-gray-500">
-                  Fecha de Vencimiento Final:
-                </span>{" "}
-                <span className="text-gray-800">
-                  {new Date(loan.dueDate).toLocaleDateString()}
-                </span>
-              </div>
+              
               <div className="mb-1">
                 <span className="text-sm font-semibold text-gray-500">
                   Tasa de Interés:
                 </span>{" "}
-                <span className="text-gray-800">{loan.interestRate}% Anual</span>
-              </div>
-              <div className="mb-1">
-                <span className="text-sm font-semibold text-gray-500">
-                  Monto por Cuota:
-                </span>{" "}
                 <span className="text-gray-800">
-                  $
-                  {loan.installments && loan.installments.total > 0
-                    ? (loan.amount / loan.installments.total).toLocaleString(
-                        "es-AR",
-                        { minimumFractionDigits: 2 }
-                      )
-                    : "-"}
+                  {loan.interestRate}% Anual
                 </span>
               </div>
-              <div className="mb-1">
-                <span className="text-sm font-semibold text-gray-500">
-                  Frecuencia de Pago:
-                </span>{" "}
-                <span className="text-gray-800">{mockLoanDetails.frecuencia}</span>
-              </div>
+              
+            
             </div>
           </div>
         </div>
