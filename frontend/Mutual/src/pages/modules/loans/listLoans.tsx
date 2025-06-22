@@ -39,7 +39,7 @@ export const initialLoans = [
     dueDate: "2024-11-01T00:00:00Z",
     status: "Rechazado",
     active: false,
-    installments: "-" ,
+    installments: "-",
   },
   {
     id: 4,
@@ -86,7 +86,7 @@ export const initialLoans = [
     dueDate: "2025-05-18T00:00:00Z",
     status: "Aprobado",
     active: true,
-    installments:  6 ,
+    installments: 6,
   },
   {
     id: 8,
@@ -97,7 +97,7 @@ export const initialLoans = [
     dueDate: "2025-06-01T00:00:00Z",
     status: "Pendiente",
     active: true,
-    installments:"-",
+    installments: "-",
   },
   {
     id: 9,
@@ -108,7 +108,7 @@ export const initialLoans = [
     dueDate: "2025-01-01T00:00:00Z",
     status: "Aprobado",
     active: true,
-    installments: 12 ,
+    installments: 12,
   },
   {
     id: 10,
@@ -119,7 +119,7 @@ export const initialLoans = [
     dueDate: "2025-02-01T00:00:00Z",
     status: "Aprobado",
     active: true,
-    installments:  12 ,
+    installments: 12,
   },
   {
     id: 11,
@@ -130,7 +130,7 @@ export const initialLoans = [
     dueDate: "2025-03-01T00:00:00Z",
     status: "Pendiente",
     active: true,
-    installments:"-",
+    installments: "-",
   },
 ];
 
@@ -158,6 +158,8 @@ const Loans: React.FC<DashboardProps> = ({
   const [modalAction, setModalAction] = useState<"aprobar" | "rechazar" | null>(
     null
   );
+  const [motive, setMotive] = useState<string>("");
+
   const [selectedLoan, setSelectedLoan] = useState<any>(null);
   const [modalError, setModalError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(1);
@@ -216,9 +218,12 @@ const Loans: React.FC<DashboardProps> = ({
   };
 
   // Confirmacion de accion
-  const handleConfirm = () => {
-    if (!selectedLoan) return;
-
+ const handleConfirm = () => {
+  if (!motive.trim()) {
+    setModalError("El motivo es obligatorio.");
+    return;
+  }
+  if (!selectedLoan) return;
     // Validaciones
     if (modalAction === "aprobar" && selectedLoan.status === "Aprobado") {
       setModalError("El préstamo ya está aprobado.");
@@ -245,6 +250,7 @@ const Loans: React.FC<DashboardProps> = ({
     setSelectedLoan(null);
     setModalAction(null);
     setModalError(null);
+    setMotive("");
   };
 
   const handleCancel = () => {
@@ -382,16 +388,16 @@ const Loans: React.FC<DashboardProps> = ({
                           </td>
 
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                            {loan.installments
-                              ? `${loan.installments}`
-                              : "-"}
+                            {loan.installments ? `${loan.installments}` : "-"}
                           </td>
                           <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
                             <div className="space-x-2 flex justify-end">
                               {/* acciones rechazo y aprobacion */}
                               <button
                                 className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded transition text-xs font-medium disabled:opacity-50"
-                                onClick={() => handleOpenModal(loan, "rechazar")}
+                                onClick={() =>
+                                  handleOpenModal(loan, "rechazar")
+                                }
                                 disabled={loan.status !== "Pendiente"}
                               >
                                 Rechazar
@@ -449,6 +455,7 @@ const Loans: React.FC<DashboardProps> = ({
               </div>
             </div>
           </div>
+          
           {/* Importacion de modales segun accion */}
           <Modal
             isOpen={showModal}
@@ -459,9 +466,25 @@ const Loans: React.FC<DashboardProps> = ({
             }
             message={
               <>
-                {modalAction === "aprobar"
-                  ? `¿Está seguro de que desea aprobar el préstamo COD: ${selectedLoan?.id}?`
-                  : `¿Está seguro de que desea rechazar el préstamo COD: ${selectedLoan?.id}?`}
+                
+                <div className="mb-2">
+                  {modalAction === "aprobar"
+                    ? `¿Está seguro de que desea aprobar el préstamo de ${selectedLoan?.associateLegalName} DNI: ${selectedLoan?.associateDni}?`
+                    : `¿Está seguro de que desea rechazar el préstamo de ${selectedLoan?.associateLegalName} DNI: ${selectedLoan?.associateDni}?`}
+                </div>
+                <div className="mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Motivo <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={motive}
+                    onChange={(e) => setMotive(e.target.value)}
+                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ingrese el motivo"
+                    required
+                  />
+                </div>
                 {modalError && (
                   <div className="mt-3 text-red-600 font-semibold">
                     {modalError}
