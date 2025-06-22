@@ -156,10 +156,10 @@ const EditSupplier: React.FC = () => {
             <div className="flex gap-2 justify-end">
               <button
                 type="button"
-                onClick={() => navigate("/proveedores/allsuppliers")}
+                onClick={() => navigate("/proveedores")}
                 className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
               >
-                Cancelar
+                Volver atrás
               </button>
               <button
                 type="submit"
