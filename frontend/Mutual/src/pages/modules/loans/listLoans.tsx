@@ -4,6 +4,7 @@ import Header from "../../dashboard/components/Header";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import Sidebar from "../../dashboard/components/Sidebar";
 import Modal from "../../../components/modal";
+import ListTypesLoan from "./loanTypes/listTypesLoan";
 
 export const initialLoans = [
   {
@@ -218,12 +219,12 @@ const Loans: React.FC<DashboardProps> = ({
   };
 
   // Confirmacion de accion
- const handleConfirm = () => {
-  if (!motive.trim()) {
-    setModalError("El motivo es obligatorio.");
-    return;
-  }
-  if (!selectedLoan) return;
+  const handleConfirm = () => {
+    if (!motive.trim()) {
+      setModalError("El motivo es obligatorio.");
+      return;
+    }
+    if (!selectedLoan) return;
     // Validaciones
     if (modalAction === "aprobar" && selectedLoan.status === "Aprobado") {
       setModalError("El préstamo ya está aprobado.");
@@ -453,9 +454,12 @@ const Loans: React.FC<DashboardProps> = ({
                   {filteredAndSearchedLoans.length} préstamo(s) encontrado(s)
                 </span>
               </div>
+              
             </div>
+            
           </div>
-          
+          <ListTypesLoan />
+
           {/* Importacion de modales segun accion */}
           <Modal
             isOpen={showModal}
@@ -466,7 +470,6 @@ const Loans: React.FC<DashboardProps> = ({
             }
             message={
               <>
-                
                 <div className="mb-2">
                   {modalAction === "aprobar"
                     ? `¿Está seguro de que desea aprobar el préstamo de ${selectedLoan?.associateLegalName} DNI: ${selectedLoan?.associateDni}?`
@@ -497,7 +500,8 @@ const Loans: React.FC<DashboardProps> = ({
             onConfirm={handleConfirm}
             onCancel={handleCancel}
           />
-        </main>
+          
+        </main>       
       </div>
     </div>
   );
