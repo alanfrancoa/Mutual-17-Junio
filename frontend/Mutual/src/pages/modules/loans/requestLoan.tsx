@@ -5,7 +5,7 @@ import Sidebar from "../../dashboard/components/Sidebar";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
 
 // Opciones prestamos dropdown
-const loanTypes = ["Ayudas Economicas", "Electrodomesticos"];
+const loanTypes = ["Ayudas Economicas 15 tasa 100mil", "Electrodomesticos 5 tasa 50mil"];
 
 const RequestLoan: React.FC = () => {
   const navigate = useNavigate();
@@ -16,11 +16,17 @@ const RequestLoan: React.FC = () => {
     loanType: loanTypes[0],
     amount: "",
     installments: "",
+    applicationDate: "",
   });
 
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -31,27 +37,41 @@ const RequestLoan: React.FC = () => {
     const parsedAmount = parseFloat(form.amount);
     const parsedInstallments = parseInt(form.installments, 10);
 
-
     // Validaciones por campos
 
     if (!form.dni.trim()) {
-      setMessage({ type: "error", text: "El DNI del asociado es obligatorio." });
+      setMessage({
+        type: "error",
+        text: "El DNI del asociado es obligatorio.",
+      });
       return;
     }
     if (!form.associateName.trim()) {
-      setMessage({ type: "error", text: "El nombre del asociado es obligatorio." });
+      setMessage({
+        type: "error",
+        text: "El nombre del asociado es obligatorio.",
+      });
       return;
     }
     if (!form.loanType || !loanTypes.includes(form.loanType)) {
-      setMessage({ type: "error", text: "Debe seleccionar un tipo de préstamo válido." });
+      setMessage({
+        type: "error",
+        text: "Debe seleccionar un tipo de préstamo válido.",
+      });
       return;
     }
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      setMessage({ type: "error", text: "El monto debe ser un número positivo." });
+      setMessage({
+        type: "error",
+        text: "El monto debe ser un número positivo.",
+      });
       return;
     }
     if (isNaN(parsedInstallments) || parsedInstallments <= 0) {
-      setMessage({ type: "error", text: "La cantidad de cuotas debe ser un número entero positivo." });
+      setMessage({
+        type: "error",
+        text: "La cantidad de cuotas debe ser un número entero positivo.",
+      });
       return;
     }
 
@@ -72,14 +92,18 @@ const RequestLoan: React.FC = () => {
         loanType: loanTypes[0],
         amount: "",
         installments: "",
+        applicationDate: "",
       });
     } catch (error) {
       console.error("Error al solicitar préstamo:", error);
-      setMessage({ type: "error", text: "Error al solicitar el préstamo. Intente nuevamente." });
+      setMessage({
+        type: "error",
+        text: "Error al solicitar el préstamo. Intente nuevamente.",
+      });
     }
   };
 
-// Formulario de creacion prestamos
+  // Formulario de creacion prestamos
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
@@ -98,13 +122,17 @@ const RequestLoan: React.FC = () => {
                 <span className="ml-1">Volver</span>
               </button>
             </div>
-            <h2 className="text-2xl font-bold text-blue-900 mb-6 ">Solicitar Nuevo Préstamo</h2>
+            <h2 className="text-2xl font-bold text-blue-900 mb-6 ">
+              Solicitar Nuevo Préstamo
+            </h2>
           </div>
           <div className="w-full max-w-xl bg-white rounded-lg shadow p-8">
             {message && (
               <div
                 className={`p-3 mb-4 rounded-md ${
-                  message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                  message.type === "success"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
                 }`}
                 role="alert"
               >
@@ -114,7 +142,10 @@ const RequestLoan: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label htmlFor="dni" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="dni"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   DNI del Asociado
                 </label>
                 <input
@@ -130,7 +161,10 @@ const RequestLoan: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor="associateName" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="associateName"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Nombre Completo del Asociado
                 </label>
                 <input
@@ -146,7 +180,11 @@ const RequestLoan: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor="loanType" className="block text-sm font-medium text-gray-700 mb-1">
+                {/* aca hay que traer el listado de loan_type */}
+                <label
+                  htmlFor="loanType"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Tipo de Préstamo
                 </label>
                 <select
@@ -164,10 +202,29 @@ const RequestLoan: React.FC = () => {
                   ))}
                 </select>
               </div>
-
               <div>
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
-                  Monto del Préstamo ($)
+                <label
+                  htmlFor="applicationDate"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Fecha de Aplicación
+                </label>
+                <input
+                  type="date"
+                  id="applicationDate"
+                  name="applicationDate"
+                  value={form.applicationDate || ""}
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="amount"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Monto del Préstamo
                 </label>
                 <input
                   type="number"
@@ -184,7 +241,10 @@ const RequestLoan: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor="installments" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="installments"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Cantidad de Cuotas
                 </label>
                 <input
