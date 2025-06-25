@@ -78,6 +78,12 @@ const AllServicesPage: React.FC = () => {
             >
               Nuevo Servicio
             </button>
+            <button
+              onClick={() => navigate("/proveedores/metodos-pago")}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold"
+            >
+              Medios de pago
+            </button>
 
           </div>
           <div className="mb-4 flex flex-col md:flex-row gap-2">

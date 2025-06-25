@@ -377,20 +377,71 @@ UpdateSupplier: async (
 
  /* ----------------------- Crear servicio ----------------------- */
   RegisterService: async (
-    supplierData: IServiceRegister
+    serviceDataData: IServiceRegister
     ): Promise<{ mensaje: string }> => {
-      const url = `https://localhost:7256/api/services`;
-      const response = await Fetcher.post(url, supplierData, {
+      const url = `https://localhost:7256/api/service`;
+      const response = await Fetcher.post(url, serviceDataData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
         },
       });
       if (response.status && response.status >= 400) {
+        // Si Fetcher devuelve un status de error
         const data = response.data as { mensaje?: string };
         throw new Error(data?.mensaje || "No se pudo registrar el servicio");
     }
       return response.data as { mensaje: string };
     },
+
+  /* ----------------------- Metodos de pago ----------------------- */
+  /* ----------------------- Crear metodo de pago ----------------------- */
+  RegisterPaymentMethod: async (code: string, name: string) => {
+    const response = await fetch("https://localhost:7256/api/payment-method", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+      body: JSON.stringify({ Code: code, Name: name }),
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.mensaje || "No se pudo agregar el método de pago");
+    }
+    return true;
+  },
+  /* ----------------------- Listar metodos de pago ----------------------- */
+  GetPaymentMethods: async () => {
+    const url = "https://localhost:7256/api/payment-method";
+    const response = await Fetcher.get(url, {
+      headers: {    
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+    const data = response.data as { mensaje?: string };
+    throw new Error(data?.mensaje || "No se pudieron obtener los métodos de pago");
+  }
+  return response.data;
+  },
+
+  /* ----------------------- Estado metodo de pago ----------------------- */
+PaymentMethodState: async (id: number) => {
+  const url = `https://localhost:7256/api/payment-method/${id}/status`;
+  const response = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      "Authorization": `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.mensaje || "No se pudo activar el método de pago");
+  }
+  return true;
+},
+
 
 };
