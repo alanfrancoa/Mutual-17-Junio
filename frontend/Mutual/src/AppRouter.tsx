@@ -32,7 +32,7 @@ import CreateAssociateRelative from "./pages/modules/associates/relatives/create
 import EditRelativeAssociate from "./pages/modules/associates/relatives/editRelativeAssociate";
 import AllSuppliers from "./pages/modules/suppliers/allSuppliers";
 import Loans from "./pages/modules/loans/listLoans";
-import ReadLoan from "./pages/modules/loans/readLoan";
+// import ReadLoan from "./pages/modules/loans/readLoan";
 import RequestLoan from "./pages/modules/loans/requestLoan";
 import CreateLoan from "./pages/modules/loans/loanTypes/createLoanType";
 
@@ -90,7 +90,7 @@ const AppRouter: React.FC = () => {
         {/* seccion prestamos Admin y Gestor*/}
         <Route path="/prestamos" element={<Loans />} />
         <Route path="/prestamos/solicitar" element={<RequestLoan/>} /> 
-        <Route path="/prestamos/detalle/:id" element={< ReadLoan/>}  />
+        {/* <Route path="/prestamos/detalle/:id" element={< ReadLoan/>}  /> */}
         <Route path="/prestamos/tipo/crear" element={<CreateLoan />} /> 
 
         

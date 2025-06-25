@@ -10,6 +10,11 @@ import { ISupplierList } from "../types/ISupplierList";
 import { ISupplierRegister, ISupplierUpdate} from "../types/ISupplierRegister";
 import { IServiceRegister } from "../types/IServiceRegister";
 import { IServiceType } from "../types/IServiceType";
+import { ILoanTypesList } from "../types/ILoanTypesList";
+import { ILoanList } from "../types/ILoanList";
+import { ILoanCreate } from "../types/ILoanCreate";
+import { ICreateLoanTypes } from "../types/ILoanTypes";
+
 
 /* -----------------------Llamadas API----------------------- */
 
@@ -502,6 +507,67 @@ PaymentMethodState: async (id: number) => {
   }
   return true;
 },
+
+  /* -----------------------------Modulo prestamos---------------------- */
+  /* ----------------------- 1. Crear tipo de prestamo ----------------------- */
+  CreateLoanType: async (
+    loanTypeData: ICreateLoanTypes
+  ): Promise<{ message: string }> => {
+    const url = `https://localhost:7256/api/loan-types`;
+    const response = await Fetcher.post(url, loanTypeData, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const data = response.data as { message?: string };
+      throw new Error(data?.message || "No se pudo crear el tipo de préstamo");
+    }
+    return response.data as { message: string };
+  },
+
+  /* ----------------------- 2. Listar tipo de prestamo ----------------------- */
+  GetLoanTypes: async (): Promise<ILoanTypesList[]> => {
+    const url = `https://localhost:7256/api/loan-types`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    return response.data as ILoanTypesList[];
+  },
+  /* ----------------------- 3. Crear prestamo para asociado ----------------------- */
+
+  CreateLoan: async (
+    loanData: ILoanCreate
+  ): Promise<{ message: string }> => {
+    const url = `https://localhost:7256/api/loans`;
+    const response = await Fetcher.post(url, loanData, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const data = response.data as { message?: string };
+      throw new Error(data?.message || "No se pudo crear el tipo de préstamo");
+    }
+    return response.data as { message: string }; },
+
+
+  /* ----------------------- 4. Listar prestamos ----------------------- */
+  GetLoans: async (): Promise<ILoanList[]> => {
+    const url = `https://localhost:7256/api/loans`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    return response.data as ILoanList[];
+  },
 
 
 };

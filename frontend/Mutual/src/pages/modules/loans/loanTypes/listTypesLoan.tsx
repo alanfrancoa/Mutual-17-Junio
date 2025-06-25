@@ -1,84 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-// Datos de ejemplo
-const initialTypes = [
-  {
-    id: 1,
-    nombre: "Ayudas económicas",
-    tasa: 10.5,
-    montoMaximo: 100000,
-    estado: "Activo",
-  },
-  {
-    id: 2,
-    nombre: "Electrodomésticos",
-    tasa: 5,
-    montoMaximo: 50000,
-    estado: "Activo",
-  },
-  {
-    id: 3,
-    nombre: "Electrodomésticos A",
-    tasa: 6,
-    montoMaximo: 60000,
-    estado: "Activo",
-  },
-  {
-    id: 4,
-    nombre: "Electrodomésticos B",
-    tasa: 4,
-    montoMaximo: 40000,
-    estado: "Activo",
-  },
-  {
-    id: 5,
-    nombre: "Electrodomésticos C",
-    tasa: 5,
-    montoMaximo: 50000,
-    estado: "Activo",
-  },
-  {
-    id: 6,
-    nombre: "Ayudas economicas B",
-    tasa: 6,
-    montoMaximo: 60000,
-    estado: "Activo",
-  },
-  {
-    id: 7,
-    nombre: "Electrodomésticos D",
-    tasa: 7,
-    montoMaximo: 70000,
-    estado: "Activo",
-  },
-  {
-    id: 8,
-    nombre: "Electrodomésticos E",
-    tasa: 8,
-    montoMaximo: 80000,
-    estado: "Activo",
-  },
- 
-];
+import { ILoanTypesList } from "../../../../types/ILoanTypesList";
+import { apiMutual } from "../../../../api/apiMutual";
 
 const PAGE_SIZE = 5;
 
 const ListTypesLoan: React.FC = () => {
-  const [types, setTypes] = useState(initialTypes);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [loanTypes, setloanTypes] = useState<ILoanTypesList[]>([]);
 
-  const handleDeactivate = (id: number) => {
-    setTypes((prev) =>
-      prev.map((tipo) =>
-        tipo.id === id ? { ...tipo, estado: "Inactivo" } : tipo
-      )
-    );
+  const fetchLoanTypes = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await apiMutual.GetLoanTypes();
+      setloanTypes(data);
+    } catch (err: any) {
+      console.error("Error fetching associates:", err);
+      setError(err.response?.data?.message || "Error al cargar los tipos de prestamo.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const totalPages = Math.ceil(types.length / PAGE_SIZE);
-  const paginatedTypes = types.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  useEffect(() => {
+    fetchLoanTypes();
+  }, []);
+
+  const totalPages = Math.ceil(loanTypes.length / PAGE_SIZE);
+  const paginatedTypes = loanTypes.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
@@ -114,76 +67,84 @@ const ListTypesLoan: React.FC = () => {
                   </button>
                 </div>
               </div>
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Nombre de Préstamo
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Tasa de Interés (%)
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Monto Máximo
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Acción
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedTypes.length === 0 ? (
+              {loading ? (
+                <div className="text-center py-8 text-gray-500">
+                  Cargando tipos de prestamo...
+                </div>
+              ) : error ? (
+                <div className="text-center py-8 text-red-600">{error}</div>
+              ) : (
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <td
-                        colSpan={5}
-                        className="text-center py-8 text-gray-400"
-                      >
-                        No hay tipos de préstamos para mostrar.
-                      </td>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Nombre de Préstamo
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Tasa de Interés (%)
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Monto Máximo
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Estado
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Acción
+                      </th>
                     </tr>
-                  ) : (
-                    paginatedTypes.map((tipo, idx) => (
-                      <tr
-                        key={tipo.id}
-                        className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                      >
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                          {tipo.nombre}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                          {tipo.tasa}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                          ${tipo.montoMaximo.toLocaleString()}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              tipo.estado === "Activo"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
-                            }`}
-                          >
-                            {tipo.estado}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
-                          <button
-                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded transition text-xs font-medium disabled:opacity-50"
-                            onClick={() => handleDeactivate(tipo.id)}
-                            disabled={tipo.estado !== "Activo"}
-                          >
-                            Desactivar
-                          </button>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {paginatedTypes.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className="text-center py-8 text-gray-400"
+                        >
+                          No hay tipos de préstamos para mostrar.
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      paginatedTypes.map((tipo, idx) => (
+                        <tr
+                          key={tipo.id}
+                          className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                        >
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                            {tipo.name}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                            {tipo.interestRate}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                            ${tipo.maxAmount}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm">
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                tipo.active === "Activo"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-red-100 text-red-800"
+                              }`}
+                            >
+                              {tipo.active}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
+                            <button
+                              className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded transition text-xs font-medium disabled:opacity-50"
+                              onClick={() => (tipo.id)}
+                              disabled={tipo.active !== "Activo"}
+                            >
+                              Desactivar
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              )}
               {/* Paginación */}
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-2">
                 <div className="flex justify-center items-center gap-4 flex-1">
@@ -234,7 +195,7 @@ const ListTypesLoan: React.FC = () => {
                   </button>
                 </div>
                 <span className="text-gray-500 text-sm md:ml-4 md:w-auto w-full text-center md:text-right">
-                  {types.length} tipo(s) de préstamo encontrado(s)
+                  {loanTypes.length} tipo(s) de préstamo encontrado(s)
                 </span>
               </div>
             </div>
