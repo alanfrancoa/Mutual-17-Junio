@@ -8,10 +8,10 @@ import { apiMutual } from "../../../api/apiMutual";
 
 // Arrays de opciones para los selects
 const estadoCivilOpciones = [
-  { label: "Soltero/a", value: "Soltero" },
-  { label: "Casado/a", value: "Casado" },
-  { label: "Divorciado/a", value: "Divorciado" },
-  { label: "Viudo/a", value: "Viudo" },
+  { label: "Soltero/a", value: "Soltero/a" },
+  { label: "Casado/a", value: "Casado/a" },
+  { label: "Divorciado/a", value: "Divorciado/a" },
+  { label: "Viudo/a", value: "Viudo/a" },
 ];
 
 const generosOpciones = [
