@@ -251,13 +251,17 @@ export const apiMutual = {
     id: number,
     newStatus: boolean
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/associates/${id}/status`;
+    const url = `https://localhost:7256/api/associates/${id}/state`;
+    console.log(url);
+    console.log(newStatus);
+   
     const response = await Fetcher.patch(url, newStatus, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
+     console.log(response);
     return response.data as { mensaje: string };
   },
 
