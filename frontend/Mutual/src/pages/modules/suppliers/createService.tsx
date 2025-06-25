@@ -134,7 +134,7 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Servicio</label>
                 <select
-                  name="ServiceTypeId"
+                  name="serviceTypeId"
                   value={form.serviceTypeId}
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
@@ -152,7 +152,7 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
                <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
                 <select
-                  name="SupplierId"
+                  name="supplierId"
                   value={form.supplierId}
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
@@ -170,7 +170,7 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
                 <textarea
-                  name="Description"
+                  name="description"
                   value={form.description}
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded"
@@ -182,7 +182,7 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Costo Mensual</label>
                 <input
                   type="number"
-                  name="MonthlyCost"
+                  name="monthlyCost"
                   value={form.monthlyCost}
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded"

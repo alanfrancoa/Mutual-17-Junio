@@ -7,8 +7,9 @@ import { ILoginResponse } from "../types/loginResponse";
 import { User } from "../types/user";
 import { IRelativeList, IRelativeRegister, IRelativeUpdate } from "../types/IRelative";
 import { ISupplierList } from "../types/ISupplierList";
-import { ISupplierRegister } from "../types/ISupplierRegister";
+import { ISupplierRegister, ISupplierUpdate} from "../types/ISupplierRegister";
 import { IServiceRegister } from "../types/IServiceRegister";
+import { IServiceType } from "../types/IServiceType";
 
 /* -----------------------Llamadas API----------------------- */
 
@@ -374,6 +375,63 @@ UpdateSupplier: async (
     });
     return response.data as { mensaje: string };
   },
+     /* ----------------------- Crear tipos de servicio ----------------------- */
+
+/* ----------------------- Crear tipo de servicio ----------------------- */
+  RegisterServiceType: async (code: string, name: string): Promise<{ mensaje: string }> => {
+    const url = `https://localhost:7256/api/services-type`;
+    const response = await Fetcher.post(
+      url,
+      { Code: code, Name: name },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+        },
+      }
+    );
+    if (response.status && response.status >= 400) {
+      const data = response.data as { mensaje?: string };
+      throw new Error(data?.mensaje || "No se pudo registrar el tipo de servicio");
+    }
+    return response.data as { mensaje: string };
+  },
+   /* ----------------------- Obtener tipos de servicio ----------------------- */
+
+  GetServiceTypes: async (): Promise<IServiceType[]> => {
+  const url = "https://localhost:7256/api/services-type";
+  const response = await Fetcher.get(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+  });
+  if (response.status && response.status >= 400) {
+    const data = response.data as { mensaje?: string };
+    throw new Error(data?.mensaje || "No se pudieron obtener los tipos de servicio");
+  }
+  return response.data as IServiceType[];
+},
+
+  /* ----------------------- Cambiar estado del tipo de servicio ----------------------- */
+  ServiceTypeState: async (id: number, newStatus: boolean): Promise<{ mensaje: string }> => {
+    const url = `https://localhost:7256/api/services-type/${id}/status`;
+    const response = await Fetcher.patch(
+      url,
+      JSON.stringify(newStatus),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+        },
+      }
+    );
+    if (response.status && response.status >= 400) {
+      const data = response.data as { mensaje?: string };
+      throw new Error(data?.mensaje || "No se pudo cambiar el estado del tipo de servicio");
+    }
+    return response.data as { mensaje: string };
+  },
 
  /* ----------------------- Crear servicio ----------------------- */
   RegisterService: async (
@@ -393,6 +451,8 @@ UpdateSupplier: async (
     }
       return response.data as { mensaje: string };
     },
+
+
 
   /* ----------------------- Metodos de pago ----------------------- */
   /* ----------------------- Crear metodo de pago ----------------------- */
