@@ -3,173 +3,58 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import Sidebar from "../../dashboard/components/Sidebar";
-import Modal from "../../../components/modal";
 import ListTypesLoan from "./loanTypes/listTypesLoan";
-
-export const initialLoans = [
-  {
-    id: 1,
-    associateDni: "30123456",
-    associateLegalName: "Juan Pérez",
-    amount: 15000.0,
-    interestRate: 10.5,
-    loanDate: "2024-01-15T00:00:00Z",
-    dueDate: "2025-01-15T00:00:00Z",
-    status: "Finalizado",
-    active: true,
-    installments: 12,
-  },
-  {
-    id: 2,
-    associateDni: "25678901",
-    associateLegalName: "María García",
-    amount: 22000.0,
-    loanDate: "2024-02-20T00:00:00Z",
-    dueDate: "2025-02-20T00:00:00Z",
-    status: "Aprobado",
-    active: true,
-    installments: 6,
-  },
-  {
-    id: 3,
-    associateDni: "35987654",
-    associateLegalName: "Carlos López",
-    amount: 8000.0,
-
-    loanDate: "2023-11-01T00:00:00Z",
-    dueDate: "2024-11-01T00:00:00Z",
-    status: "Rechazado",
-    active: false,
-    installments: "-",
-  },
-  {
-    id: 4,
-    associateDni: "40567890",
-    associateLegalName: "Ana Rodríguez",
-    amount: 5000.0,
-
-    loanDate: "2024-03-10T00:00:00Z",
-    dueDate: "2025-03-10T00:00:00Z",
-    status: "Aprobado",
-    active: true,
-    installments: 3,
-  },
-  {
-    id: 5,
-    associateDni: "33445566",
-    associateLegalName: "Pedro Martínez",
-    amount: 30000.0,
-
-    loanDate: "2024-04-05T00:00:00Z",
-    dueDate: "2025-04-05T00:00:00Z",
-    status: "Pendiente",
-    active: true,
-    installments: "-",
-  },
-  {
-    id: 6,
-    associateDni: "28765432",
-    associateLegalName: "Laura Fernández",
-    amount: 12000.0,
-
-    loanDate: "2023-10-25T00:00:00Z",
-    dueDate: "2024-10-25T00:00:00Z",
-    status: "Rechazado",
-    active: false,
-    installments: "-",
-  },
-  {
-    id: 7,
-    associateDni: "37112233",
-    associateLegalName: "Miguel Torres",
-    amount: 9500.0,
-    loanDate: "2024-05-18T00:00:00Z",
-    dueDate: "2025-05-18T00:00:00Z",
-    status: "Aprobado",
-    active: true,
-    installments: 6,
-  },
-  {
-    id: 8,
-    associateDni: "31889900",
-    associateLegalName: "Sofía Gómez",
-    amount: 18000.0,
-    loanDate: "2024-06-01T00:00:00Z",
-    dueDate: "2025-06-01T00:00:00Z",
-    status: "Pendiente",
-    active: true,
-    installments: "-",
-  },
-  {
-    id: 9,
-    associateDni: "39001122",
-    associateLegalName: "Diego Ruiz",
-    amount: 7000.0,
-    loanDate: "2024-01-01T00:00:00Z",
-    dueDate: "2025-01-01T00:00:00Z",
-    status: "Aprobado",
-    active: true,
-    installments: 12,
-  },
-  {
-    id: 10,
-    associateDni: "27654321",
-    associateLegalName: "Valeria Díaz",
-    amount: 25000.0,
-    loanDate: "2024-02-01T00:00:00Z",
-    dueDate: "2025-02-01T00:00:00Z",
-    status: "Aprobado",
-    active: true,
-    installments: 12,
-  },
-  {
-    id: 11,
-    associateDni: "34987654",
-    associateLegalName: "Francisco Núñez",
-    amount: 10000.0,
-    loanDate: "2024-03-01T00:00:00Z",
-    dueDate: "2025-03-01T00:00:00Z",
-    status: "Pendiente",
-    active: true,
-    installments: "-",
-  },
-];
+import { ILoanUpdate } from "../../../types/ILoanUpdate";
+import { apiMutual } from "../../../api/apiMutual";
+import { ILoan } from "../../../types/ILoan";
+import LoanStatusModal from "../../../components/LoanModal";
+import { ILoanList } from "../../../types/ILoanList";
 
 // Paginacion
 const PAGE_SIZE = 5;
 
-interface DashboardProps {
-  userName?: string;
-  userRole?: string;
-  hasNotifications?: boolean;
-}
-
-const Loans: React.FC<DashboardProps> = ({
-  userName = "Fernando",
-  userRole = "administrador",
-  hasNotifications = true,
-}) => {
+const Loans: React.FC = () => {
   const navigate = useNavigate();
-
-  // Cambia mockLoans a estado para poder modificarlo
-  const [loans, setLoans] = useState(initialLoans);
+  const [loans, setLoans] = useState<ILoanList[]>([]);
   const [search, setSearch] = useState<string>("");
   const [estadoFiltro, setEstadoFiltro] = useState<string>("Todos");
   const [showModal, setShowModal] = useState(false);
+  const [selectedLoan, setSelectedLoan] = useState<ILoanList | null>(null);
   const [modalAction, setModalAction] = useState<"aprobar" | "rechazar" | null>(
     null
   );
   const [motive, setMotive] = useState<string>("");
-
-  const [selectedLoan, setSelectedLoan] = useState<any>(null);
   const [modalError, setModalError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(1);
-  const [filteredAndSearchedLoans, setFilteredAndSearchedLoans] =
-    useState(loans);
+  const [filteredAndSearchedLoans, setFilteredAndSearchedLoans] = useState<
+    ILoanList[]
+  >([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // const simuladas para enmaquetado
-  const loading = false;
-  const error = null;
+  // useEffect(() => {
+  //   console.log("id: ", selectedLoan?.id);
+  // }, [selectedLoan?.id]);
+
+  const fetchLoans = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data: ILoanList[] = await apiMutual.GetLoans();
+      setLoans(data);
+    } catch (err: any) {
+      console.error("Error fetching associates:", err);
+      setError(
+        err.response?.data?.message || "Error al cargar los tipos de prestamo."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLoans();
+  }, []);
 
   // useEffect para aplicar los filtrado y busqueda
   useEffect(() => {
@@ -188,7 +73,7 @@ const Loans: React.FC<DashboardProps> = ({
       currentFiltered = currentFiltered.filter(
         (loan) =>
           loan.associateDni.toLowerCase().includes(lowerCaseSearch) ||
-          loan.associateLegalName.toLowerCase().includes(lowerCaseSearch) ||
+          loan.legalName.toLowerCase().includes(lowerCaseSearch) ||
           loan.amount.toString().includes(lowerCaseSearch)
       );
     }
@@ -211,7 +96,7 @@ const Loans: React.FC<DashboardProps> = ({
   };
 
   // Funciones para abrir el modal
-  const handleOpenModal = (loan: any, action: "aprobar" | "rechazar") => {
+  const handleOpenModal = (loan: ILoanList, action: "aprobar" | "rechazar") => {
     setSelectedLoan(loan);
     setModalAction(action);
     setModalError(null);
@@ -219,12 +104,13 @@ const Loans: React.FC<DashboardProps> = ({
   };
 
   // Confirmacion de accion
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!motive.trim()) {
       setModalError("El motivo es obligatorio.");
       return;
     }
     if (!selectedLoan) return;
+
     // Validaciones
     if (modalAction === "aprobar" && selectedLoan.status === "Aprobado") {
       setModalError("El préstamo ya está aprobado.");
@@ -235,23 +121,26 @@ const Loans: React.FC<DashboardProps> = ({
       return;
     }
 
-    // Actualizar estado del préstamo
-    setLoans((prevLoans) =>
-      prevLoans.map((loan) =>
-        loan.id === selectedLoan.id
-          ? {
-              ...loan,
-              status: modalAction === "aprobar" ? "Aprobado" : "Rechazado",
-            }
-          : loan
-      )
-    );
+    try {
+      // Llama a la API para actualizar el estado del préstamo
+      await apiMutual.UpdateLoan(selectedLoan.id!, {
+        status: modalAction === "aprobar" ? "Aprobado" : "Rechazado",
+        reason: motive,
+      } as ILoanUpdate);
 
-    setShowModal(false);
-    setSelectedLoan(null);
-    setModalAction(null);
-    setModalError(null);
-    setMotive("");
+      // Refresca la lista de préstamos
+      await fetchLoans();
+
+      setShowModal(false);
+      setSelectedLoan(null);
+      setModalAction(null);
+      setModalError(null);
+      setMotive("");
+    } catch (error: any) {
+      setModalError(
+        error.message || "Ocurrió un error al actualizar el préstamo."
+      );
+    }
   };
 
   const handleCancel = () => {
@@ -266,7 +155,7 @@ const Loans: React.FC<DashboardProps> = ({
       <Sidebar />
 
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-        <Header hasNotifications={hasNotifications} />
+        <Header hasNotifications />
 
         <main className="flex-1 p-6 bg-gray-100">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Préstamos</h1>
@@ -354,14 +243,14 @@ const Loans: React.FC<DashboardProps> = ({
                     ) : (
                       paginatedLoans.map((loan, idx) => (
                         <tr
-                          key={loan.id}
+                          key={loan.associateDni}
                           className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
                         >
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                             {loan.associateDni}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                            {loan.associateLegalName}
+                            {loan.legalName}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                             ${loan.amount.toFixed(2)}
@@ -384,12 +273,12 @@ const Loans: React.FC<DashboardProps> = ({
                               {loan.status}
                             </span>
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                          {/* <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                             {new Date(loan.loanDate).toLocaleDateString()}
-                          </td>
+                          </td> */}
 
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                            {loan.installments ? `${loan.installments}` : "-"}
+                            {loan.termMonths ? `${loan.termMonths}` : "-"}
                           </td>
                           <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
                             <div className="space-x-2 flex justify-end">
@@ -413,7 +302,9 @@ const Loans: React.FC<DashboardProps> = ({
                               <button
                                 className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded transition text-xs font-medium"
                                 onClick={() =>
-                                  navigate(`/prestamos/detalle/${loan.id}`)
+                                  navigate(
+                                    `/prestamos/detalle/${loan.associateDni}`
+                                  )
                                 }
                               >
                                 Ver
@@ -454,54 +345,25 @@ const Loans: React.FC<DashboardProps> = ({
                   {filteredAndSearchedLoans.length} préstamo(s) encontrado(s)
                 </span>
               </div>
-              
             </div>
-            
           </div>
           <ListTypesLoan />
 
           {/* Importacion de modales segun accion */}
-          <Modal
-            isOpen={showModal}
-            title={
-              modalAction === "aprobar"
-                ? "Aprobar Préstamo"
-                : "Rechazar Préstamo"
-            }
-            message={
-              <>
-                <div className="mb-2">
-                  {modalAction === "aprobar"
-                    ? `¿Está seguro de que desea aprobar el préstamo de ${selectedLoan?.associateLegalName} DNI: ${selectedLoan?.associateDni}?`
-                    : `¿Está seguro de que desea rechazar el préstamo de ${selectedLoan?.associateLegalName} DNI: ${selectedLoan?.associateDni}?`}
-                </div>
-                <div className="mb-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Motivo <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={motive}
-                    onChange={(e) => setMotive(e.target.value)}
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Ingrese el motivo"
-                    required
-                  />
-                </div>
-                {modalError && (
-                  <div className="mt-3 text-red-600 font-semibold">
-                    {modalError}
-                  </div>
-                )}
-              </>
-            }
-            confirmText={modalAction === "aprobar" ? "Aprobar" : "Rechazar"}
-            cancelText="Cancelar"
-            onConfirm={handleConfirm}
-            onCancel={handleCancel}
-          />
-          
-        </main>       
+          {selectedLoan?.id && (
+            <LoanStatusModal
+              loanId={selectedLoan?.id!}
+              isOpen={showModal}
+              onClose={function (): void {
+                throw new Error("Function not implemented.");
+              }}
+              onUpdateSuccess={function (message: string): void {
+                throw new Error("Function not implemented.");
+              }}
+              actionType={"Aprobado"}
+            />
+          )}
+        </main>
       </div>
     </div>
   );

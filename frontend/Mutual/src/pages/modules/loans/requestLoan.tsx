@@ -1,23 +1,46 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
-
-// Opciones prestamos dropdown
-const loanTypes = ["Ayudas Economicas 15 tasa 100mil", "Electrodomesticos 5 tasa 50mil"];
+import { ILoanTypesList } from "../../../types/ILoanTypesList";
+import { apiMutual } from "../../../api/apiMutual";
 
 const RequestLoan: React.FC = () => {
   const navigate = useNavigate();
 
+  const [loanTypes, setLoanTypes] = useState<ILoanTypesList[]>([]);
+
   const [form, setForm] = useState({
-    dni: "",
+    associateDni: "",
     associateName: "",
-    loanType: loanTypes[0],
-    amount: "",
-    installments: "",
     applicationDate: "",
+    loanTypeId: 0,
+    amount: 0,
+    termMonths: 0,
   });
+
+  useEffect(() => {
+    const fetchLoanTypes = async () => {
+      try {
+        const allTypes = await apiMutual.GetLoanTypes();
+        // Filtrar solo los activos
+        const activos = allTypes.filter((type) => type.active === "Activo");
+        setLoanTypes(activos);
+        if (activos.length > 0) {
+          setForm((prev) => ({
+            ...prev,
+            loanTypeId: activos[0].id,
+          }));
+        }
+      } catch (error) {
+        setLoanTypes([]);
+      }
+    };
+    fetchLoanTypes();
+  }, []);
+
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -34,12 +57,12 @@ const RequestLoan: React.FC = () => {
     e.preventDefault();
     setMessage(null);
 
-    const parsedAmount = parseFloat(form.amount);
-    const parsedInstallments = parseInt(form.installments, 10);
+    // const parsedAmount = parseFloat(form.amount);
+    // const parsedInstallments = parseInt(form.termMonths, 10);
 
     // Validaciones por campos
 
-    if (!form.dni.trim()) {
+    if (!form.associateDni.trim()) {
       setMessage({
         type: "error",
         text: "El DNI del asociado es obligatorio.",
@@ -53,21 +76,21 @@ const RequestLoan: React.FC = () => {
       });
       return;
     }
-    if (!form.loanType || !loanTypes.includes(form.loanType)) {
+    if (!form.loanTypeId) {
       setMessage({
         type: "error",
         text: "Debe seleccionar un tipo de préstamo válido.",
       });
       return;
     }
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+    if (isNaN(form.amount) || form.amount <= 0) {
       setMessage({
         type: "error",
         text: "El monto debe ser un número positivo.",
       });
       return;
     }
-    if (isNaN(parsedInstallments) || parsedInstallments <= 0) {
+    if (isNaN(form.termMonths) || form.termMonths <= 0) {
       setMessage({
         type: "error",
         text: "La cantidad de cuotas debe ser un número entero positivo.",
@@ -77,21 +100,21 @@ const RequestLoan: React.FC = () => {
 
     try {
       console.log("Datos del nuevo préstamo a enviar:", {
-        dni: form.dni,
+        dni: form.associateDni,
         associateName: form.associateName,
-        loanType: form.loanType,
-        amount: parsedAmount,
-        installments: parsedInstallments,
+        loanType: form.loanTypeId,
+        amount: form.amount,
+        termMonths: form.termMonths,
       });
 
       setMessage({ type: "success", text: "¡Préstamo solicitado con éxito!" });
 
       setForm({
-        dni: "",
+        associateDni: "",
         associateName: "",
-        loanType: loanTypes[0],
-        amount: "",
-        installments: "",
+        loanTypeId: loanTypes[0].id,
+        amount: 0,
+        termMonths: 0,
         applicationDate: "",
       });
     } catch (error) {
@@ -100,6 +123,23 @@ const RequestLoan: React.FC = () => {
         type: "error",
         text: "Error al solicitar el préstamo. Intente nuevamente.",
       });
+    }
+
+    try {
+      const response = await apiMutual.CreateLoan(form);
+      setMessage({ type: "success", text: response.message });
+
+      setTimeout(() => {
+        navigate("/prestamos");
+      }, 2000);
+    } catch (error: any) {
+      console.error("Error al registrar prestamo:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Ocurrió un error al registrar prestamo.";
+      setMessage({ type: "error", text: errorMessage });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -143,16 +183,16 @@ const RequestLoan: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label
-                  htmlFor="dni"
+                  htmlFor="associateDni"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
                   DNI del Asociado
                 </label>
                 <input
                   type="text"
-                  id="dni"
-                  name="dni"
-                  value={form.dni}
+                  id="associateDni"
+                  name="associateDni"
+                  value={form.associateDni}
                   onChange={handleChange}
                   required
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -188,16 +228,16 @@ const RequestLoan: React.FC = () => {
                   Tipo de Préstamo
                 </label>
                 <select
-                  id="loanType"
-                  name="loanType"
-                  value={form.loanType}
+                  id="loanTypeId"
+                  name="loanTypeId"
+                  value={form.loanTypeId}
                   onChange={handleChange}
                   required
                   className="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   {loanTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
+                    <option key={type.id} value={type.id}>
+                      {type.name}
                     </option>
                   ))}
                 </select>
@@ -242,16 +282,16 @@ const RequestLoan: React.FC = () => {
 
               <div>
                 <label
-                  htmlFor="installments"
+                  htmlFor="termMonths"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
                   Cantidad de Cuotas
                 </label>
                 <input
                   type="number"
-                  id="installments"
-                  name="installments"
-                  value={form.installments}
+                  id="termMonths"
+                  name="termMonths"
+                  value={form.termMonths}
                   onChange={handleChange}
                   required
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" // <-- También puedes añadirlo aquí si quieres

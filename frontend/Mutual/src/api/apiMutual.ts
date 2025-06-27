@@ -5,16 +5,20 @@ import { ILoginData } from "../types/loginData";
 import { IAssociateList } from "../../src/types/IAssociateList";
 import { ILoginResponse } from "../types/loginResponse";
 import { User } from "../types/user";
-import { IRelativeList, IRelativeRegister, IRelativeUpdate } from "../types/IRelative";
+import {
+  IRelativeList,
+  IRelativeRegister,
+  IRelativeUpdate,
+} from "../types/IRelative";
 import { ISupplierList } from "../types/ISupplierList";
-import { ISupplierRegister, ISupplierUpdate} from "../types/ISupplierRegister";
+import { ISupplierRegister, ISupplierUpdate } from "../types/ISupplierRegister";
 import { IServiceRegister } from "../types/IServiceRegister";
 import { IServiceType } from "../types/IServiceType";
 import { ILoanTypesList } from "../types/ILoanTypesList";
 import { ILoanList } from "../types/ILoanList";
 import { ILoanCreate } from "../types/ILoanCreate";
 import { ICreateLoanTypes } from "../types/ILoanTypes";
-
+import { ILoanUpdate } from "../types/ILoanUpdate";
 
 /* -----------------------Llamadas API----------------------- */
 
@@ -254,14 +258,14 @@ export const apiMutual = {
     const url = `https://localhost:7256/api/associates/${id}/state`;
     console.log(url);
     console.log(newStatus);
-   
+
     const response = await Fetcher.patch(url, newStatus, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
-     console.log(response);
+    console.log(response);
     return response.data as { mensaje: string };
   },
 
@@ -296,7 +300,6 @@ export const apiMutual = {
     return response.data as { mensaje: string };
   },
 
- 
   /* ----------------------- 3. Baja-reactivar familiar del Asociado ----------------------- */
   ChangeRelativeStatus: async (
     relativeId: number,
@@ -305,7 +308,7 @@ export const apiMutual = {
     const url = `https://localhost:7256/api/relative/${relativeId}/status`;
     const response = await Fetcher.patch(url, newStatus, {
       headers: {
-        "Content-Type": "application/json", 
+        "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
@@ -316,21 +319,21 @@ export const apiMutual = {
   /* ----------------------- 1. Registrar Proveedor ----------------------- */
   RegisterSupplier: async (
     supplierData: ISupplierRegister
-    ): Promise<{ mensaje: string }> => {
-      const url = `https://localhost:7256/api/suppliers`;
-      const response = await Fetcher.post(url, supplierData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-        },
-      });
-      if (response.status && response.status >= 400) {
-        // Si Fetcher devuelve un status de error
-        const data = response.data as { mensaje?: string };
-        throw new Error(data?.mensaje || "No se pudo registrar el proveedor");
+  ): Promise<{ mensaje: string }> => {
+    const url = `https://localhost:7256/api/suppliers`;
+    const response = await Fetcher.post(url, supplierData, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      // Si Fetcher devuelve un status de error
+      const data = response.data as { mensaje?: string };
+      throw new Error(data?.mensaje || "No se pudo registrar el proveedor");
     }
-      return response.data as { mensaje: string };
-    },
+    return response.data as { mensaje: string };
+  },
   /* ----------------------- 2. Obtener lista de Proveedores ----------------------- */
   GetAllSuppliers: async (): Promise<any[]> => {
     const url = "https://localhost:7256/api/suppliers";
@@ -342,13 +345,15 @@ export const apiMutual = {
     });
     if (response.status && response.status >= 400) {
       const data = response.data as { mensaje?: string };
-      throw new Error(data?.mensaje || "No se pudieron obtener los proveedores");
+      throw new Error(
+        data?.mensaje || "No se pudieron obtener los proveedores"
+      );
     }
     return response.data as any[];
-},
+  },
   /* ----------------------- 3. Obtener Proveedor por ID ----------------------- */
 
-    GetSupplierById: async (id: number): Promise<ISupplierList> => {
+  GetSupplierById: async (id: number): Promise<ISupplierList> => {
     const url = `https://localhost:7256/api/suppliers/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
@@ -359,9 +364,9 @@ export const apiMutual = {
     return response.data as ISupplierList;
   },
 
- /* ----------------------- 4. Editar Proveedor ----------------------- */
+  /* ----------------------- 4. Editar Proveedor ----------------------- */
 
-UpdateSupplier: async (
+  UpdateSupplier: async (
     supplierId: number,
     supplierData: ISupplierRegister
   ): Promise<{ mensaje: string }> => {
@@ -384,10 +389,13 @@ UpdateSupplier: async (
     });
     return response.data as { mensaje: string };
   },
-     /* ----------------------- Crear tipos de servicio ----------------------- */
+  /* ----------------------- Crear tipos de servicio ----------------------- */
 
-/* ----------------------- Crear tipo de servicio ----------------------- */
-  RegisterServiceType: async (code: string, name: string): Promise<{ mensaje: string }> => {
+  /* ----------------------- Crear tipo de servicio ----------------------- */
+  RegisterServiceType: async (
+    code: string,
+    name: string
+  ): Promise<{ mensaje: string }> => {
     const url = `https://localhost:7256/api/services-type`;
     const response = await Fetcher.post(
       url,
@@ -401,67 +409,70 @@ UpdateSupplier: async (
     );
     if (response.status && response.status >= 400) {
       const data = response.data as { mensaje?: string };
-      throw new Error(data?.mensaje || "No se pudo registrar el tipo de servicio");
+      throw new Error(
+        data?.mensaje || "No se pudo registrar el tipo de servicio"
+      );
     }
     return response.data as { mensaje: string };
   },
-   /* ----------------------- Obtener tipos de servicio ----------------------- */
+  /* ----------------------- Obtener tipos de servicio ----------------------- */
 
   GetServiceTypes: async (): Promise<IServiceType[]> => {
-  const url = "https://localhost:7256/api/services-type";
-  const response = await Fetcher.get(url, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-    },
-  });
-  if (response.status && response.status >= 400) {
-    const data = response.data as { mensaje?: string };
-    throw new Error(data?.mensaje || "No se pudieron obtener los tipos de servicio");
-  }
-  return response.data as IServiceType[];
-},
-
-  /* ----------------------- Cambiar estado del tipo de servicio ----------------------- */
-  ServiceTypeState: async (id: number, newStatus: boolean): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/services-type/${id}/status`;
-    const response = await Fetcher.patch(
-      url,
-      JSON.stringify(newStatus),
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-        },
-      }
-    );
+    const url = "https://localhost:7256/api/services-type";
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
     if (response.status && response.status >= 400) {
       const data = response.data as { mensaje?: string };
-      throw new Error(data?.mensaje || "No se pudo cambiar el estado del tipo de servicio");
+      throw new Error(
+        data?.mensaje || "No se pudieron obtener los tipos de servicio"
+      );
+    }
+    return response.data as IServiceType[];
+  },
+
+  /* ----------------------- Cambiar estado del tipo de servicio ----------------------- */
+  ServiceTypeState: async (
+    id: number,
+    newStatus: boolean
+  ): Promise<{ mensaje: string }> => {
+    const url = `https://localhost:7256/api/services-type/${id}/status`;
+    const response = await Fetcher.patch(url, JSON.stringify(newStatus), {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const data = response.data as { mensaje?: string };
+      throw new Error(
+        data?.mensaje || "No se pudo cambiar el estado del tipo de servicio"
+      );
     }
     return response.data as { mensaje: string };
   },
 
- /* ----------------------- Crear servicio ----------------------- */
+  /* ----------------------- Crear servicio ----------------------- */
   RegisterService: async (
     serviceDataData: IServiceRegister
-    ): Promise<{ mensaje: string }> => {
-      const url = `https://localhost:7256/api/service`;
-      const response = await Fetcher.post(url, serviceDataData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-        },
-      });
-      if (response.status && response.status >= 400) {
-        // Si Fetcher devuelve un status de error
-        const data = response.data as { mensaje?: string };
-        throw new Error(data?.mensaje || "No se pudo registrar el servicio");
+  ): Promise<{ mensaje: string }> => {
+    const url = `https://localhost:7256/api/service`;
+    const response = await Fetcher.post(url, serviceDataData, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      // Si Fetcher devuelve un status de error
+      const data = response.data as { mensaje?: string };
+      throw new Error(data?.mensaje || "No se pudo registrar el servicio");
     }
-      return response.data as { mensaje: string };
-    },
-
-
+    return response.data as { mensaje: string };
+  },
 
   /* ----------------------- Metodos de pago ----------------------- */
   /* ----------------------- Crear metodo de pago ----------------------- */
@@ -470,7 +481,7 @@ UpdateSupplier: async (
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${sessionStorage.getItem("token") || ""}`,
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
       body: JSON.stringify({ Code: code, Name: name }),
     });
@@ -484,33 +495,35 @@ UpdateSupplier: async (
   GetPaymentMethods: async () => {
     const url = "https://localhost:7256/api/payment-method";
     const response = await Fetcher.get(url, {
-      headers: {    
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
     if (response.status && response.status >= 400) {
-    const data = response.data as { mensaje?: string };
-    throw new Error(data?.mensaje || "No se pudieron obtener los métodos de pago");
-  }
-  return response.data;
+      const data = response.data as { mensaje?: string };
+      throw new Error(
+        data?.mensaje || "No se pudieron obtener los métodos de pago"
+      );
+    }
+    return response.data;
   },
 
   /* ----------------------- Estado metodo de pago ----------------------- */
-PaymentMethodState: async (id: number) => {
-  const url = `https://localhost:7256/api/payment-method/${id}/status`;
-  const response = await fetch(url, {
-    method: "PATCH",
-    headers: {
-      "Authorization": `Bearer ${sessionStorage.getItem("token") || ""}`,
-    },
-  });
-  if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.mensaje || "No se pudo activar el método de pago");
-  }
-  return true;
-},
+  PaymentMethodState: async (id: number) => {
+    const url = `https://localhost:7256/api/payment-method/${id}/status`;
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.mensaje || "No se pudo activar el método de pago");
+    }
+    return true;
+  },
 
   /* -----------------------------Modulo prestamos---------------------- */
   /* ----------------------- 1. Crear tipo de prestamo ----------------------- */
@@ -542,11 +555,12 @@ PaymentMethodState: async (id: number) => {
     });
     return response.data as ILoanTypesList[];
   },
+
+  /* ----------------------- 3. Desactivar tipo de prestamo ----------------------- */
+
   /* ----------------------- 3. Crear prestamo para asociado ----------------------- */
 
-  CreateLoan: async (
-    loanData: ILoanCreate
-  ): Promise<{ message: string }> => {
+  CreateLoan: async (loanData: ILoanCreate): Promise<{ message: string }> => {
     const url = `https://localhost:7256/api/loans`;
     const response = await Fetcher.post(url, loanData, {
       headers: {
@@ -558,8 +572,8 @@ PaymentMethodState: async (id: number) => {
       const data = response.data as { message?: string };
       throw new Error(data?.message || "No se pudo crear el tipo de préstamo");
     }
-    return response.data as { message: string }; },
-
+    return response.data as { message: string };
+  },
 
   /* ----------------------- 4. Listar prestamos ----------------------- */
   GetLoans: async (): Promise<ILoanList[]> => {
@@ -573,5 +587,32 @@ PaymentMethodState: async (id: number) => {
     return response.data as ILoanList[];
   },
 
+  /* ----------------------- 5. Aprobar/rechazar estado de prestamo ----------------------- */
+  UpdateLoan: async (
+    loanId: number,
+    data: ILoanUpdate
+  ) => {
+    const url = `https://localhost:7256/api/loans/${loanId}/status`;
+    const response = await Fetcher.patch(url, data, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+  //let successMessage: string = "";
 
+    // if (response.data?.status === "Aprobado") {
+    //   successMessage = "Prestamo aprobado con exito";
+    // } else if (response.data?.status === "Rechazado") {
+    //   successMessage = "Prestamo rechazado con exito";
+    // }
+
+    return response.data as ILoanUpdate;
+  },
 };
+
+export interface ILoanResponse{
+  status:string;
+  reason : string;
+
+}

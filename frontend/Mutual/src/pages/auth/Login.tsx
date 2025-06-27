@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiMutual } from "../../api/apiMutual";
-import TermsModal from "../../components/ui/auth/modalTermsAndConditions";
-import PrivacyModal from "../../components/ui/auth/modalPrivacyPolitics";
+// import TermsModal from "../../components/ui/auth/modalTermsAndConditions";
+// import PrivacyModal from "../../components/ui/auth/modalPrivacyPolitics";
 
 function parseJwt(token: string) {
   try {
@@ -211,7 +211,7 @@ const Login = () => {
         </div>
       )}
 
-      {/* importacion de modales */}
+      {/* importacion de modales
       <TermsModal
         isOpen={showTermsModal}
         onClose={() => setShowTermsModal(false)}
@@ -228,7 +228,7 @@ const Login = () => {
           saveUserAcceptance(username, "privacy");
           setShowPrivacyModal(false);
         }}
-      />
+      /> */}
     </div>
   );
 };
