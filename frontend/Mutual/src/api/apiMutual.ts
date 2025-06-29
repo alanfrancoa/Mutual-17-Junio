@@ -19,6 +19,7 @@ import { ILoanList } from "../types/loans/ILoanList";
 import { ILoanCreate } from "../types/loans/ILoanCreate";
 import { ICreateLoanTypes } from "../types/loans/ILoanTypes";
 import { ILoanUpdate } from "../types/loans/ILoanUpdate";
+import { IInstallmentInfo, ILoanDetails } from "../types/loans/ILoan";
 
 /* -----------------------Llamadas API----------------------- */
 
@@ -601,5 +602,26 @@ export const apiMutual = {
 
   /* ----------------------- 6. Obtener prestamo-detalle (pendiente)----------------------- */
 
+    GetLoanById: async (loanId: number): Promise<ILoanDetails> => {
+    const url = `https://localhost:7256/api/loans/${loanId}`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    return response.data as ILoanDetails;
+  },
+
+  /* ----------------------- Obtener cuotas de un préstamo por ID ----------------------- */
+  GetLoanInstallments: async (loanId: number): Promise<IInstallmentInfo[]> => {
+    const url = `https://localhost:7256/api/loans/${loanId}/installments`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    return response.data as IInstallmentInfo[];
+  },
 
 };
