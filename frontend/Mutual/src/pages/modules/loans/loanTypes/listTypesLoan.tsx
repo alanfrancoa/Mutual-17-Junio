@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ILoanTypesList } from "../../../../types/ILoanTypesList";
+import { ILoanTypesList } from "../../../../types/loans/ILoanTypesList";
 import { apiMutual } from "../../../../api/apiMutual";
 
 const PAGE_SIZE = 5;

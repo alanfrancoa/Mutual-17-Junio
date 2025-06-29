@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
-import { ILoanTypesList } from "../../../types/ILoanTypesList";
+import { ILoanTypesList } from "../../../types/loans/ILoanTypesList";
 import { apiMutual } from "../../../api/apiMutual";
 
 const RequestLoan: React.FC = () => {
@@ -57,9 +57,7 @@ const RequestLoan: React.FC = () => {
     e.preventDefault();
     setMessage(null);
 
-    // const parsedAmount = parseFloat(form.amount);
-    // const parsedInstallments = parseInt(form.termMonths, 10);
-
+   
     // Validaciones por campos
 
     if (!form.associateDni.trim()) {

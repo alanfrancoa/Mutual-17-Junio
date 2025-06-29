@@ -4,7 +4,7 @@ import Header from "../../dashboard/components/Header";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
-import { IAssociateList } from "../../../types/IAssociateList";
+import { IAssociateList } from "../../../types/associates/IAssociateList";
 
 // Paginación y búsqueda
 const PAGE_SIZE = 10;

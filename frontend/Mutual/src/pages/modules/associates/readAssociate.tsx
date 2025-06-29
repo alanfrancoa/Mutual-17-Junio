@@ -4,8 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
-import { IAssociateList } from "../../../types/IAssociateList";
-import { IRelativeList } from "../../../types/IRelative";
+import { IAssociateList } from "../../../types/associates/IAssociateList";
+import { IRelativeList } from "../../../types/associates/IRelative";
 import AssociateRelativesTable from "./relatives/associatesRelativeTable";
 
 

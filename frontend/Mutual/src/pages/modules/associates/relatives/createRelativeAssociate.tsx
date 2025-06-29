@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { IRelativeRegister } from "../../../../types/IRelative";
-import { IAssociateList } from "../../../../types/IAssociateList";
+import { IRelativeRegister } from "../../../../types/associates/IRelative";
+import { IAssociateList } from "../../../../types/associates/IAssociateList";
 import { apiMutual } from "../../../../api/apiMutual";
 import Header from "../../../dashboard/components/Header";
 import Sidebar from "../../../dashboard/components/Sidebar";

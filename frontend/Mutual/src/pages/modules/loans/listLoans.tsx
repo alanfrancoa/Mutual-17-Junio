@@ -4,11 +4,10 @@ import Header from "../../dashboard/components/Header";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import Sidebar from "../../dashboard/components/Sidebar";
 import ListTypesLoan from "./loanTypes/listTypesLoan";
-import { ILoanUpdate } from "../../../types/ILoanUpdate";
 import { apiMutual } from "../../../api/apiMutual";
-import { ILoan } from "../../../types/ILoan";
-import LoanStatusModal from "../../../components/LoanModal";
-import { ILoanList } from "../../../types/ILoanList";
+import { ILoanList } from "../../../types/loans/ILoanList";
+import RejectLoanButton from "./rejectLoan";
+import ApproveLoanButton from "../loans/approveLoan";
 
 // Paginacion
 const PAGE_SIZE = 5;
@@ -18,23 +17,12 @@ const Loans: React.FC = () => {
   const [loans, setLoans] = useState<ILoanList[]>([]);
   const [search, setSearch] = useState<string>("");
   const [estadoFiltro, setEstadoFiltro] = useState<string>("Todos");
-  const [showModal, setShowModal] = useState(false);
-  const [selectedLoan, setSelectedLoan] = useState<ILoanList | null>(null);
-  const [modalAction, setModalAction] = useState<"aprobar" | "rechazar" | null>(
-    null
-  );
-  const [motive, setMotive] = useState<string>("");
-  const [modalError, setModalError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(1);
   const [filteredAndSearchedLoans, setFilteredAndSearchedLoans] = useState<
     ILoanList[]
   >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  // useEffect(() => {
-  //   console.log("id: ", selectedLoan?.id);
-  // }, [selectedLoan?.id]);
 
   const fetchLoans = async () => {
     setLoading(true);
@@ -43,7 +31,7 @@ const Loans: React.FC = () => {
       const data: ILoanList[] = await apiMutual.GetLoans();
       setLoans(data);
     } catch (err: any) {
-      console.error("Error fetching associates:", err);
+      console.error("Error cargando prestamos:", err);
       setError(
         err.response?.data?.message || "Error al cargar los tipos de prestamo."
       );
@@ -93,61 +81,6 @@ const Loans: React.FC = () => {
     if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
     }
-  };
-
-  // Funciones para abrir el modal
-  const handleOpenModal = (loan: ILoanList, action: "aprobar" | "rechazar") => {
-    setSelectedLoan(loan);
-    setModalAction(action);
-    setModalError(null);
-    setShowModal(true);
-  };
-
-  // Confirmacion de accion
-  const handleConfirm = async () => {
-    if (!motive.trim()) {
-      setModalError("El motivo es obligatorio.");
-      return;
-    }
-    if (!selectedLoan) return;
-
-    // Validaciones
-    if (modalAction === "aprobar" && selectedLoan.status === "Aprobado") {
-      setModalError("El préstamo ya está aprobado.");
-      return;
-    }
-    if (modalAction === "rechazar" && selectedLoan.status === "Rechazado") {
-      setModalError("El préstamo ya está rechazado.");
-      return;
-    }
-
-    try {
-      // Llama a la API para actualizar el estado del préstamo
-      await apiMutual.UpdateLoan(selectedLoan.id!, {
-        status: modalAction === "aprobar" ? "Aprobado" : "Rechazado",
-        reason: motive,
-      } as ILoanUpdate);
-
-      // Refresca la lista de préstamos
-      await fetchLoans();
-
-      setShowModal(false);
-      setSelectedLoan(null);
-      setModalAction(null);
-      setModalError(null);
-      setMotive("");
-    } catch (error: any) {
-      setModalError(
-        error.message || "Ocurrió un error al actualizar el préstamo."
-      );
-    }
-  };
-
-  const handleCancel = () => {
-    setShowModal(false);
-    setSelectedLoan(null);
-    setModalAction(null);
-    setModalError(null);
   };
 
   return (
@@ -255,7 +188,6 @@ const Loans: React.FC = () => {
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                             ${loan.amount.toFixed(2)}
                           </td>
-
                           <td className="px-4 py-4 whitespace-nowrap">
                             <span
                               className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -273,38 +205,31 @@ const Loans: React.FC = () => {
                               {loan.status}
                             </span>
                           </td>
-                          {/* <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                            {new Date(loan.loanDate).toLocaleDateString()}
-                          </td> */}
-
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                            {new Date(
+                              loan.applicationDate
+                            ).toLocaleDateString()}
+                          </td>{" "}
+                          *
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                             {loan.termMonths ? `${loan.termMonths}` : "-"}
                           </td>
                           <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
                             <div className="space-x-2 flex justify-end">
                               {/* acciones rechazo y aprobacion */}
-                              <button
-                                className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded transition text-xs font-medium disabled:opacity-50"
-                                onClick={() =>
-                                  handleOpenModal(loan, "rechazar")
-                                }
-                                disabled={loan.status !== "Pendiente"}
-                              >
-                                Rechazar
-                              </button>
-                              <button
-                                className="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded transition text-xs font-medium disabled:opacity-50"
-                                onClick={() => handleOpenModal(loan, "aprobar")}
-                                disabled={loan.status !== "Pendiente"}
-                              >
-                                Aprobar
-                              </button>
+                              <RejectLoanButton
+                                loan={loan}
+                                
+                                onRefreshLoans={fetchLoans}
+                              />
+                              <ApproveLoanButton
+                                loan={loan}
+                                onRefreshLoans={fetchLoans}
+                              />
                               <button
                                 className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded transition text-xs font-medium"
                                 onClick={() =>
-                                  navigate(
-                                    `/prestamos/detalle/${loan.associateDni}`
-                                  )
+                                  navigate(`/prestamos/detalle/${loan.id}`)
                                 }
                               >
                                 Ver
@@ -348,21 +273,6 @@ const Loans: React.FC = () => {
             </div>
           </div>
           <ListTypesLoan />
-
-          {/* Importacion de modales segun accion */}
-          {selectedLoan?.id && (
-            <LoanStatusModal
-              loanId={selectedLoan?.id!}
-              isOpen={showModal}
-              onClose={function (): void {
-                throw new Error("Function not implemented.");
-              }}
-              onUpdateSuccess={function (message: string): void {
-                throw new Error("Function not implemented.");
-              }}
-              actionType={"Aprobado"}
-            />
-          )}
         </main>
       </div>
     </div>

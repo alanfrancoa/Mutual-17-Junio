@@ -1,6 +1,6 @@
 import React, { useState, useEffect, FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { IRelativeList, IRelativeUpdate } from "../../../../types/IRelative";
+import { IRelativeList, IRelativeUpdate } from "../../../../types/associates/IRelative";
 import { apiMutual } from "../../../../api/apiMutual";
 import Sidebar from "../../../dashboard/components/Sidebar";
 import Header from "../../../dashboard/components/Header";

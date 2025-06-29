@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
-import { IAssociateList } from "../../../types/IAssociateList";
+import { IAssociateList } from "../../../types/associates/IAssociateList";
 
 const DeleteAssociate: React.FC = () => {
   const navigate = useNavigate();

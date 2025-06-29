@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { IRelativeList } from "../../../../types/IRelative";
+import { IRelativeList } from "../../../../types/associates/IRelative";
 import DeleteAndReactivateRelative from "./deleteAndReactivateRelative";
 
 

@@ -1,24 +1,24 @@
 import Fetcher from "../helper/fetcher";
 import { AuditLog } from "../types/auditLog";
-import { IAssociateRegister } from "../types/IAssociateRegister";
+import { IAssociateRegister } from "../types/associates/IAssociateRegister";
 import { ILoginData } from "../types/loginData";
-import { IAssociateList } from "../../src/types/IAssociateList";
+import { IAssociateList } from "../types/associates/IAssociateList";
 import { ILoginResponse } from "../types/loginResponse";
 import { User } from "../types/user";
 import {
   IRelativeList,
   IRelativeRegister,
   IRelativeUpdate,
-} from "../types/IRelative";
+} from "../types/associates/IRelative";
 import { ISupplierList } from "../types/ISupplierList";
-import { ISupplierRegister, ISupplierUpdate } from "../types/ISupplierRegister";
+import { ISupplierRegister} from "../types/ISupplierRegister";
 import { IServiceRegister } from "../types/IServiceRegister";
 import { IServiceType } from "../types/IServiceType";
-import { ILoanTypesList } from "../types/ILoanTypesList";
-import { ILoanList } from "../types/ILoanList";
-import { ILoanCreate } from "../types/ILoanCreate";
-import { ICreateLoanTypes } from "../types/ILoanTypes";
-import { ILoanUpdate } from "../types/ILoanUpdate";
+import { ILoanTypesList } from "../types/loans/ILoanTypesList";
+import { ILoanList } from "../types/loans/ILoanList";
+import { ILoanCreate } from "../types/loans/ILoanCreate";
+import { ICreateLoanTypes } from "../types/loans/ILoanTypes";
+import { ILoanUpdate } from "../types/loans/ILoanUpdate";
 
 /* -----------------------Llamadas API----------------------- */
 
@@ -556,7 +556,7 @@ export const apiMutual = {
     return response.data as ILoanTypesList[];
   },
 
-  /* ----------------------- 3. Desactivar tipo de prestamo ----------------------- */
+  /* ----------------------- 3. Desactivar tipo de prestamo (pendiente)----------------------- */
 
   /* ----------------------- 3. Crear prestamo para asociado ----------------------- */
 
@@ -587,11 +587,8 @@ export const apiMutual = {
     return response.data as ILoanList[];
   },
 
-  /* ----------------------- 5. Aprobar/rechazar estado de prestamo ----------------------- */
-  UpdateLoan: async (
-    loanId: number,
-    data: ILoanUpdate
-  ) => {
+  /* ----------------------- 5. Aprobar/rechazar prestamo ----------------------- */
+  UpdateLoan: async (loanId: number, data: ILoanUpdate) => {
     const url = `https://localhost:7256/api/loans/${loanId}/status`;
     const response = await Fetcher.patch(url, data, {
       headers: {
@@ -599,20 +596,10 @@ export const apiMutual = {
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
-  //let successMessage: string = "";
-
-    // if (response.data?.status === "Aprobado") {
-    //   successMessage = "Prestamo aprobado con exito";
-    // } else if (response.data?.status === "Rechazado") {
-    //   successMessage = "Prestamo rechazado con exito";
-    // }
-
     return response.data as ILoanUpdate;
   },
+
+  /* ----------------------- 6. Obtener prestamo-detalle (pendiente)----------------------- */
+
+
 };
-
-export interface ILoanResponse{
-  status:string;
-  reason : string;
-
-}

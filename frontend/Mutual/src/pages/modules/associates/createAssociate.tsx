@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
-import { IAssociateRegister } from "../../../types/IAssociateRegister";
+import { IAssociateRegister } from "../../../types/associates/IAssociateRegister";
 import { apiMutual } from "../../../api/apiMutual";
 
 
