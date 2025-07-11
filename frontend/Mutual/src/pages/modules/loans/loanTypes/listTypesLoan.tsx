@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ILoanTypesList } from "../../../../types/loans/ILoanTypesList";
 import { apiMutual } from "../../../../api/apiMutual";
+import DeactivateLoanTypeButton from "./deactivateLoanType";
+import useAppToast from "../../../../hooks/useAppToast";
 
 const PAGE_SIZE = 5;
 
@@ -11,6 +13,7 @@ const ListTypesLoan: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const [loanTypes, setloanTypes] = useState<ILoanTypesList[]>([]);
+  const { showErrorToast } = useAppToast(); 
 
   const fetchLoanTypes = async () => {
     setLoading(true);
@@ -20,7 +23,14 @@ const ListTypesLoan: React.FC = () => {
       setloanTypes(data);
     } catch (err: any) {
       console.error("Error fetching associates:", err);
-      setError(err.response?.data?.message || "Error al cargar los tipos de prestamo.");
+      setError(
+        err.response?.data?.message || "Error al cargar los tipos de prestamo."
+      );
+      showErrorToast({
+        message:
+          err.response?.data?.message ||
+          "Error al cargar los tipos de préstamo.",
+      });
     } finally {
       setLoading(false);
     }
@@ -28,10 +38,23 @@ const ListTypesLoan: React.FC = () => {
 
   useEffect(() => {
     fetchLoanTypes();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+ 
+  const handleLoanTypeDeactivated = (deactivatedId: number) => {
+    setloanTypes((prevTypes) =>
+      prevTypes.map((type) =>
+        type.id === deactivatedId ? { ...type, active: "Inactivo" } : type
+      )
+    );
+  };
+
   const totalPages = Math.ceil(loanTypes.length / PAGE_SIZE);
-  const paginatedTypes = loanTypes.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const paginatedTypes = loanTypes.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
@@ -131,13 +154,14 @@ const ListTypesLoan: React.FC = () => {
                             </span>
                           </td>
                           <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
-                            <button
-                              className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded transition text-xs font-medium disabled:opacity-50"
-                              onClick={() => (tipo.id)}
-                              disabled={tipo.active !== "Activo"}
+                            <DeactivateLoanTypeButton
+                              loanTypeId={tipo.id}
+                              loanTypeName={tipo.name}
+                              isActive={tipo.active === "Activo"}
+                              onDeactivated={handleLoanTypeDeactivated}
                             >
                               Desactivar
-                            </button>
+                            </DeactivateLoanTypeButton>
                           </td>
                         </tr>
                       ))

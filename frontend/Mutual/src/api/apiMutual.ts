@@ -11,7 +11,7 @@ import {
   IRelativeUpdate,
 } from "../types/associates/IRelative";
 import { ISupplierList } from "../types/ISupplierList";
-import { ISupplierRegister} from "../types/ISupplierRegister";
+import { ISupplierRegister } from "../types/ISupplierRegister";
 import { IServiceRegister } from "../types/IServiceRegister";
 import { IServiceType } from "../types/IServiceType";
 import { ILoanTypesList } from "../types/loans/ILoanTypesList";
@@ -557,9 +557,21 @@ export const apiMutual = {
     return response.data as ILoanTypesList[];
   },
 
-  /* ----------------------- 3. Desactivar tipo de prestamo (pendiente)----------------------- */
+  /* ----------------------- 3. Desactivar tipo de prestamo ----------------------- */
+  DeactivateLoanType: async (id: number): Promise<{ message: string }> => {
+      const url = `https://localhost:7256/api/loan-types/${id}/state`;
 
-  /* ----------------------- 3. Crear prestamo para asociado ----------------------- */
+      
+    const response = await Fetcher.put(url, {}, { 
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    return response.data as { message: string };
+  },
+
+  /* ----------------------- 4. Crear prestamo para asociado ----------------------- */
 
   CreateLoan: async (loanData: ILoanCreate): Promise<{ message: string }> => {
     const url = `https://localhost:7256/api/loans`;
@@ -576,7 +588,7 @@ export const apiMutual = {
     return response.data as { message: string };
   },
 
-  /* ----------------------- 4. Listar prestamos ----------------------- */
+  /* ----------------------- 5. Listar prestamos ----------------------- */
   GetLoans: async (): Promise<ILoanList[]> => {
     const url = `https://localhost:7256/api/loans`;
     const response = await Fetcher.get(url, {
@@ -588,7 +600,7 @@ export const apiMutual = {
     return response.data as ILoanList[];
   },
 
-  /* ----------------------- 5. Aprobar/rechazar prestamo ----------------------- */
+  /* ----------------------- 6. Aprobar/rechazar prestamo ----------------------- */
   UpdateLoan: async (loanId: number, data: ILoanUpdate) => {
     const url = `https://localhost:7256/api/loans/${loanId}/status`;
     const response = await Fetcher.patch(url, data, {
@@ -600,9 +612,9 @@ export const apiMutual = {
     return response.data as ILoanUpdate;
   },
 
-  /* ----------------------- 6. Obtener prestamo-detalle (pendiente)----------------------- */
+  /* ----------------------- 7. Obtener prestamo-detalle----------------------- */
 
-    GetLoanById: async (loanId: number): Promise<ILoanDetails> => {
+  GetLoanById: async (loanId: number): Promise<ILoanDetails> => {
     const url = `https://localhost:7256/api/loans/${loanId}`;
     const response = await Fetcher.get(url, {
       headers: {
@@ -613,7 +625,7 @@ export const apiMutual = {
     return response.data as ILoanDetails;
   },
 
-  /* ----------------------- Obtener cuotas de un préstamo por ID ----------------------- */
+  /* ----------------------- 8 Obtener cuotas de un préstamo por ID ----------------------- */
   GetLoanInstallments: async (loanId: number): Promise<IInstallmentInfo[]> => {
     const url = `https://localhost:7256/api/loans/${loanId}/installments`;
     const response = await Fetcher.get(url, {
@@ -623,5 +635,4 @@ export const apiMutual = {
     });
     return response.data as IInstallmentInfo[];
   },
-
 };

@@ -67,10 +67,7 @@ const AppRouter: React.FC = () => {
         <Route path="/asociados/crear" element={<CreateAssociate />} />
         <Route path="/asociados/editar/:id" element={<EditAssociate />} />
         <Route path="/asociados/eliminar/:id" element={<DeleteAssociate />} />
-        <Route
-          path="/asociados/reactivar/:id"
-          element={<ReactivateAssociate />}
-        />
+        <Route path="/asociados/reactivar/:id" element={<ReactivateAssociate />} />
         <Route path="/asociados/detalle/:id" element={<ReadAssociate />} />
 
         {/* Seccion asociados-familiares Gestor */}
@@ -93,8 +90,6 @@ const AppRouter: React.FC = () => {
         <Route path="/prestamos/solicitar" element={<RequestLoan/>} /> 
         <Route path="/prestamos/detalle/:id" element={< ReadLoan/>}  /> 
         <Route path="/prestamos/tipo/crear" element={<CreateLoan />} /> 
-
-        
 
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/auth/login" replace />} />
