@@ -14,6 +14,12 @@ import { ISupplierList } from "../types/ISupplierList";
 import { ISupplierRegister } from "../types/ISupplierRegister";
 import { IServiceRegister } from "../types/IServiceRegister";
 import { IServiceType } from "../types/IServiceType";
+import { 
+  ICollection, 
+  ICollectionListResponse,
+  ICollectionDetail, 
+  ICollectionMethod 
+} from "../types/ICollection";
 import { ILoanTypesList } from "../types/loans/ILoanTypesList";
 import { ILoanList } from "../types/loans/ILoanList";
 import { ILoanCreate } from "../types/loans/ILoanCreate";
@@ -526,6 +532,48 @@ export const apiMutual = {
     return true;
   },
 
+
+  /* -----------------------------Modulo cobros---------------------- */
+
+  /* ----------------------- Registrar cobro ----------------------- */
+  RegisterCollection: async (data: {
+  installmentId: number;
+  amount: number;
+  methodId: number;
+  receiptNumber: string;
+  collectionDate: string;
+  observations?: string;
+}): Promise<{ message: string }> => {
+  const url = `https://localhost:7256/api/collections`;
+  const response = await Fetcher.post(url, data, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+  });
+  if (response.status && response.status >= 400) {
+    const resData = response.data as { message?: string };
+    throw new Error(resData?.message || "No se pudo registrar el cobro");
+  }
+  return response.data as { message: string };
+},
+
+/* ----------------------- Obtener listado de cobros ----------------------- */
+GetCollections: async (): Promise<ICollection[]> => {
+  const url = `https://localhost:7256/api/collections`;
+  const response = await Fetcher.get(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+  });
+  if (response.status && response.status >= 400) {
+    const data = response.data as { mensaje?: string };
+    throw new Error(data?.mensaje || "No se pudo obtener el listado de cobros");
+  }
+  return response.data as ICollection[];
+},
+
   /* -----------------------------Modulo prestamos---------------------- */
   /* ----------------------- 1. Crear tipo de prestamo ----------------------- */
   CreateLoanType: async (
@@ -545,6 +593,22 @@ export const apiMutual = {
     return response.data as { message: string };
   },
 
+  GetCollectionMethods: async (): Promise<ICollectionMethod[]> => {
+    const url = `https://localhost:7256/api/collection-methods`;
+    const response = await Fetcher.get(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+
+  });
+    if (response.status && response.status >= 400) {
+      const data = response.data as { message?: string };
+      throw new Error(data?.message || "No se pudieron obtener los métodos de cobro");
+    }
+    return response.data as ICollectionMethod[];
+  },
+ 
   /* ----------------------- 2. Listar tipo de prestamo ----------------------- */
   GetLoanTypes: async (): Promise<ILoanTypesList[]> => {
     const url = `https://localhost:7256/api/loan-types`;

@@ -36,6 +36,9 @@ import Loans from "./pages/modules/loans/listLoans";
 import RequestLoan from "./pages/modules/loans/requestLoan";
 import CreateLoan from "./pages/modules/loans/loanTypes/createLoanType";
 import ReadLoan from "./pages/modules/loans/readLoan";
+import Collection from "./pages/modules/collections/Collections";
+import RegisterCollection from "./pages/modules/collections/RegisterCollection";
+
 
 const AppRouter: React.FC = () => {
   return (
@@ -90,6 +93,10 @@ const AppRouter: React.FC = () => {
         <Route path="/prestamos/solicitar" element={<RequestLoan/>} /> 
         <Route path="/prestamos/detalle/:id" element={< ReadLoan/>}  /> 
         <Route path="/prestamos/tipo/crear" element={<CreateLoan />} /> 
+
+        {/* Rutas de cobros */}
+        <Route path="/cobros" element={<Collection />} />
+        <Route path="/cobros/registrar" element={<RegisterCollection />} />
 
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/auth/login" replace />} />
