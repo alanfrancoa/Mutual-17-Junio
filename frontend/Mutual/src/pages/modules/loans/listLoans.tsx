@@ -210,7 +210,7 @@ const Loans: React.FC = () => {
                               loan.applicationDate
                             ).toLocaleDateString()}
                           </td>{" "}
-                          *
+                          
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                             {loan.termMonths ? `${loan.termMonths}` : "-"}
                           </td>

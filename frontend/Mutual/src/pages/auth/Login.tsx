@@ -52,14 +52,14 @@ const Login = () => {
     const termsAccepted = checkUserAcceptance(username, "terms");
     const privacyAccepted = checkUserAcceptance(username, "privacy");
 
-    if (!termsAccepted || !privacyAccepted) {
-      setError(
-        "Debes aceptar los Términos y Condiciones y la Política de Privacidad"
-      );
-      if (!termsAccepted) setShowTermsModal(true);
-      if (!privacyAccepted) setShowPrivacyModal(true);
-      return;
-    }
+    // if (!termsAccepted || !privacyAccepted) {
+    //   setError(
+    //     "Debes aceptar los Términos y Condiciones y la Política de Privacidad"
+    //   );
+    //   if (!termsAccepted) setShowTermsModal(true);
+    //   if (!privacyAccepted) setShowPrivacyModal(true);
+    //   return;
+    // }
 
     setLoading(true);
     setError("");
