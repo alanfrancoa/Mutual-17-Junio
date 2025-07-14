@@ -558,21 +558,44 @@ export const apiMutual = {
   return response.data as { message: string };
 },
 
-/* ----------------------- Obtener listado de cobros ----------------------- */
-GetCollections: async (): Promise<ICollection[]> => {
-  const url = `https://localhost:7256/api/collections`;
-  const response = await Fetcher.get(url, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-    },
-  });
-  if (response.status && response.status >= 400) {
-    const data = response.data as { mensaje?: string };
-    throw new Error(data?.mensaje || "No se pudo obtener el listado de cobros");
-  }
-  return response.data as ICollection[];
-},
+  /* ----------------------- Obtener listado de cobros ----------------------- */
+  GetCollections: async (): Promise<ICollection[]> => {
+    const url = `https://localhost:7256/api/collections`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const data = response.data as { mensaje?: string };
+      throw new Error(data?.mensaje || "No se pudo obtener el listado de cobros");
+    }
+    return response.data as ICollection[];
+  },
+
+  /* ----------------------- Anular cobro ----------------------- */
+  AnnullCollection: async (
+    collectionId: number,
+    cancellationReason: string
+  ): Promise<{ message: string }> => {
+    const url = `https://localhost:7256/api/collections/${collectionId}/cancel`;
+    const response = await Fetcher.patch(
+      url,
+      { cancellationReason },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+        },
+      }
+    );
+    if (response.status && response.status >= 400) {
+      const resData = response.data as { message?: string };
+      throw new Error(resData?.message || "No se pudo anular el cobro");
+    }
+    return response.data as { message: string };
+  },
 
   /* -----------------------------Modulo prestamos---------------------- */
   /* ----------------------- 1. Crear tipo de prestamo ----------------------- */

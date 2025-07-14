@@ -4,7 +4,7 @@ export interface ICollection {
   amount: number;
   collectionDate: string;
   status: string;
-  associate: string; // Nombre del asociado (listado) o associate?: { id: number; name: string; dni: string }; // (detalle)
+  associate: string;
   method: string;
 }
 
@@ -27,7 +27,8 @@ export interface ICollectionDetail {
   associate: {
     id: number;
     name: string;
-    dni: string;};
+    dni: string;
+  };
   installment: {
     number: number;
     dueDate: string;
