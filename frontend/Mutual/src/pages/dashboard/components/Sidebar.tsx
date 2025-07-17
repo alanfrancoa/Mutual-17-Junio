@@ -106,10 +106,10 @@ const Sidebar: React.FC = () => {
         </a>
 
         <a
-          href=" "
+          href="/periodos"
           className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
         >
-          <ChartBarIcon className="h-5 w-5" /> Reportes Y Normativas
+          <ChartBarIcon className="h-5 w-5" /> Reportes Y Periodos
         </a>
 
         <div className="relative">
