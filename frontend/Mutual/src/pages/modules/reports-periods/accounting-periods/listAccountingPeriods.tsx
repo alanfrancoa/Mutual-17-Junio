@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
-import Sidebar from "../../dashboard/components/Sidebar";
-import Header from "../../dashboard/components/Header";
-import { IAccountingPeriod } from "../../../types/accountablePeriods/IAccountingPeriod";
-import CreateAccountingPeriodForm from "./createAccountingPeriod";
 import toast from "react-hot-toast";
+import { IAccountingPeriod } from "../../../../types/accountablePeriods/IAccountingPeriod";
+import Header from "../../../dashboard/components/Header";
+import Sidebar from "../../../dashboard/components/Sidebar";
 import CloseAccountingPeriod from "./closeAccountingPeriod";
+import CreateAccountingPeriodForm from "./createAccountingPeriod";
+import GenerateReportForm from "../reports-inaes/listReportGeneration";
 
 // Paginacion
 const PAGE_SIZE = 5;
@@ -335,6 +336,9 @@ const AccountingPeriods: React.FC = () => {
               </div>
             )}
           </div>
+          <GenerateReportForm closedPeriods={[]} onGenerateReport={function (selectedPeriodId: number | null, reportType: string): void {
+            throw new Error("Function not implemented.");
+          } } />
         </main>
       </div>
     </div>

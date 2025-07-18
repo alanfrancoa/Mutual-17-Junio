@@ -37,8 +37,8 @@ import CreateLoan from "./pages/modules/loans/loanTypes/createLoanType";
 import ReadLoan from "./pages/modules/loans/readLoan";
 import Collection from "./pages/modules/collections/Collections";
 import RegisterCollection from "./pages/modules/collections/RegisterCollection";
-import AccountingPeriods from "./pages/modules/reports-periods/listAccountingPeriods";
-import ReadAccountingPeriod from "./pages/modules/reports-periods/readAccountingPeriod";
+import ReadAccountingPeriod from "./pages/modules/reports-periods/accounting-periods/readAccountingPeriod";
+import AccountingPeriods from "./pages/modules/reports-periods/accounting-periods/listAccountingPeriods";
 
 const AppRouter: React.FC = () => {
   return (
@@ -119,7 +119,7 @@ const AppRouter: React.FC = () => {
         <Route path="/cobros" element={<Collection />} />
         <Route path="/cobros/registrar" element={<RegisterCollection />} />
 
-        {/* seccion reportes y normativas */}
+        {/* seccion reportes y periodos */}
         <Route path="/periodos" element={<AccountingPeriods />} />
         <Route path="/periodos/detalle/:id" element={<ReadAccountingPeriod />} />
 

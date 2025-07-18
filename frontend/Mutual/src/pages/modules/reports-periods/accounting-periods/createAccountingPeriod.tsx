@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { IAccountingPeriod } from "../../../types/accountablePeriods/IAccountingPeriod";
+import { IAccountingPeriod } from "../../../../types/accountablePeriods/IAccountingPeriod";
 
 type PeriodFormType = "Mensual" | "Trimestral";
 

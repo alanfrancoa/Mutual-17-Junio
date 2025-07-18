@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Header from "../../dashboard/components/Header";
-import Sidebar from "../../dashboard/components/Sidebar";
+import Header from "../../../dashboard/components/Header";
+import Sidebar from "../../../dashboard/components/Sidebar";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
-import { IAccountingPeriod } from "../../../types/accountablePeriods/IAccountingPeriod";
-import useAppToast from "../../../hooks/useAppToast"; 
+import { IAccountingPeriod } from "../../../../types/accountablePeriods/IAccountingPeriod";
+import useAppToast from "../../../../hooks/useAppToast"; 
 
 const ReadAccountingPeriod: React.FC = () => {
   const navigate = useNavigate();

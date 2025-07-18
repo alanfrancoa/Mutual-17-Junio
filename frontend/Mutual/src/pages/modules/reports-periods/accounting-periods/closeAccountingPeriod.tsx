@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
-import ClosePeriodModal from "../../../components/ui/closePeriodModal";
+import ClosePeriodModal from "../../../../components/ui/closePeriodModal";
 
 
 interface CloseAccountingPeriodProps {
