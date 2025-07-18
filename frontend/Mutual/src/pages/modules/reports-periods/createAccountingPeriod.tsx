@@ -2,9 +2,11 @@ import React, { useState } from "react";
 
 import { IAccountingPeriod } from "../../../types/accountablePeriods/IAccountingPeriod";
 
+type PeriodFormType = "Mensual" | "Trimestral";
+
 interface CreateAccountingPeriodFormProps {
-  onSuccess: (newPeriod: IAccountingPeriod) => void; 
-  onCancel: () => void; 
+  onSuccess: (newPeriod: IAccountingPeriod) => void;
+  onCancel: () => void;
 }
 
 const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
@@ -12,14 +14,16 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
   onCancel,
 }) => {
   const [form, setForm] = useState<
-    Omit<IAccountingPeriod, "id" | "status"> & { status: string }
+    Omit<IAccountingPeriod, "id" | "status" | "type"> & {
+      status: string;
+      type: PeriodFormType;
+    }
   >({
-  
     code: "",
     type: "Mensual",
     startDate: "",
     endDate: "",
-    status: "Abierto", 
+    status: "Abierto",
   });
 
   const [message, setMessage] = useState<{
@@ -27,18 +31,68 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
     text: string;
   } | null>(null);
 
+  // Función para calcular las fechas de inicio y fin
+  const calculateDates = (periodType: string) => {
+    const today = new Date();
+    let startDate = new Date(today.getFullYear(), today.getMonth(), 1); 
+    let endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0); 
+
+    if (periodType === "Trimestral") {
+      const currentMonth = today.getMonth();
+      const quarter = Math.floor(currentMonth / 3); 
+      startDate = new Date(today.getFullYear(), quarter * 3, 1);
+      endDate = new Date(today.getFullYear(), quarter * 3 + 3, 0);
+    } else if (periodType === "Anual") {
+      startDate = new Date(today.getFullYear(), 0, 1);
+      endDate = new Date(today.getFullYear(), 11, 31);
+    }
+
+   
+    const formatToISOString = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}T00:00:00Z`; 
+    };
+
+    return {
+      startDate: formatToISOString(startDate),
+      endDate: formatToISOString(endDate),
+    };
+  };
+
+  // Effect para calcular las fechas iniciales 
+  React.useEffect(() => {
+    const { startDate, endDate } = calculateDates(form.type);
+    setForm((prevForm) => ({
+      ...prevForm,
+      startDate,
+      endDate,
+    }));
+  }, [form.type]); 
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    if (name === "type") {
+      const selectedType = value as PeriodFormType;
+      const { startDate, endDate } = calculateDates(selectedType);
+      setForm((prevForm) => ({
+        ...prevForm,
+        [name]: selectedType, 
+        startDate,
+        endDate,
+      }));
+    } else {
+      setForm((prevForm) => ({ ...prevForm, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage(null);
 
-   
     const numericCode = parseInt(form.code as string, 10);
     if (isNaN(numericCode) || numericCode <= 0) {
       setMessage({
@@ -51,45 +105,28 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
       setMessage({ type: "error", text: "El Tipo de Período es obligatorio." });
       return;
     }
-    if (!form.startDate) {
-      setMessage({ type: "error", text: "La Fecha de Inicio es obligatoria." });
-      return;
-    }
-    if (!form.endDate) {
-      setMessage({ type: "error", text: "La Fecha de Fin es obligatoria." });
-      return;
-    }
-    if (new Date(form.startDate) >= new Date(form.endDate)) {
-      setMessage({
-        type: "error",
-        text: "La Fecha de Fin debe ser posterior a la Fecha de Inicio.",
-      });
-      return;
-    }
 
     try {
       // Aca va llamada a la API para crear el período contable
 
-
       const newPeriod: IAccountingPeriod = {
         ...form,
-        code: form.code as string, 
-        id: Math.floor(Math.random() * 100000) + 1, 
-        status: form.status as "Abierto" | "Cerrado", 
+        code: form.code as string,
+        id: Math.floor(Math.random() * 100000) + 1,
+        status: form.status as "Abierto" | "Cerrado",
       };
 
       setMessage({
         type: "success",
         text: "¡Período contable creado con éxito!",
       });
-      onSuccess(newPeriod); 
+      onSuccess(newPeriod);
 
-    
       setForm({
-        code: "", 
+        code: "",
         type: "Mensual",
-        startDate: "",
-        endDate: "",
+        startDate: calculateDates("Mensual").startDate,
+        endDate: calculateDates("Mensual").endDate,
         status: "Abierto",
       });
     } catch (error: any) {
@@ -128,7 +165,7 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
             type="text"
             id="code"
             name="code"
-            value={form.code} 
+            value={form.code}
             onChange={handleChange}
             required
             className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -155,43 +192,37 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
             {" "}
             <option value="Mensual">Mensual</option>
             <option value="Trimestral">Trimestral</option>
-            <option value="Anual">Anual</option>
           </select>
         </div>
-
         <div>
           <label
-            htmlFor="startDate"
+            htmlFor="startDateDisplay"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Fecha de Inicio
+            Fecha de Inicio (Automático)
           </label>
           <input
-            type="date"
-            id="startDate"
-            name="startDate"
-            value={form.startDate}
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            type="text"
+            id="startDateDisplay"
+            value={new Date(form.startDate).toLocaleDateString()}
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-gray-700 cursor-not-allowed"
+            readOnly
           />
         </div>
 
         <div>
           <label
-            htmlFor="endDate"
+            htmlFor="endDateDisplay"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Fecha de Fin
+            Fecha de Fin (Automático)
           </label>
           <input
-            type="date"
-            id="endDate"
-            name="endDate"
-            value={form.endDate}
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            type="text"
+            id="endDateDisplay"
+            value={new Date(form.endDate).toLocaleDateString()}
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-gray-700 cursor-not-allowed"
+            readOnly
           />
         </div>
 
