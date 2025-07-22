@@ -154,7 +154,7 @@ const GenerateReportForm: React.FC<GenerateReportFormProps> = ({
               Reporte de Periodos contables
             </h3>
             <hr className="my-4" />
-            <div className="flex flex-row justify-start gap-4 mb-4">
+            <div className="flex flex-row justify-end gap-4 mb-4">
               <button
                 type="button"
                 onClick={handleExportExcel}
