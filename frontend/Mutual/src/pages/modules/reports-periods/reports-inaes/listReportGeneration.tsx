@@ -1,37 +1,44 @@
-import React, { useState } from 'react';
-import { IAccountingPeriod, PeriodType } from '../../../../types/accountablePeriods/IAccountingPeriod';
+import React, { useState } from "react";
+import { IAccountingPeriod } from "../../../../types/accountablePeriods/IAccountingPeriod";
+import { DocumentTextIcon, TableCellsIcon } from "@heroicons/react/24/solid";
+import toast from "react-hot-toast";
 
 interface GenerateReportFormProps {
-  closedPeriods: IAccountingPeriod[]; // Lista de períodos contables cerrados
-  onGenerateReport: (selectedPeriodId: number | null, reportType: string) => void;
+  closedPeriods: IAccountingPeriod[];
 }
+
+const fakeReportData = {
+  Mensual: {
+    loansApproved: 8,
+    totalCollected: "$25,000.00",
+    delinquency: "3.1%",
+    paymentsToSuppliers: "$9,500.00",
+  },
+  Trimestral: {
+    loansApproved: 12,
+    totalCollected: "$42,300.50",
+    delinquency: "5.2%",
+    paymentsToSuppliers: "$18,200.00",
+  },
+};
 
 const GenerateReportForm: React.FC<GenerateReportFormProps> = ({
   closedPeriods,
-  onGenerateReport,
 }) => {
   const [selectedPeriodId, setSelectedPeriodId] = useState<number | null>(null);
-  const [selectedReportType, setSelectedReportType] = useState<string>('');
-  const [message, setMessage] = useState<{ type: 'error' | 'info', text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "error" | "info";
+    text: string;
+  } | null>(null);
+  const [reportResult, setReportResult] = useState<any | null>(null);
 
-  const availableReportTypes: PeriodType[] = ["Mensual", "Trimestral"];
-
-  const reportTypeOptions = [
-    { value: '', label: 'Seleccione Tipo de Reporte' },
-    ...availableReportTypes.map(type => ({
-      value: type.toLowerCase(),
-      label: type
-    }))
-  ];
+  // Solo períodos cerrados
+  const closedFiltered = closedPeriods.filter((p) => p.status === "Cerrado");
 
   const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedPeriodId(Number(e.target.value) || null);
     setMessage(null);
-  };
-
-  const handleReportTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedReportType(e.target.value);
-    setMessage(null);
+    setReportResult(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,100 +46,180 @@ const GenerateReportForm: React.FC<GenerateReportFormProps> = ({
     setMessage(null);
 
     if (!selectedPeriodId) {
-      setMessage({ type: 'error', text: 'Por favor, seleccione un período contable.' });
-      return;
-    }
-    if (!selectedReportType) {
-      setMessage({ type: 'error', text: 'Por favor, seleccione un tipo de reporte.' });
+      setMessage({
+        type: "error",
+        text: "Por favor, seleccione un período contable.",
+      });
       return;
     }
 
-    onGenerateReport(selectedPeriodId, selectedReportType);
-    // Opcional: Resetear los campos después de generar el reporte
-    // setSelectedPeriodId(null);
-    // setSelectedReportType('');
+    const period = closedFiltered.find((p) => p.id === selectedPeriodId);
+    if (!period) return;
+
+    // Generar datos falsos segun el tipo
+    const fakeData = fakeReportData[period.type as "Mensual" | "Trimestral"];
+
+    setReportResult({
+      periodDisplay: `${period.code} (${period.type})`,
+      ...fakeData,
+    });
+  };
+
+  // mock aviso exportar a Excel
+  const handleExportExcel = () => {
+    if (reportResult) {
+      toast.loading("Exportando a Excel el reporte...");
+    } else {
+      alert("Genere un reporte primero para exportar a Excel.");
+    }
+  };
+
+  // mock aviso exportar a PDF
+  const handleExportPdf = () => {
+    if (reportResult) {
+      toast.loading("Exportando a PDF el reporte...");
+    } else {
+      alert("Genere un reporte primero para exportar a PDF.");
+    }
   };
 
   return (
     <>
-    <h2 className="text-2xl font-bold text-blue-900 mt-12 mb-6">Generar Reporte Contable</h2>
-
-    <div className="w-full max-full bg-white rounded-lg shadow p-8">
-
-      {message && (
-        <div
-          className={`p-3 mb-4 rounded-md ${
-            message.type === 'error' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
-          }`}
-          role="alert"
-        >
-          {message.text}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {/* === CAMBIO CLAVE AQUÍ: CONTENEDOR FLEX PARA DROPDOWNS Y BOTÓN === */}
-        <div className="flex flex-col sm:flex-row sm:items-end gap-4"> {/* Agregado flex, flex-col para móvil, sm:flex-row para desktop */}
-
-          {/* Dropdown de Períodos Cerrados */}
-          <div className="flex-1 min-w-[350px]"> {/* flex-1 para que ocupe espacio, min-w para evitar que se achique demasiado */}
-            <label htmlFor="period-select" className="block text-sm font-medium text-gray-700 mb-1">
-              Período Contable Cerrado
-            </label>
-            <select
-              id="period-select"
-              value={selectedPeriodId || ''}
-              onChange={handlePeriodChange}
-              className="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            >
-              <option value="">Seleccione un Período</option>
-              {closedPeriods.length > 0 ? (
-                closedPeriods.map((period) => (
-                  <option key={period.id} value={period.id}>
-                    {period.code} ({new Date(period.startDate).toLocaleDateString()} - {new Date(period.endDate).toLocaleDateString()})
-                  </option>
-                ))
-              ) : (
-                <option value="" disabled>No hay períodos cerrados disponibles</option>
-              )}
-            </select>
-          </div>
-
-          {/* Dropdown de Tipo de Reporte */}
-          <div className="flex-1 min-w-[450px]"> {/* flex-1 para que ocupe espacio */}
-            <label htmlFor="report-type-select" className="block text-sm font-medium text-gray-700 mb-1">
-              Tipo de Reporte
-            </label>
-            <select
-              id="report-type-select"
-              value={selectedReportType}
-              onChange={handleReportTypeChange}
-              className="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            >
-              {reportTypeOptions.map((typeOption) => (
-                <option key={typeOption.value} value={typeOption.value}>
-                  {typeOption.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Botón Generar */}
-          {/* El botón ya no necesita el div justify-end, se alineará con flex-end en el contenedor padre */}
-          <button
-            type="submit"
-            className="bg-green-600 hover:bg-green-700 text-white px-10 py-2 rounded font-semibold shadow transition" // self-end para alinearlo abajo si los otros crecen
+      <h2 className="text-2xl font-bold text-blue-900 mt-12 mb-6">
+        Generar Reporte Contable
+      </h2>
+      <div className="w-full max-w-full bg-white rounded-lg shadow p-8">
+        {message && (
+          <div
+            className={`p-3 mb-4 rounded-md ${
+              message.type === "error"
+                ? "bg-red-100 text-red-800"
+                : "bg-blue-100 text-blue-800"
+            }`}
+            role="alert"
           >
-            Generar Reporte
-          </button>
-        </div> 
-      </form>
-    </div>
+            {message.text}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-start gap-4">
+            {/*  Dropdown  Periodos Cerrados */}
+            <div className="flex-1 w-full sm:max-w-xs md:max-w-sm lg:max-w-md">
+              <label
+                htmlFor="period-select"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Período Contable Cerrado
+              </label>
+              <select
+                id="period-select"
+                value={selectedPeriodId || ""}
+                onChange={handlePeriodChange}
+                className="w-full text-base border border-gray-300 rounded px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              >
+                <option value="">Seleccione un Período</option>
+                {closedFiltered.length > 0 ? (
+                  closedFiltered.map((period) => (
+                    <option key={period.id} value={period.id}>
+                      {period.code} (
+                      {new Date(period.startDate).toLocaleDateString()} -{" "}
+                      {new Date(period.endDate).toLocaleDateString()})
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    No hay períodos cerrados disponibles
+                  </option>
+                )}
+              </select>
+            </div>
+
+            {/* Btn Generar Reporte */}
+            <div className="w-full sm:w-auto mt-4 sm:mt-0">
+              <button
+                type="submit"
+                className="w-full bg-green-600 hover:bg-green-700 text-white px-14 py-3 rounded font-semibold shadow transition"
+              >
+                Generar Reporte
+              </button>
+            </div>
+          </div>
+        </form>
+
+        {reportResult && (
+          <div className="mt-8 border-t pt-6">
+            <h3 className="text-2xl font-bold text-black-900  mb-4 text-center">
+              Reporte de Periodos contables
+            </h3>
+            <hr className="my-4" />
+            <div className="flex flex-row justify-start gap-4 mb-4">
+              <button
+                type="button"
+                onClick={handleExportExcel}
+                disabled={!reportResult}
+                className="flex items-center justify-center bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+              >
+                <TableCellsIcon className="h-5 w-5 mr-2" />
+                Exportar Excel
+              </button>
+              <button
+                type="button"
+                onClick={handleExportPdf}
+                disabled={!reportResult}
+                className="flex items-center justify-center bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+              >
+                <DocumentTextIcon className="h-5 w-5 mr-2" />
+                Exportar PDF
+              </button>
+            </div>
+            <hr className="my-4" />
+
+            {/* resultado del reporte */}
+            <div className=" border-gray-100 p-4 mt-8 rounded-lg"> 
+                {/* Encabezado  */}
+                <div className="border-b border-gray-200 pb-2 mb-2">
+                    <strong className="text-gray-800">Período: {reportResult.periodDisplay}</strong>
+                </div>
+
+                {/* Filas s */}
+                <div className="grid grid-cols-2 text-gray-700 text-base">
+                    <div className="col-span-1 py-2 px-2 border-r border-gray-200">
+                        <strong>Préstamos aprobados:</strong>
+                    </div>
+                    <div className="col-span-1 py-2 px-2">
+                        {reportResult.loansApproved}
+                    </div>
+
+                    <div className="col-span-1 py-2 px-2 border-r border-gray-200 border-t border-gray-200">
+                        <strong>Total cobrado:</strong>
+                    </div>
+                    <div className="col-span-1 py-2 px-2 border-t border-gray-200">
+                        {reportResult.totalCollected}
+                    </div>
+
+                    <div className="col-span-1 py-2 px-2 border-r border-gray-200 border-t border-gray-200">
+                        <strong>Morosidad:</strong>
+                    </div>
+                    <div className="col-span-1 py-2 px-2 border-t border-gray-200">
+                        {reportResult.delinquency}
+                    </div>
+
+                    <div className="col-span-1 py-2 px-2 border-r border-gray-200 border-t border-gray-200">
+                        <strong>Pagos a proveedores:</strong>
+                    </div>
+                    <div className="col-span-1 py-2 px-2 border-t border-gray-200">
+                        {reportResult.paymentsToSuppliers}
+                    </div>
+                </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
-</>
-)}
+};
 
 
 export default GenerateReportForm;
