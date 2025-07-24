@@ -38,6 +38,7 @@ import CreateLoan from "./pages/modules/loans/loanTypes/createLoanType";
 import ReadLoan from "./pages/modules/loans/readLoan";
 import Collection from "./pages/modules/collections/Collections";
 import RegisterCollection from "./pages/modules/collections/RegisterCollection";
+import PaymentMethodsCollection from "./pages/modules/collections/paymentMethodsCollection";
 
 
 const AppRouter: React.FC = () => {
@@ -97,6 +98,7 @@ const AppRouter: React.FC = () => {
         {/* Rutas de cobros */}
         <Route path="/cobros" element={<Collection />} />
         <Route path="/cobros/registrar" element={<RegisterCollection />} />
+        <Route path="/collections/payment-methods" element={<PaymentMethodsCollection />} />
 
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/auth/login" replace />} />
