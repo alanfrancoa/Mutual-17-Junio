@@ -197,9 +197,12 @@ const Dashboard: React.FC<DashboardProps> = ({ hasNotifications = true }) => {
                   </svg>
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-center">
-                  REPORTES Y NORMATIVAS
+                  REPORTES Y PERIODOS CONTABLES
                 </h3>
-                <button className="mt-2 px-8 py-3 bg-blue-600 text-white rounded-full text-lg font-semibold hover:bg-blue-700 transition">
+                <button 
+                 onClick={() => navigate("/periodos")}
+                className="mt-2 px-8 py-3 bg-blue-600 text-white rounded-full text-lg font-semibold hover:bg-blue-700 transition">
+                 
                   Ingresar
                 </button>
               </div>

@@ -32,12 +32,13 @@ import CreateAssociateRelative from "./pages/modules/associates/relatives/create
 import EditRelativeAssociate from "./pages/modules/associates/relatives/editRelativeAssociate";
 import AllSuppliers from "./pages/modules/suppliers/allSuppliers";
 import Loans from "./pages/modules/loans/listLoans";
-// import ReadLoan from "./pages/modules/loans/readLoan";
 import RequestLoan from "./pages/modules/loans/requestLoan";
 import CreateLoan from "./pages/modules/loans/loanTypes/createLoanType";
 import ReadLoan from "./pages/modules/loans/readLoan";
 import Collection from "./pages/modules/collections/Collections";
 import RegisterCollection from "./pages/modules/collections/RegisterCollection";
+import ReadAccountingPeriod from "./pages/modules/reports-periods/accounting-periods/readAccountingPeriod";
+import AccountingPeriods from "./pages/modules/reports-periods/accounting-periods/listAccountingPeriods";
 import PaymentMethodsCollection from "./pages/modules/collections/paymentMethodsCollection";
 
 
@@ -56,14 +57,26 @@ const AppRouter: React.FC = () => {
         <Route path="/proveedores" element={<AllSuppliers />} />
         <Route path="/proveedores/crear" element={<CreateSupplier />} />
         <Route path="/proveedores/editar/:id" element={<EditSupplier />} />
-        <Route path="/proveedores/desactivar/:id" element={<DeleteSupplier />} />
-        <Route path="/proveedores/tipos-servicio" element={<ServiceTypeList />} />
+        <Route
+          path="/proveedores/desactivar/:id"
+          element={<DeleteSupplier />}
+        />
+        <Route
+          path="/proveedores/tipos-servicio"
+          element={<ServiceTypeList />}
+        />
         <Route path="/proveedores/metodos-pago" element={<PaymentMethods />} />
 
         {/* Seccion proveedores - servicios */}
         <Route path="/proveedores/servicios" element={<AllServices />} />
-        <Route path="/proveedores/servicios/crear/" element={<CreateService />} />
-        <Route path="/proveedores/servicios/editar/:id" element={<EditService />} />
+        <Route
+          path="/proveedores/servicios/crear/"
+          element={<CreateService />}
+        />
+        <Route
+          path="/proveedores/servicios/editar/:id"
+          element={<EditService />}
+        />
         {/*<Route path="/proveedores/servicios/ver/:id" element={<ReadService />} />*/}
 
         {/* Seccion asociados */}
@@ -71,12 +84,21 @@ const AppRouter: React.FC = () => {
         <Route path="/asociados/crear" element={<CreateAssociate />} />
         <Route path="/asociados/editar/:id" element={<EditAssociate />} />
         <Route path="/asociados/eliminar/:id" element={<DeleteAssociate />} />
-        <Route path="/asociados/reactivar/:id" element={<ReactivateAssociate />} />
+        <Route
+          path="/asociados/reactivar/:id"
+          element={<ReactivateAssociate />}
+        />
         <Route path="/asociados/detalle/:id" element={<ReadAssociate />} />
 
         {/* Seccion asociados-familiares Gestor */}
-        <Route path="/asociados/crear/familiar/:associateId" element={<CreateAssociateRelative />}/>
-        <Route path="/asociados/:associateId/familiar/editar/:relativeId" element={<EditRelativeAssociate />}/>
+        <Route
+          path="/asociados/crear/familiar/:associateId"
+          element={<CreateAssociateRelative />}
+        />
+        <Route
+          path="/asociados/:associateId/familiar/editar/:relativeId"
+          element={<EditRelativeAssociate />}
+        />
 
         {/* seccion usuarios -- ADMIN ONLY*/}
         <Route path="/usuarios" element={<UsersTable />} />
@@ -91,14 +113,21 @@ const AppRouter: React.FC = () => {
 
         {/* seccion prestamos Admin y Gestor*/}
         <Route path="/prestamos" element={<Loans />} />
-        <Route path="/prestamos/solicitar" element={<RequestLoan/>} /> 
-        <Route path="/prestamos/detalle/:id" element={< ReadLoan/>}  /> 
-        <Route path="/prestamos/tipo/crear" element={<CreateLoan />} /> 
+        <Route path="/prestamos/solicitar" element={<RequestLoan />} />
+        <Route path="/prestamos/detalle/:id" element={<ReadLoan />} />
+        <Route path="/prestamos/tipo/crear" element={<CreateLoan />} />
 
         {/* Rutas de cobros */}
         <Route path="/cobros" element={<Collection />} />
         <Route path="/cobros/registrar" element={<RegisterCollection />} />
         <Route path="/collections/payment-methods" element={<PaymentMethodsCollection />} />
+
+
+        {/* seccion reportes y periodos */}
+        <Route path="/periodos" element={<AccountingPeriods />} />
+        <Route path="/periodos/detalle/:id" element={<ReadAccountingPeriod />} />
+
+
 
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/auth/login" replace />} />
