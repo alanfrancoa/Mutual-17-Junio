@@ -14,11 +14,11 @@ import { ISupplierList } from "../types/ISupplierList";
 import { ISupplierRegister } from "../types/ISupplierRegister";
 import { IServiceRegister } from "../types/IServiceRegister";
 import { IServiceType } from "../types/IServiceType";
-import { 
-  ICollection, 
+import {
+  ICollection,
   ICollectionListResponse,
-  ICollectionDetail, 
-  ICollectionMethod 
+  ICollectionDetail,
+  ICollectionMethod
 } from "../types/ICollection";
 import { ILoanTypesList } from "../types/loans/ILoanTypesList";
 import { ILoanList } from "../types/loans/ILoanList";
@@ -532,31 +532,91 @@ export const apiMutual = {
     return true;
   },
 
-
-  /* -----------------------------Modulo cobros---------------------- */
-
-  /* ----------------------- Registrar cobro ----------------------- */
-  RegisterCollection: async (data: {
-  installmentId: number;
-  amount: number;
-  methodId: number;
-  receiptNumber: string;
-  collectionDate: string;
-  observations?: string;
-}): Promise<{ message: string }> => {
-  const url = `https://localhost:7256/api/collections`;
-  const response = await Fetcher.post(url, data, {
+  /* ----------------------- Registrar factura ----------------------- */
+RegisterInvoice: async (invoiceData: {
+  supplierId: number;
+  invoiceNumber: string;
+  issueDate: string;
+  dueDate: string;
+  total: number;
+  serviceTypeId: number;
+  description: string;
+}): Promise<{ mesagge: string }> => {
+  const url = `https://localhost:7256/api/invoices`;
+  const response = await Fetcher.post(url, invoiceData, {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
     },
   });
   if (response.status && response.status >= 400) {
-    const resData = response.data as { message?: string };
-    throw new Error(resData?.message || "No se pudo registrar el cobro");
+    const data = response.data as { mesagge?: string };
+    throw new Error(data?.mesagge || "No se pudo registrar la factura");
   }
-  return response.data as { message: string };
+  return response.data as { mesagge: string };
 },
+
+  /* ----------------------- Obtener listado de facturas ----------------------- */
+  GetInvoices: async (): Promise<any[]> => {
+    const url = `https://localhost:7256/api/invoices`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const data = response.data as { mesagge?: string };
+      throw new Error(data?.mesagge || "No se pudieron obtener las facturas");
+    }
+    return response.data as any[];
+  },
+
+  /* -----------------------  Cambiar estado de factura ----------------------- */
+  UpdateInvoiceStatus: async (id: number, newStatus: boolean) => {
+    const response = await fetch(`/api/invoices/${id}/status`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        // Si usas JWT:
+        Authorization: `Bearer ${sessionStorage.getItem("jwtToken")}`,
+      },
+      body: JSON.stringify(newStatus),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.mensaje || "Error al actualizar estado.");
+    }
+    return response.json();
+  },
+
+
+
+  /* -----------------------------Modulo cobros---------------------- */
+
+  /* ----------------------- Registrar cobro ----------------------- */
+  RegisterCollection: async (data: {
+    installmentId: number;
+    amount: number;
+    methodId: number;
+    receiptNumber: string;
+    collectionDate: string;
+    observations?: string;
+  }): Promise<{ message: string }> => {
+    const url = `https://localhost:7256/api/collections`;
+    const response = await Fetcher.post(url, data, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const resData = response.data as { message?: string };
+      throw new Error(resData?.message || "No se pudo registrar el cobro");
+    }
+    return response.data as { message: string };
+  },
 
   /* ----------------------- Obtener listado de cobros ----------------------- */
   GetCollections: async (): Promise<ICollection[]> => {
@@ -619,19 +679,19 @@ export const apiMutual = {
   GetCollectionMethods: async (): Promise<ICollectionMethod[]> => {
     const url = `https://localhost:7256/api/collection-methods`;
     const response = await Fetcher.get(url, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-    },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
 
-  });
+    });
     if (response.status && response.status >= 400) {
       const data = response.data as { message?: string };
       throw new Error(data?.message || "No se pudieron obtener los métodos de cobro");
     }
     return response.data as ICollectionMethod[];
   },
- 
+
   /* ----------------------- 2. Listar tipo de prestamo ----------------------- */
   GetLoanTypes: async (): Promise<ILoanTypesList[]> => {
     const url = `https://localhost:7256/api/loan-types`;
@@ -646,10 +706,10 @@ export const apiMutual = {
 
   /* ----------------------- 3. Desactivar tipo de prestamo ----------------------- */
   DeactivateLoanType: async (id: number): Promise<{ message: string }> => {
-      const url = `https://localhost:7256/api/loan-types/${id}/state`;
+    const url = `https://localhost:7256/api/loan-types/${id}/state`;
 
-      
-    const response = await Fetcher.put(url, {}, { 
+
+    const response = await Fetcher.put(url, {}, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
@@ -722,4 +782,5 @@ export const apiMutual = {
     });
     return response.data as IInstallmentInfo[];
   },
+
 };
