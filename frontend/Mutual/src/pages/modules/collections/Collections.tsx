@@ -116,6 +116,12 @@ const Collections: React.FC = () => {
                             >
                                 + Registrar nuevo cobro
                             </button>
+                            <button
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded"
+                                onClick={() => navigate("/collections/payment-methods")}
+                            >
+                                Métodos de Cobro
+                            </button>
                         </div>
 
                         {/* Tabla de cobros */}
@@ -148,9 +154,33 @@ const Collections: React.FC = () => {
                                             {/* Botón para ver/descargar comprobante PDF */}
                                             <button
                                                 className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
-                                            // onClick={() => handleDownloadPDF(c)}
+                                                onClick={async () => {
+                                                    try {
+                                                        const response = await fetch(
+                                                            `https://localhost:7256/api/collections/${c.id}/pdf`,
+                                                            {
+                                                                method: "GET",
+                                                                headers: {
+                                                                    Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+                                                                },
+                                                            }
+                                                        );
+                                                        if (!response.ok) throw new Error("No se pudo generar el PDF");
+                                                        const blob = await response.blob();
+                                                        const url = window.URL.createObjectURL(blob);
+                                                        const link = document.createElement("a");
+                                                        link.href = url;
+                                                        link.download = `Cobro_${c.id}.pdf`;
+                                                        document.body.appendChild(link);
+                                                        link.click();
+                                                        link.remove();
+                                                        window.URL.revokeObjectURL(url);
+                                                    } catch (err) {
+                                                        alert("Error al generar el comprobante PDF");
+                                                    }
+                                                }}
                                             >
-                                                PDF
+                                                Imprimir
                                             </button>
                                             <button
                                                 className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
