@@ -22,6 +22,8 @@ const InvoicesPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   const userRole = useMemo(() => (sessionStorage.getItem("userRole") || "consultante") as "administrador" | "gestor" | "consultante", []);
 
@@ -67,15 +69,33 @@ const InvoicesPage: React.FC = () => {
 
   const handleTogglePaidStatus = async (invoiceId: number, currentStatus: boolean) => {
     if (userRole !== 'administrador' && userRole !== 'gestor') {
-        alert("No tiene permisos para realizar esta acción.");
-        return;
+      alert("No tiene permisos para realizar esta acción.");
+      return;
     }
     try {
-        await apiMutual.UpdateInvoiceStatus(invoiceId, !currentStatus);
-        fetchInvoices();
+      await apiMutual.UpdateInvoiceStatus(invoiceId, !currentStatus);
+      fetchInvoices();
     } catch (error: any) {
-        setError(error.mensaje || "No se pudo actualizar el estado de la factura.");
+      setError(error.mensaje || "No se pudo actualizar el estado de la factura.");
     }
+  };
+
+  const handleAskTogglePaidStatus = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setModalOpen(true);
+  };
+
+  const handleConfirmTogglePaidStatus = async () => {
+    if (selectedInvoice) {
+      await handleTogglePaidStatus(selectedInvoice.Id, selectedInvoice.Paid);
+      setModalOpen(false);
+      setSelectedInvoice(null);
+    }
+  };
+
+  const handleCancelModal = () => {
+    setModalOpen(false);
+    setSelectedInvoice(null);
   };
 
   return (
@@ -145,11 +165,10 @@ const InvoicesPage: React.FC = () => {
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{invoice.TypeService}</td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
                         <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            invoice.Paid
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${invoice.Paid
                               ? "bg-green-100 text-green-800"
                               : "bg-red-100 text-red-800"
-                          }`}
+                            }`}
                         >
                           {invoice.Paid ? "Pagada" : "Pendiente"}
                         </span>
@@ -157,7 +176,13 @@ const InvoicesPage: React.FC = () => {
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium flex gap-4">
                         <button onClick={() => navigate(`/proveedores/facturas/editar/${invoice.Id}`)} className="text-indigo-600 hover:text-indigo-900" title="Ver/Editar Factura">Ver/Editar</button>
                         {(userRole === 'administrador' || userRole === 'gestor') && (
-                          <button onClick={() => handleTogglePaidStatus(invoice.Id, invoice.Paid)} className={invoice.Paid ? "text-yellow-600 hover:text-yellow-900" : "text-green-600 hover:text-green-900"} title={invoice.Paid ? "Marcar como Pendiente" : "Marcar como Pagada"}>{invoice.Paid ? "Anular Pago" : "Pagar"}</button>
+                          <button
+                            onClick={() => handleAskTogglePaidStatus(invoice)}
+                            className={invoice.Paid ? "text-yellow-600 hover:text-yellow-900" : "text-green-600 hover:text-green-900"}
+                            title={invoice.Paid ? "Marcar como Pendiente" : "Marcar como Pagada"}
+                          >
+                            {invoice.Paid ? "Anular Pago" : "Pagar"}
+                          </button>
                         )}
                       </td>
                     </tr>
@@ -168,6 +193,36 @@ const InvoicesPage: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Modal para doble verificación de cambio de estado */}
+      {modalOpen && selectedInvoice && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">
+              {selectedInvoice.Paid ? "¿Anular pago de la factura?" : "¿Marcar factura como pagada?"}
+            </h3>
+            <p className="mb-6 text-gray-600">
+              ¿Está seguro que desea {selectedInvoice.Paid ? "anular el pago" : "marcar como pagada"} la factura <b>{selectedInvoice.InvoiceNumber}</b>?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={handleCancelModal}
+                className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmTogglePaidStatus}
+                className={selectedInvoice.Paid
+                  ? "px-4 py-2 rounded bg-yellow-600 text-white hover:bg-yellow-700"
+                  : "px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
