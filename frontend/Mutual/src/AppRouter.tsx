@@ -39,6 +39,8 @@ import Collection from "./pages/modules/collections/Collections";
 import RegisterCollection from "./pages/modules/collections/RegisterCollection";
 import ReadAccountingPeriod from "./pages/modules/reports-periods/accounting-periods/readAccountingPeriod";
 import AccountingPeriods from "./pages/modules/reports-periods/accounting-periods/listAccountingPeriods";
+import PaymentMethodsCollection from "./pages/modules/collections/paymentMethodsCollection";
+
 
 const AppRouter: React.FC = () => {
   return (
@@ -118,6 +120,8 @@ const AppRouter: React.FC = () => {
         {/* Rutas de cobros */}
         <Route path="/cobros" element={<Collection />} />
         <Route path="/cobros/registrar" element={<RegisterCollection />} />
+        <Route path="/collections/payment-methods" element={<PaymentMethodsCollection />} />
+
 
         {/* seccion reportes y periodos */}
         <Route path="/periodos" element={<AccountingPeriods />} />
