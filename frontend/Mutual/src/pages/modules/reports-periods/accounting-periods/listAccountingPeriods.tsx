@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import toast from "react-hot-toast";
-import { IAccountingPeriod } from "../../../../types/accountablePeriods/IAccountingPeriod";
 import Header from "../../../dashboard/components/Header";
 import Sidebar from "../../../dashboard/components/Sidebar";
 import CloseAccountingPeriod from "./closeAccountingPeriod";
 import CreateAccountingPeriodForm from "./createAccountingPeriod";
 import GenerateReportForm from "../reports-inaes/listReportGeneration";
+import { apiMutual } from "../../../../api/apiMutual";
+import { IAccountingPeriodList } from "../../../../types/accountablePeriods/IAccountingPeriodList";
 
 // Paginacion
 const PAGE_SIZE = 5;
@@ -16,66 +17,48 @@ const AccountingPeriods: React.FC = () => {
   const navigate = useNavigate();
 
   const [accountingPeriods, setAccountingPeriods] = useState<
-    IAccountingPeriod[]
+    IAccountingPeriodList[]
   >([]);
   const [search, setSearch] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("Todos");
   const [page, setPage] = useState<number>(1);
   const [filteredAndSearchedPeriods, setFilteredAndSearchedPeriods] = useState<
-    IAccountingPeriod[]
+    IAccountingPeriodList[]
   >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState<boolean>(false);
 
-  const [nextId, setNextId] = useState(16);
+  const fetchAccountingPeriods = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      let closedFilter: boolean | undefined = undefined;
+      if (statusFilter === "Abierto") {
+        closedFilter = false;
+      } else if (statusFilter === "Cerrado") {
+        closedFilter = true;
+      }
+
+      
+      const data = await apiMutual.GetAccountingPeriods(closedFilter);
+      setAccountingPeriods(data);
+    } catch (err: any) {
+      console.error("Error al cargar períodos contables:", err);
+      const errorMessage =
+        err.data?.message ||
+        err.message ||
+        "Error al cargar los períodos contables.";
+      setError(errorMessage);
+      setAccountingPeriods([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter]); 
 
   useEffect(() => {
-    const loadInitialData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-
-        const initialMockData: IAccountingPeriod[] = Array.from(
-          { length: 15 },
-          (_, i) => {
-            const code = `PERIODO-${2024 + i}`;
-            const typeOptions: ("Mensual" | "Trimestral")[] = [
-              "Mensual",
-              "Trimestral",
-            ];
-            const periodType =
-              typeOptions[Math.floor(Math.random() * typeOptions.length)];
-            const statusOptions: ("Abierto" | "Cerrado")[] = [
-              "Abierto",
-              "Cerrado",
-            ];
-            const status =
-              statusOptions[Math.floor(Math.random() * statusOptions.length)];
-
-            return {
-              id: i + 1,
-              code,
-              type: periodType,
-              startDate: `2024-01-01T00:00:00Z`,
-              endDate: `2024-12-31T23:59:59Z`,
-              status: status,
-            };
-          }
-        );
-        setAccountingPeriods(initialMockData);
-        setNextId(initialMockData.length + 1);
-      } catch (err: any) {
-        console.error("Error cargando períodos contables mockeados:", err);
-        setError("Error al cargar los períodos contables mockeados.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadInitialData();
-  }, []);
+    fetchAccountingPeriods();
+  }, [fetchAccountingPeriods]); 
 
   useEffect(() => {
     let currentFiltered = accountingPeriods;
@@ -91,8 +74,8 @@ const AccountingPeriods: React.FC = () => {
       currentFiltered = currentFiltered.filter(
         (period) =>
           period.code.toLowerCase().includes(lowerCaseSearch) ||
-          period.type.toLowerCase().includes(lowerCaseSearch) ||
-          period.status.toLowerCase().includes(lowerCaseSearch)
+          period.periodType.toLowerCase().includes(lowerCaseSearch) ||
+          (period.status ? "cerrado" : "abierto").includes(lowerCaseSearch)
       );
     }
 
@@ -112,7 +95,7 @@ const AccountingPeriods: React.FC = () => {
     }
   };
 
-  const handleViewReport = (period: IAccountingPeriod) => {
+  const handleViewReport = (period: IAccountingPeriodList) => {
     navigate(`/periodos/detalle/${period.id}`);
   };
 
@@ -128,11 +111,8 @@ const AccountingPeriods: React.FC = () => {
     setShowCreateForm(true);
   };
 
-  const handleNewPeriodSuccess = (newPeriod: IAccountingPeriod) => {
-    const periodWithId = { ...newPeriod, id: nextId };
-    setNextId((prevId) => prevId + 1);
-
-    setAccountingPeriods((prevPeriods) => [...prevPeriods, periodWithId]);
+  const handleNewPeriodSuccess = (newPeriod: IAccountingPeriodList) => {
+    setAccountingPeriods((prev) => [...prev, newPeriod]);
     setShowCreateForm(false);
     toast.success(
       `Nuevo período ${newPeriod.code} creado y añadido a la lista.`
@@ -264,7 +244,7 @@ const AccountingPeriods: React.FC = () => {
                                 {period.code}
                               </td>
                               <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                                {period.type}
+                                {period.periodType}
                               </td>
                               <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                                 {new Date(
@@ -278,11 +258,9 @@ const AccountingPeriods: React.FC = () => {
                               <td className="px-4 py-4 whitespace-nowrap">
                                 <span
                                   className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                    period.status === "Abierto"
-                                      ? "bg-green-100 text-green-800"
-                                      : period.status === "Cerrado"
+                                    period.status === "Cerrado"
                                       ? "bg-red-100 text-red-800"
-                                      : "bg-gray-100 text-gray-800"
+                                      : "bg-green-100 text-green-800"
                                   }`}
                                 >
                                   {period.status}
@@ -307,7 +285,7 @@ const AccountingPeriods: React.FC = () => {
                                       isPeriodAlreadyClosed={false}
                                     />
                                   )}
-                                  {/* Si el periodo es cerrado, mostrar un boton deshabilitado  */}
+                                  {/* Si el periodo es cerrado, mostrar boton deshabilitado  */}
                                   {period.status === "Cerrado" && (
                                     <button
                                       disabled
@@ -354,8 +332,7 @@ const AccountingPeriods: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                <GenerateReportForm
-                  closedPeriods={accountingPeriods.filter(
+                <GenerateReportForm closedPeriods={accountingPeriods.filter(
                     (p) => p.status === "Cerrado"
                   )}
                 />

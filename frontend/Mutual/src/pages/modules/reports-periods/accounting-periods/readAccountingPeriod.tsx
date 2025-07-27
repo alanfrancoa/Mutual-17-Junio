@@ -3,15 +3,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../../dashboard/components/Header";
 import Sidebar from "../../../dashboard/components/Sidebar";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
-import { IAccountingPeriod } from "../../../../types/accountablePeriods/IAccountingPeriod";
-import useAppToast from "../../../../hooks/useAppToast"; 
+import useAppToast from "../../../../hooks/useAppToast";
+import { IAccountingPeriodList } from "../../../../types/accountablePeriods/IAccountingPeriodList";
+import { apiMutual } from "../../../../api/apiMutual";
 
 const ReadAccountingPeriod: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>(); 
-  const { showErrorToast } = useAppToast(); 
+  const { id } = useParams<{ id: string }>();
+  const { showErrorToast } = useAppToast();
 
-  const [period, setPeriod] = useState<IAccountingPeriod | null>(null);
+  const [period, setPeriod] = useState<IAccountingPeriodList | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,29 +32,12 @@ const ReadAccountingPeriod: React.FC = () => {
         return;
       }
 
-     
-      // Datos mockeados para simular un período
-      await new Promise((resolve) => setTimeout(resolve, 800)); 
-      const mockPeriod: IAccountingPeriod | undefined = {
-        id: periodId,
-        code: `P-${periodId}-2025`, 
-        type: periodId % 2 === 0 ? "Trimestral" : "Mensual",
-        startDate: `2025-01-01T00:00:00Z`,
-        endDate: `2025-12-31T23:59:59Z`,
-        status: periodId % 2 === 0 ? "Abierto" : "Cerrado", 
-       
-      };
-
-      if (mockPeriod) {
-        setPeriod(mockPeriod);
-      } else {
-        setError("Período contable no encontrado.");
-      }
-      
-
+      const data = await apiMutual.GetAccountingPeriodById(periodId);
+      setPeriod(data);
     } catch (err: any) {
       console.error("Error fetching accounting period details:", err);
       const errorMessage =
+        err.message ||
         err.response?.data?.message ||
         "Error al cargar los detalles del período contable.";
       setError(errorMessage);
@@ -62,21 +46,15 @@ const ReadAccountingPeriod: React.FC = () => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchPeriodDetails();
-  }, [id]); 
+  }, [id]);
 
   // Función auxiliar para clases de color del estado
-  const getStatusColorClass = (status: IAccountingPeriod["status"]) => {
-    switch (status) {
-      case "Abierto":
-        return "bg-green-100 text-green-800";
-      case "Cerrado":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+  const getStatusColorClass = (status: string) => {
+    if (status === "Abierto") return "bg-green-100 text-green-800";
+    if (status === "Cerrado") return "bg-red-100 text-red-800";
+    return "bg-gray-100 text-gray-800";
   };
 
   // Renderizado condicional para estados de carga, error y no encontrado
@@ -104,7 +82,7 @@ const ReadAccountingPeriod: React.FC = () => {
             <p className="text-red-600 mb-4">{error}</p>
             <button
               type="button"
-              onClick={() => navigate("/periodos")} 
+              onClick={() => navigate("/periodos")}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-semibold"
             >
               Volver a la lista de períodos
@@ -138,7 +116,7 @@ const ReadAccountingPeriod: React.FC = () => {
     );
   }
 
-  // Renderizado principal de los detalles del período
+  
   return (
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
@@ -148,7 +126,7 @@ const ReadAccountingPeriod: React.FC = () => {
         <main className="flex-1 p-6 bg-gray-100">
           <div className="flex justify-start mb-6">
             <button
-              onClick={() => navigate("/periodos")} 
+              onClick={() => navigate("/periodos")}
               className="text-gray-600 hover:text-gray-800 flex items-center"
               aria-label="Volver a Períodos Contables"
             >
@@ -182,9 +160,7 @@ const ReadAccountingPeriod: React.FC = () => {
                 <div>
                   <span className="text-sm text-gray-500 block">Estado:</span>
                   <span
-                    className={`font-semibold px-3 py-1 rounded-full text-sm ${getStatusColorClass(
-                      period.status
-                    )}`}
+                    className={`font-semibold px-3 py-1 rounded-full text-sm ${getStatusColorClass(period.status)}`}
                   >
                     {period.status}
                   </span>
@@ -203,7 +179,7 @@ const ReadAccountingPeriod: React.FC = () => {
                     Tipo de Período:
                   </span>{" "}
                   <span className="text-gray-800 text-lg">
-                    {period.type}
+                    {period.periodType}
                   </span>
                 </div>
                 <div>
@@ -224,7 +200,6 @@ const ReadAccountingPeriod: React.FC = () => {
                 </div>
               </div>
             </div>
-            
           </div>
         </main>
       </div>
