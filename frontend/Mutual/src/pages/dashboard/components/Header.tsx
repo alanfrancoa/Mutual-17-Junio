@@ -25,7 +25,6 @@ const Header: React.FC<HeaderProps> = ({ hasNotifications }) => {
     },
   ];
 
-  
   const userName = sessionStorage.getItem("username");
   const userRole = sessionStorage.getItem("userRole");
 
@@ -79,7 +78,10 @@ const Header: React.FC<HeaderProps> = ({ hasNotifications }) => {
           <button
             className="p-1 rounded-full hover:bg-blue-600 transition"
             title="Cerrar sesión"
-            onClick={() => navigate("/")}
+            onClick={() => {
+              sessionStorage.clear();
+              navigate("/auth/login");
+            }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
