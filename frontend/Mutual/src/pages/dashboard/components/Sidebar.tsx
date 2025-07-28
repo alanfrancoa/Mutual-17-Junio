@@ -23,7 +23,7 @@ const Sidebar: React.FC = () => {
   const toggleSuppliersMenu = () => {
     setIsSuppliersOpen(!isSuppliersOpen);
   };
-
+  const userRole = sessionStorage.getItem("userRole");
   return (
     <aside
       className="fixed top-0 left-0 h-screen w-72 shadow-2xl text-white flex flex-col z-50"
@@ -112,40 +112,42 @@ const Sidebar: React.FC = () => {
           <ChartBarIcon className="h-5 w-5" /> Reportes Y Periodos
         </a>
 
-        <div className="relative">
-          <button
-            onClick={toggleAdminMenu}
-            className="flex items-center justify-between w-full gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
-          >
-            <div className="flex items-center gap-3">
-              <Cog6ToothIcon className="h-5 w-5" />
-              Acceso Administrador
-            </div>
+        {userRole === "Administrador" && (
+          <div className="relative">
+            <button
+              onClick={toggleAdminMenu}
+              className="flex items-center justify-between w-full gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
+            >
+              <div className="flex items-center gap-3">
+                <Cog6ToothIcon className="h-5 w-5" />
+                Acceso Administrador
+              </div>
 
-            <ChevronDownIcon
-              className={`h-5 w-5 transition-transform duration-300 ${
-                isAdminMenuOpen ? "rotate-0" : "-rotate-90"
-              }`}
-            />
-          </button>
-          {isAdminMenuOpen && (
-            <div className="pl-8 pt-2 pb-1 space-y-1">
-              <a
-                href="/usuarios"
-                className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
-              >
-                <UserGroupIcon className="h-4 w-4" />
-                Usuarios
-              </a>
-              <a
-                href="/auditoria"
-                className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
-              >
-                <ClipboardDocumentListIcon className="h-4 w-4" /> Auditorías
-              </a>
-            </div>
-          )}
-        </div>
+              <ChevronDownIcon
+                className={`h-5 w-5 transition-transform duration-300 ${
+                  isAdminMenuOpen ? "rotate-0" : "-rotate-90"
+                }`}
+              />
+            </button>
+            {isAdminMenuOpen && (
+              <div className="pl-8 pt-2 pb-1 space-y-1">
+                <a
+                  href="/usuarios"
+                  className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                >
+                  <UserGroupIcon className="h-4 w-4" />
+                  Usuarios
+                </a>
+                <a
+                  href="/auditoria"
+                  className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                >
+                  <ClipboardDocumentListIcon className="h-4 w-4" /> Auditorías
+                </a>
+              </div>
+            )}
+          </div>
+        )}
       </nav>
     </aside>
   );
