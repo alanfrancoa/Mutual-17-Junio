@@ -5,13 +5,13 @@ import Header from "../../dashboard/components/Header";
 import { apiMutual } from "../../../api/apiMutual";
 import { IAssociateList } from "../../../types/associates/IAssociateList";
 import { ICollectionMethod } from "../../../types/ICollection";
-import { IInstallment } from "../../../types/IInstallment";
+import { IInstallmentInfo } from "../../../types/loans/ILoan";
 
 const RegisterCollection: React.FC = () => {
   const navigate = useNavigate();
   const [associates, setAssociates] = useState<IAssociateList[]>([]);
   const [methods, setMethods] = useState<ICollectionMethod[]>([]);
-  const [installments, setInstallments] = useState<IInstallment[]>([]);
+  const [installments, setInstallments] = useState<IInstallmentInfo[]>([]);
   const [loans, setLoans] = useState<any[]>([]);
   const [form, setForm] = useState({
     associateId: "",
@@ -60,7 +60,7 @@ const RegisterCollection: React.FC = () => {
       setInstallments([]);
       setForm((prev) => ({ ...prev, loanId: "", installmentId: "", amount: "" }));
       if (!form.associateId) return;
-      
+
       try {
         const allLoans = await apiMutual.GetLoans();
         // Filtrar por personId (campo correcto según tu backend)
@@ -82,20 +82,12 @@ const RegisterCollection: React.FC = () => {
       setInstallments([]);
       setForm((prev) => ({ ...prev, installmentId: "", amount: "" }));
       if (!form.loanId) return;
-      
+
       try {
         const installmentsList = await apiMutual.GetLoanInstallments(Number(form.loanId));
         // Filtrar solo cuotas no cobradas (campo booleano)
         const pending = installmentsList.filter((i: any) => !i.collected);
-        setInstallments(
-          pending.map((i: any) => ({
-            id: i.id,
-            installmentNumber: i.installmentNumber,
-            dueDate: i.dueDate,
-            amount: i.amount,
-            collected: i.collected,
-          }))
-        );
+        setInstallments(pending);
       } catch {
         setInstallments([]);
         setError("Error al cargar cuotas del préstamo");
@@ -110,7 +102,7 @@ const RegisterCollection: React.FC = () => {
       setForm((prev) => ({ ...prev, amount: "" }));
       return;
     }
-    const selected = installments.find(i => i.id === Number(form.installmentId));
+    const selected = installments.find(i => i.installmentNumber === Number(form.installmentId));
     setForm((prev) => ({ ...prev, amount: selected ? String(selected.amount) : "" }));
   }, [form.installmentId, installments]);
 
@@ -123,7 +115,7 @@ const RegisterCollection: React.FC = () => {
     setError("");
     setSuccess("");
     setLoading(true);
-    
+
     try {
       // Validaciones básicas
       if (!form.associateId || !form.installmentId || !form.amount || !form.methodId || !form.receiptNumber) {
@@ -173,13 +165,13 @@ const RegisterCollection: React.FC = () => {
         <div className="flex flex-col items-center py-8">
           <div className="w-full max-w-lg bg-white rounded-lg shadow p-8">
             <h2 className="text-2xl font-bold mb-6">Registrar Cobro</h2>
-            
+
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                 {error}
               </div>
             )}
-            
+
             {success && (
               <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                 {success}
@@ -241,7 +233,7 @@ const RegisterCollection: React.FC = () => {
                     {!form.loanId ? "Primero seleccione un préstamo" : "Seleccione una cuota..."}
                   </option>
                   {installments.map(i => (
-                    <option key={i.id} value={i.id}>
+                    <option key={i.installmentNumber} value={i.installmentNumber}>
                       Cuota #{i.installmentNumber} - Vence: {i.dueDate} - ${i.amount}
                     </option>
                   ))}

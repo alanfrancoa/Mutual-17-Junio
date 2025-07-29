@@ -1,11 +1,3 @@
-export interface IInstallment {
-  id: number;
-  installmentNumber: number;
-  dueDate: string;
-  amount: number;
-  collected: "Pagado" | "Pendiente";
-}
-
 export interface IOverdueInstallment {
   id: number;
   installmentNumber: number;
@@ -16,4 +8,5 @@ export interface IOverdueInstallment {
   loanType: string;
   collected: string;
 }
+
 
