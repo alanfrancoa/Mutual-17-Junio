@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronDownIcon, ShoppingCartIcon } from "@heroicons/react/24/solid"; // Esta es la versión sólida
+import { ChevronDownIcon } from "@heroicons/react/24/solid"; 
 
 import {
   HomeIcon,
