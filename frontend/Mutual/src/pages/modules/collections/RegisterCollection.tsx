@@ -6,7 +6,6 @@ import { apiMutual } from "../../../api/apiMutual";
 import { IAssociateList } from "../../../types/associates/IAssociateList";
 import { ICollectionMethod } from "../../../types/ICollection";
 import { IInstallment } from "../../../types/IInstallment";
-import { ICollection } from "../../../types/ICollection";
 
 const RegisterCollection: React.FC = () => {
   const navigate = useNavigate();
@@ -28,6 +27,15 @@ const RegisterCollection: React.FC = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // Verificar rol del usuario (solo Administrador y Gestor pueden registrar cobros)
+  useEffect(() => {
+    const userRole = sessionStorage.getItem("userRole");
+    if (userRole !== "Administrador" && userRole !== "Gestor") {
+      navigate("/dashboard");
+      return;
+    }
+  }, [navigate]);
+
   // Cargar asociados y métodos de cobro al montar
   useEffect(() => {
     const fetchData = async () => {
@@ -37,7 +45,7 @@ const RegisterCollection: React.FC = () => {
           apiMutual.GetCollectionMethods(),
         ]);
         setAssociates(assoc);
-        setMethods(meth);
+        setMethods(meth.filter(m => m.isActive)); // Solo métodos activos
       } catch {
         setError("Error al cargar datos iniciales");
       }
@@ -45,23 +53,27 @@ const RegisterCollection: React.FC = () => {
     fetchData();
   }, []);
 
+  // Cargar préstamos del asociado seleccionado
   useEffect(() => {
     const fetchLoans = async () => {
       setLoans([]);
       setInstallments([]);
       setForm((prev) => ({ ...prev, loanId: "", installmentId: "", amount: "" }));
       if (!form.associateId) return;
+      
       try {
-        // Si tienes un endpoint específico, úsalo. Si no, filtra GetLoans()
         const allLoans = await apiMutual.GetLoans();
-        const loansOfAssociate = allLoans.filter((l: any) => l.associateId === Number(form.associateId));
-        setLoans(loansOfAssociate);
+        // Filtrar por personId (campo correcto según tu backend)
+        const loansOfAssociate = allLoans.filter((l: any) => l.personId === Number(form.associateId));
+        // Solo préstamos activos
+        const activeLoans = loansOfAssociate.filter((l: any) => l.status === "Activo");
+        setLoans(activeLoans);
       } catch {
         setLoans([]);
+        setError("Error al cargar préstamos del asociado");
       }
     };
     fetchLoans();
-    // eslint-disable-next-line
   }, [form.associateId]);
 
   // Cargar cuotas pendientes del préstamo seleccionado
@@ -70,10 +82,11 @@ const RegisterCollection: React.FC = () => {
       setInstallments([]);
       setForm((prev) => ({ ...prev, installmentId: "", amount: "" }));
       if (!form.loanId) return;
+      
       try {
-        const loan = await apiMutual.GetLoanById(Number(form.loanId));
-        // Filtra solo cuotas pendientes
-        const pending = loan.installments.filter((i: any) => i.collected === "Pendiente");
+        const installmentsList = await apiMutual.GetLoanInstallments(Number(form.loanId));
+        // Filtrar solo cuotas no cobradas (campo booleano)
+        const pending = installmentsList.filter((i: any) => !i.collected);
         setInstallments(
           pending.map((i: any) => ({
             id: i.id,
@@ -85,10 +98,10 @@ const RegisterCollection: React.FC = () => {
         );
       } catch {
         setInstallments([]);
+        setError("Error al cargar cuotas del préstamo");
       }
     };
     fetchInstallments();
-    // eslint-disable-next-line
   }, [form.loanId]);
 
   // Autocompletar monto al seleccionar cuota
@@ -110,6 +123,7 @@ const RegisterCollection: React.FC = () => {
     setError("");
     setSuccess("");
     setLoading(true);
+    
     try {
       // Validaciones básicas
       if (!form.associateId || !form.installmentId || !form.amount || !form.methodId || !form.receiptNumber) {
@@ -117,16 +131,33 @@ const RegisterCollection: React.FC = () => {
         setLoading(false);
         return;
       }
+
+      // Validar que el monto sea positivo
+      if (Number(form.amount) <= 0) {
+        setError("El monto debe ser mayor a cero.");
+        setLoading(false);
+        return;
+      }
+
+      // Validar que la fecha no sea futura
+      const today = new Date().toISOString().slice(0, 10);
+      if (form.date > today) {
+        setError("La fecha de cobro no puede ser futura.");
+        setLoading(false);
+        return;
+      }
+
       await apiMutual.RegisterCollection({
         installmentId: Number(form.installmentId),
         amount: Number(form.amount),
         methodId: Number(form.methodId),
-        receiptNumber: form.receiptNumber,
+        receiptNumber: form.receiptNumber.trim(),
         collectionDate: form.date,
-        observations: form.observations,
+        observations: form.observations.trim(),
       });
+
       setSuccess("Cobro registrado correctamente");
-      setTimeout(() => navigate("/collections"), 1200);
+      setTimeout(() => navigate("/collections"), 1500);
     } catch (err: any) {
       setError(err.message || "Error al registrar el cobro");
     } finally {
@@ -142,8 +173,19 @@ const RegisterCollection: React.FC = () => {
         <div className="flex flex-col items-center py-8">
           <div className="w-full max-w-lg bg-white rounded-lg shadow p-8">
             <h2 className="text-2xl font-bold mb-6">Registrar Cobro</h2>
-            {error && <div className="text-red-600 mb-2">{error}</div>}
-            {success && <div className="text-green-600 mb-2">{success}</div>}
+            
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {error}
+              </div>
+            )}
+            
+            {success && (
+              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                {success}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Asociado *</label>
@@ -152,16 +194,18 @@ const RegisterCollection: React.FC = () => {
                   value={form.associateId}
                   onChange={handleChange}
                   required
-                  className="w-full border px-2 py-1 rounded"
+                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+                  disabled={loading}
                 >
-                    <option value="">Seleccione un asociado...</option>
-                    {associates.map(a => (
-                        <option key={a.id} value={a.id}>
-                            {a.legalName} ({a.dni})
-                        </option>
-                    ))}
+                  <option value="">Seleccione un asociado...</option>
+                  {associates.map(a => (
+                    <option key={a.id} value={a.id}>
+                      {a.legalName} (DNI: {a.dni})
+                    </option>
+                  ))}
                 </select>
               </div>
+
               <div>
                 <label className="block text-sm font-medium mb-1">Préstamo *</label>
                 <select
@@ -169,17 +213,20 @@ const RegisterCollection: React.FC = () => {
                   value={form.loanId || ""}
                   onChange={handleChange}
                   required
-                  className="w-full border px-2 py-1 rounded"
-                  disabled={!form.associateId}
+                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+                  disabled={!form.associateId || loading}
                 >
-                  <option value="">Seleccione un préstamo...</option>
+                  <option value="">
+                    {!form.associateId ? "Primero seleccione un asociado" : "Seleccione un préstamo..."}
+                  </option>
                   {loans.map(l => (
                     <option key={l.id} value={l.id}>
-                      Préstamo #{l.id} - Estado: {l.status}
+                      Préstamo #{l.id} - ${l.amount} - Estado: {l.status}
                     </option>
                   ))}
                 </select>
               </div>
+
               <div>
                 <label className="block text-sm font-medium mb-1">Cuota a cobrar *</label>
                 <select
@@ -187,10 +234,12 @@ const RegisterCollection: React.FC = () => {
                   value={form.installmentId}
                   onChange={handleChange}
                   required
-                  className="w-full border px-2 py-1 rounded"
-                  disabled={!form.loanId}
+                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+                  disabled={!form.loanId || loading}
                 >
-                  <option value="">Seleccione una cuota...</option>
+                  <option value="">
+                    {!form.loanId ? "Primero seleccione un préstamo" : "Seleccione una cuota..."}
+                  </option>
                   {installments.map(i => (
                     <option key={i.id} value={i.id}>
                       Cuota #{i.installmentNumber} - Vence: {i.dueDate} - ${i.amount}
@@ -198,6 +247,7 @@ const RegisterCollection: React.FC = () => {
                   ))}
                 </select>
               </div>
+
               <div>
                 <label className="block text-sm font-medium mb-1">Monto *</label>
                 <input
@@ -208,10 +258,13 @@ const RegisterCollection: React.FC = () => {
                   required
                   min={0}
                   step="0.01"
-                  className="w-full border px-2 py-1 rounded"
+                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-gray-100"
                   disabled
+                  placeholder="Se completa automáticamente"
                 />
+                <small className="text-gray-500">El monto se asigna automáticamente según la cuota seleccionada</small>
               </div>
+
               <div>
                 <label className="block text-sm font-medium mb-1">Fecha de cobro *</label>
                 <input
@@ -220,9 +273,12 @@ const RegisterCollection: React.FC = () => {
                   value={form.date}
                   onChange={handleChange}
                   required
-                  className="w-full border px-2 py-1 rounded"
+                  max={new Date().toISOString().slice(0, 10)}
+                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+                  disabled={loading}
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium mb-1">Método de cobro *</label>
                 <select
@@ -230,14 +286,18 @@ const RegisterCollection: React.FC = () => {
                   value={form.methodId}
                   onChange={handleChange}
                   required
-                  className="w-full border px-2 py-1 rounded"
+                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+                  disabled={loading}
                 >
-                  <option value="">Seleccione...</option>
+                  <option value="">Seleccione un método...</option>
                   {methods.map(m => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
+                    <option key={m.id} value={m.id}>
+                      {m.name} ({m.code})
+                    </option>
                   ))}
                 </select>
               </div>
+
               <div>
                 <label className="block text-sm font-medium mb-1">N° de comprobante *</label>
                 <input
@@ -247,34 +307,42 @@ const RegisterCollection: React.FC = () => {
                   onChange={handleChange}
                   required
                   maxLength={255}
-                  className="w-full border px-2 py-1 rounded"
+                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+                  disabled={loading}
+                  placeholder="Ingrese el número del comprobante"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium mb-1">Observaciones</label>
                 <textarea
                   name="observations"
                   value={form.observations}
                   onChange={handleChange}
-                  className="w-full border px-2 py-1 rounded"
+                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
                   maxLength={255}
+                  rows={3}
+                  disabled={loading}
+                  placeholder="Observaciones adicionales (opcional)"
                 />
+                <small className="text-gray-500">{form.observations.length}/255 caracteres</small>
               </div>
-              <div className="flex justify-end gap-2">
+
+              <div className="flex justify-end gap-2 pt-4">
                 <button
                   type="button"
                   onClick={() => navigate("/collections")}
-                  className="bg-gray-400 text-white px-4 py-2 rounded"
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors"
                   disabled={loading}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition-colors disabled:bg-green-400"
                   disabled={loading}
                 >
-                  {loading ? "Guardando..." : "Guardar"}
+                  {loading ? "Guardando..." : "Registrar Cobro"}
                 </button>
               </div>
             </form>
