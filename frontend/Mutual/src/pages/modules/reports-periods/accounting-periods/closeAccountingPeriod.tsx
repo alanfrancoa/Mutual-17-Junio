@@ -21,6 +21,7 @@ const CloseAccountingPeriod: React.FC<CloseAccountingPeriodProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
+  const userRole = sessionStorage.getItem("userRole");
 
   const handleOpenModal = () => {
     if (isPeriodAlreadyClosed) {
@@ -61,14 +62,15 @@ const CloseAccountingPeriod: React.FC<CloseAccountingPeriodProps> = ({
 
   return (
     <>
-      <button
-        onClick={handleOpenModal}
-        className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded transition text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-        disabled={isLoading || isPeriodAlreadyClosed}
-      >
-        {isPeriodAlreadyClosed ? "Período Cerrado" : "Cerrar Período"}
-      </button>
-
+      {userRole === "Administrador" && (
+        <button
+          onClick={handleOpenModal}
+          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded transition text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isLoading || isPeriodAlreadyClosed}
+        >
+          {isPeriodAlreadyClosed ? "Período Cerrado" : "Cerrar Período"}
+        </button>
+      )}
       {/* Usamos el nuevo modal específico */}
       <ClosePeriodModal
         isOpen={isModalOpen}
