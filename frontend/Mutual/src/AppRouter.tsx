@@ -40,6 +40,7 @@ import RegisterCollection from "./pages/modules/collections/RegisterCollection";
 import ReadAccountingPeriod from "./pages/modules/reports-periods/accounting-periods/readAccountingPeriod";
 import AccountingPeriods from "./pages/modules/reports-periods/accounting-periods/listAccountingPeriods";
 import PaymentMethodsCollection from "./pages/modules/collections/paymentMethodsCollection";
+import NotFound from "./pages/not-found/page";
 
 
 const AppRouter: React.FC = () => {
@@ -130,7 +131,7 @@ const AppRouter: React.FC = () => {
 
 
         {/* Redirección por defecto */}
-        <Route path="*" element={<Navigate to="/auth/login" replace />} />
+        <Route path="*" element={<NotFound/>} />
       </Routes>
     </Router>
   );
