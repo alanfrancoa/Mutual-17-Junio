@@ -23,6 +23,7 @@ const Loans: React.FC = () => {
   >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const userRole = sessionStorage.getItem("userRole") || "";
 
   const fetchLoans = async () => {
     setLoading(true);
@@ -119,12 +120,14 @@ const Loans: React.FC = () => {
                 </div>
 
                 <div className="flex gap-2 w-full md:w-auto">
-                  <button
-                    onClick={() => navigate("/prestamos/solicitar")}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded font-semibold shadow transition flex items-center gap-2"
-                  >
-                    Solicitar Préstamo
-                  </button>
+                  {userRole !== "Administrador" && (
+                    <button
+                      onClick={() => navigate("/prestamos/solicitar")}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded font-semibold shadow transition flex items-center gap-2"
+                    >
+                      Solicitar Préstamo
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -210,7 +213,6 @@ const Loans: React.FC = () => {
                               loan.applicationDate
                             ).toLocaleDateString()}
                           </td>{" "}
-                          
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                             {loan.termMonths ? `${loan.termMonths}` : "-"}
                           </td>
@@ -219,7 +221,6 @@ const Loans: React.FC = () => {
                               {/* acciones rechazo y aprobacion */}
                               <RejectLoanButton
                                 loan={loan}
-                                
                                 onRefreshLoans={fetchLoans}
                               />
                               <ApproveLoanButton

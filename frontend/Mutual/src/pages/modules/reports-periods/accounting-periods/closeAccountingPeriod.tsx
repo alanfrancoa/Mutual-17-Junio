@@ -3,19 +3,13 @@
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import ClosePeriodModal from "../../../../components/ui/closePeriodModal";
-
+import { apiMutual } from "../../../../api/apiMutual";
 
 interface CloseAccountingPeriodProps {
   periodId: number;
   periodCode: string;
   onPeriodClosedSuccess?: (periodId: number) => void;
   isPeriodAlreadyClosed: boolean;
-}
-
-interface MockActionResult {
-  success: boolean;
-  message?: string;
-  errors?: string[];
 }
 
 const CloseAccountingPeriod: React.FC<CloseAccountingPeriodProps> = ({
@@ -42,37 +36,22 @@ const CloseAccountingPeriod: React.FC<CloseAccountingPeriodProps> = ({
     setModalError(null);
   };
 
-  const mockClosePeriod = async (data: { periodId: number }): Promise<MockActionResult> => {
-    return new Promise<MockActionResult>((resolve) => {
-      setTimeout(() => {
-        console.log(`[MOCK] Simulating closing period ${data.periodId}`);
-        resolve({
-          success: true,
-          message: `Período "${periodCode}" cerrado (simulado) con éxito.`,
-        });
-      }, 1500);
-    });
-  };
-
   const handleConfirmClosePeriod = async () => {
     setModalError(null);
     setIsLoading(true);
     try {
-      const result: MockActionResult = await mockClosePeriod({ periodId });
+      const result = await apiMutual.CloseAccountingPeriod(periodId);
 
-      if (result.success) {
-        toast.success(result.message || `Período "${periodCode}" cerrado con éxito.`);
-        handleCloseModal();
-        onPeriodClosedSuccess?.(periodId);
-      } else {
-        const errorMessage = result.errors?.join(", ") || "Ocurrió un error al cerrar el período.";
-        setModalError(errorMessage);
-        toast.error(`Error al cerrar el período: ${errorMessage}`);
-      }
-    } catch (error) {
-      console.error("Error al cerrar el período:", error);
+      toast.success(
+        result.message || `Período "${periodCode}" cerrado con éxito.`
+      );
+      handleCloseModal();
+      onPeriodClosedSuccess?.(periodId);
+    } catch (error: any) {
       const errorMessage =
-        error instanceof Error ? error.message : "Ocurrió un error inesperado.";
+        error?.message ||
+        error?.errorDetails ||
+        "Ocurrió un error al cerrar el período.";
       setModalError(errorMessage);
       toast.error(`Error al cerrar el período: ${errorMessage}`);
     } finally {
@@ -97,7 +76,7 @@ const CloseAccountingPeriod: React.FC<CloseAccountingPeriodProps> = ({
         onConfirm={handleConfirmClosePeriod}
         modalError={modalError}
         isLoading={isLoading}
-        periodCode={periodCode} 
+        periodCode={periodCode}
       />
     </>
   );

@@ -16,8 +16,9 @@ import { IServiceRegister } from "../types/IServiceRegister";
 import { IServiceType } from "../types/IServiceType";
 import {
   ICollection,
+  ICollectionListResponse,
+  ICollectionMethod,
   ICollectionDetail,
-  ICollectionMethod
 } from "../types/ICollection";
 import { ILoanTypesList } from "../types/loans/ILoanTypesList";
 import { ILoanList } from "../types/loans/ILoanList";
@@ -25,7 +26,13 @@ import { ILoanCreate } from "../types/loans/ILoanCreate";
 import { ICreateLoanTypes } from "../types/loans/ILoanTypes";
 import { ILoanUpdate } from "../types/loans/ILoanUpdate";
 import { IInstallmentInfo, ILoanDetails } from "../types/loans/ILoan";
-import { IOverdueInstallment } from "../types/IInstallment";
+import { IAccountingPeriodResponse } from "../types/accountablePeriods/IAccountingPeriodResponse";
+import { ICreateAccountingPeriod } from "../types/accountablePeriods/ICreateAccountingPeriod";
+import {
+  IAccountingPeriod,
+  PeriodType,
+} from "../types/accountablePeriods/IAccountingPeriod";
+import { IAccountingPeriodList } from "../types/accountablePeriods/IAccountingPeriodList";
 
 /* -----------------------Llamadas API----------------------- */
 
@@ -591,8 +598,6 @@ export const apiMutual = {
     return response.json();
   },
 
-
-
   /* -----------------------------Modulo cobros---------------------- */
 
   /* ----------------------- Registrar cobro ----------------------- */
@@ -629,7 +634,9 @@ export const apiMutual = {
     });
     if (response.status && response.status >= 400) {
       const data = response.data as { mensaje?: string };
-      throw new Error(data?.mensaje || "No se pudo obtener el listado de cobros");
+      throw new Error(
+        data?.mensaje || "No se pudo obtener el listado de cobros"
+      );
     }
     return response.data as ICollection[];
   },
@@ -732,9 +739,12 @@ export const apiMutual = {
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
+
     if (response.status && response.status >= 400) {
       const data = response.data as { message?: string };
-      throw new Error(data?.message || "No se pudieron obtener los métodos de cobro");
+      throw new Error(
+        data?.message || "No se pudieron obtener los métodos de cobro"
+      );
     }
     return response.data as ICollectionMethod[];
   },
@@ -755,13 +765,16 @@ export const apiMutual = {
   DeactivateLoanType: async (id: number): Promise<{ message: string }> => {
     const url = `https://localhost:7256/api/loan-types/${id}/state`;
 
-
-    const response = await Fetcher.put(url, {}, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-      },
-    });
+    const response = await Fetcher.put(
+      url,
+      {},
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+        },
+      }
+    );
     return response.data as { message: string };
   },
 
@@ -829,5 +842,105 @@ export const apiMutual = {
     });
     return response.data as IInstallmentInfo[];
   },
+  /* -----------------------------Modulo Periodos y Reportes---------------------- */
 
+  /* ----------------------- 1. Crear periodo contable ----------------------- */
+  CreateAccountingPeriod: async (
+    code: string,
+    periodType: PeriodType
+  ): Promise<IAccountingPeriodResponse> => {
+    const url = `https://localhost:7256/accounting-periods`;
+
+    const response = await Fetcher.post(
+      url,
+      {
+        Code: code,
+        PeriodType: periodType,
+      } as ICreateAccountingPeriod,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+        },
+      }
+    );
+
+    if (response.status && response.status >= 400) {
+      const error = new Error("Error al crear el período contable.");
+      (error as any).response = response;
+      throw error;
+    }
+
+    return response.data as IAccountingPeriodResponse;
+  },
+
+  /* ----------------------- 2. Obtener listado periodos contables ----------------------- */
+  GetAccountingPeriods: async (
+    closed?: boolean
+  ): Promise<IAccountingPeriodList[]> => {
+    let url = `https://localhost:7256/accounting-periods`;
+    if (typeof closed === "boolean") {
+      url += `?closed=${closed}`;
+    }
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+
+    if (Array.isArray(response.data)) {
+      return response.data as IAccountingPeriodList[];
+    }
+
+    if (response.data && Array.isArray(response.data)) {
+      return response.data as IAccountingPeriodList[];
+    }
+
+    return [];
+  },
+
+  /* ----------------------- 3. Cerrar periodo contable ----------------------- */
+
+  CloseAccountingPeriod: async (
+    id: number
+  ): Promise<IAccountingPeriodResponse> => {
+    try {
+      const response = await Fetcher.patch(
+        `https://localhost:7256/accounting-periods/${id}/close`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+          },
+        }
+      );
+      return response.data as IAccountingPeriodResponse;
+    } catch (error: any) {
+      throw error.response?.data as IAccountingPeriodResponse;
+    }
+  },
+  /* ----------------------- 4. Ver detalle periodo contable ----------------------- */
+
+  GetAccountingPeriodById: async (
+    id: number
+  ): Promise<IAccountingPeriodList> => {
+    const url = `https://localhost:7256/accounting-periods/${id}`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+
+    if (response.status && response.status >= 400) {
+      const data = response.data as { message?: string };
+      throw new Error(
+        data?.message || "No se pudo obtener el período contable"
+      );
+    }
+
+    return response.data as IAccountingPeriodList;
+  },
 };

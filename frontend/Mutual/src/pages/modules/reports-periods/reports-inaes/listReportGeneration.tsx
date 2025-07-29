@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { IAccountingPeriod } from "../../../../types/accountablePeriods/IAccountingPeriod";
 import { DocumentTextIcon, TableCellsIcon } from "@heroicons/react/24/solid";
 import toast from "react-hot-toast";
+import { IAccountingPeriodList } from "../../../../types/accountablePeriods/IAccountingPeriodList";
 
 interface GenerateReportFormProps {
-  closedPeriods: IAccountingPeriod[];
+  closedPeriods: IAccountingPeriodList[];
 }
 
 const fakeReportData = {
@@ -32,7 +32,7 @@ const GenerateReportForm: React.FC<GenerateReportFormProps> = ({
   } | null>(null);
   const [reportResult, setReportResult] = useState<any | null>(null);
 
-  // Solo períodos cerrados
+  // Solo cerrados
   const closedFiltered = closedPeriods.filter((p) => p.status === "Cerrado");
 
   const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -57,10 +57,10 @@ const GenerateReportForm: React.FC<GenerateReportFormProps> = ({
     if (!period) return;
 
     // Generar datos falsos segun el tipo
-    const fakeData = fakeReportData[period.type as "Mensual" | "Trimestral"];
+    const fakeData = fakeReportData[period.periodType as "Mensual" | "Trimestral"];
 
     setReportResult({
-      periodDisplay: `${period.code} (${period.type})`,
+      periodDisplay: `${period.code} (${period.periodType})`,
       ...fakeData,
     });
   };
