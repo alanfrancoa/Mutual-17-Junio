@@ -86,7 +86,7 @@ const GenerateReportForm: React.FC<GenerateReportFormProps> = ({
   return (
     <>
       <h2 className="text-2xl font-bold text-blue-900 mt-12 mb-6">
-        Generar Reporte Contable
+        Generar Reporte Contable INAES
       </h2>
       <div className="w-full max-w-full bg-white rounded-lg shadow p-8">
         {message && (
@@ -142,7 +142,7 @@ const GenerateReportForm: React.FC<GenerateReportFormProps> = ({
                 type="submit"
                 className="w-full bg-green-600 hover:bg-green-700 text-white px-14 py-3 rounded font-semibold shadow transition"
               >
-                Generar Reporte
+                Registrar Reporte
               </button>
             </div>
           </div>
