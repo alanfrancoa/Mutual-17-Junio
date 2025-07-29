@@ -41,9 +41,14 @@ import ReadAccountingPeriod from "./pages/modules/reports-periods/accounting-per
 import AccountingPeriods from "./pages/modules/reports-periods/accounting-periods/listAccountingPeriods";
 import PaymentMethodsCollection from "./pages/modules/collections/paymentMethodsCollection";
 import NotFound from "./pages/not-found/page";
-
+import NotAuthorized from "./pages/unauthorized/page";
+import ProtectedRoute from "./components/protectedRoutes";
+import { Role } from "./helper/config";
 
 const AppRouter: React.FC = () => {
+  const userName = sessionStorage.getItem("username");
+  const userRole = sessionStorage.getItem("userRole");
+
   return (
     <Router>
       <Routes>
@@ -52,7 +57,14 @@ const AppRouter: React.FC = () => {
 
         {/* Rutas privadas */}
 
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute user={{username:userName, role:userRole as Role}} >
+              <Dashboard />
+            </ProtectedRoute>            
+          }
+        />
 
         {/* seccion proveedores */}
         <Route path="/proveedores" element={<AllSuppliers />} />
@@ -121,17 +133,22 @@ const AppRouter: React.FC = () => {
         {/* Rutas de cobros */}
         <Route path="/cobros" element={<Collection />} />
         <Route path="/cobros/registrar" element={<RegisterCollection />} />
-        <Route path="/collections/payment-methods" element={<PaymentMethodsCollection />} />
-
+        <Route
+          path="/collections/payment-methods"
+          element={<PaymentMethodsCollection />}
+        />
 
         {/* seccion reportes y periodos */}
         <Route path="/periodos" element={<AccountingPeriods />} />
-        <Route path="/periodos/detalle/:id" element={<ReadAccountingPeriod />} />
-
-
+        <Route
+          path="/periodos/detalle/:id"
+          element={<ReadAccountingPeriod />}
+        />
 
         {/* Redirección por defecto */}
-        <Route path="*" element={<NotFound/>} />
+        <Route path="/unauthorized" element={<NotAuthorized />} />
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );
