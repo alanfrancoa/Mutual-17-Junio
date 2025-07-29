@@ -16,10 +16,12 @@ import { IServiceRegister } from "../types/IServiceRegister";
 import { IServiceType } from "../types/IServiceType";
 import {
   ICollection,
-  ICollectionListResponse,
   ICollectionMethod,
   ICollectionDetail,
 } from "../types/ICollection";
+import {
+  IOverdueInstallment
+} from "../types/IInstallment";
 import { ILoanTypesList } from "../types/loans/ILoanTypesList";
 import { ILoanList } from "../types/loans/ILoanList";
 import { ILoanCreate } from "../types/loans/ILoanCreate";
@@ -696,22 +698,28 @@ export const apiMutual = {
     }
     return response.data as { message: string };
   },
+  GetOverdueInstallments: async (estado?: string): Promise<IOverdueInstallment[]> => {
+    let url = `https://localhost:7256/api/installments/pending`;
 
-  GetOverdueInstallments: async (): Promise<IOverdueInstallment[]> => {
-    const url = `https://localhost:7256/api/installments/pending?estado=Expirado`;
+    // Agregar parámetro de query si se proporciona
+    if (estado) {
+      url += `?estado=${encodeURIComponent(estado)}`;
+    }
+
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
+
     if (response.status && response.status >= 400) {
       const data = response.data as { message?: string };
       throw new Error(data?.message || "No se pudieron obtener las cuotas vencidas");
     }
+
     return response.data as IOverdueInstallment[];
   },
-
   /* -----------------------------Modulo prestamos---------------------- */
   /* ----------------------- 1. Crear tipo de prestamo ----------------------- */
   CreateLoanType: async (

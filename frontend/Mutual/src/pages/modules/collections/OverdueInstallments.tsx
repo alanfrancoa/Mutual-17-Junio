@@ -5,15 +5,13 @@ import { apiMutual } from "../../../api/apiMutual";
 
 interface OverdueInstallment {
     id: number;
-    associateName: string;
-    loanId: number;
-    loanType: string;
     installmentNumber: number;
     dueDate: string;
     amount: number;
-    status: string;
     daysOverdue: number;
-    collected?: string;
+    associate: string; 
+    loanType: string;
+    collected: string;
 }
 
 const OverdueInstallments: React.FC = () => {
@@ -26,14 +24,7 @@ const OverdueInstallments: React.FC = () => {
             setLoading(true);
             setError(null);
             try {
-                const token = sessionStorage.getItem("token") || "";
-                const response = await fetch("https://localhost:7256/api/installments/overdue", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                if (!response.ok) throw new Error("Error al cargar cuotas vencidas");
-                const data = await response.json();
+                const data = await apiMutual.GetOverdueInstallments("Expirado");
                 setInstallments(data);
             } catch (err: any) {
                 setError(err.message || "Error al cargar cuotas vencidas");
@@ -68,20 +59,20 @@ const OverdueInstallments: React.FC = () => {
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={6} className="text-center py-4">Cargando...</td>
+                                        <td colSpan={7} className="text-center py-4">Cargando...</td>
                                     </tr>
                                 ) : installments.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="text-center py-4">No hay cuotas vencidas.</td>
+                                        <td colSpan={7} className="text-center py-4">No hay cuotas vencidas.</td>
                                     </tr>
                                 ) : (
                                     installments.map((i) => (
                                         <tr key={i.id}>
-                                            <td className="px-4 py-2">{i.associateName}</td>
+                                            <td className="px-4 py-2">{i.associate}</td>
                                             <td className="px-4 py-2">{i.loanType}</td>
                                             <td className="px-4 py-2">{i.installmentNumber}</td>
                                             <td className="px-4 py-2">{i.dueDate}</td>
-                                            <td className="px-4 py-2">{i.amount}</td>
+                                            <td className="px-4 py-2">${i.amount}</td>
                                             <td className="px-4 py-2">{i.daysOverdue} días</td>
                                             <td className="px-4 py-2 text-red-600">{i.collected}</td>
                                         </tr>
