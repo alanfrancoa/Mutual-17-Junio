@@ -16,7 +16,6 @@ import { IServiceRegister } from "../types/IServiceRegister";
 import { IServiceType } from "../types/IServiceType";
 import {
   ICollection,
-  ICollectionListResponse,
   ICollectionDetail,
   ICollectionMethod
 } from "../types/ICollection";
@@ -26,6 +25,7 @@ import { ILoanCreate } from "../types/loans/ILoanCreate";
 import { ICreateLoanTypes } from "../types/loans/ILoanTypes";
 import { ILoanUpdate } from "../types/loans/ILoanUpdate";
 import { IInstallmentInfo, ILoanDetails } from "../types/loans/ILoan";
+import { IOverdueInstallment } from "../types/IInstallment";
 
 /* -----------------------Llamadas API----------------------- */
 
@@ -533,28 +533,28 @@ export const apiMutual = {
   },
 
   /* ----------------------- Registrar factura ----------------------- */
-RegisterInvoice: async (invoiceData: {
-  supplierId: number;
-  invoiceNumber: string;
-  issueDate: string;
-  dueDate: string;
-  total: number;
-  serviceTypeId: number;
-  description: string;
-}): Promise<{ mesagge: string }> => {
-  const url = `https://localhost:7256/api/invoices`;
-  const response = await Fetcher.post(url, invoiceData, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-    },
-  });
-  if (response.status && response.status >= 400) {
-    const data = response.data as { mesagge?: string };
-    throw new Error(data?.mesagge || "No se pudo registrar la factura");
-  }
-  return response.data as { mesagge: string };
-},
+  RegisterInvoice: async (invoiceData: {
+    supplierId: number;
+    invoiceNumber: string;
+    issueDate: string;
+    dueDate: string;
+    total: number;
+    serviceTypeId: number;
+    description: string;
+  }): Promise<{ mesagge: string }> => {
+    const url = `https://localhost:7256/api/invoices`;
+    const response = await Fetcher.post(url, invoiceData, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const data = response.data as { mesagge?: string };
+      throw new Error(data?.mesagge || "No se pudo registrar la factura");
+    }
+    return response.data as { mesagge: string };
+  },
 
   /* ----------------------- Obtener listado de facturas ----------------------- */
   GetInvoices: async (): Promise<any[]> => {
@@ -634,6 +634,39 @@ RegisterInvoice: async (invoiceData: {
     return response.data as ICollection[];
   },
 
+  /* ----------------------- Obtener listado de cobros x id ----------------------- */
+  GetCollectionById: async (id: number): Promise<ICollectionDetail> => {
+    const url = `https://localhost:7256/api/collections/${id}`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const data = response.data as { message?: string };
+      throw new Error(data?.message || "No se pudo obtener el cobro");
+    }
+    return response.data as ICollectionDetail;
+  },
+
+  /* ----------------------- Actualizar cobro ----------------------- */
+
+  UpdateCollection: async (id: number, data: { methodId: number; observations: string }) => {
+    const url = `https://localhost:7256/api/collections/${id}`;
+    const response = await Fetcher.put(url, data, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const resData = response.data as { message?: string };
+      throw new Error(resData?.message || "Error al actualizar el cobro");
+    }
+    return response.data as { message: string };
+  },
+
   /* ----------------------- Anular cobro ----------------------- */
   AnnullCollection: async (
     collectionId: number,
@@ -657,6 +690,21 @@ RegisterInvoice: async (invoiceData: {
     return response.data as { message: string };
   },
 
+  GetOverdueInstallments: async (): Promise<IOverdueInstallment[]> => {
+    const url = `https://localhost:7256/api/installments/pending?estado=Expirado`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const data = response.data as { message?: string };
+      throw new Error(data?.message || "No se pudieron obtener las cuotas vencidas");
+    }
+    return response.data as IOverdueInstallment[];
+  },
+
   /* -----------------------------Modulo prestamos---------------------- */
   /* ----------------------- 1. Crear tipo de prestamo ----------------------- */
   CreateLoanType: async (
@@ -677,13 +725,12 @@ RegisterInvoice: async (invoiceData: {
   },
 
   GetCollectionMethods: async (): Promise<ICollectionMethod[]> => {
-    const url = `https://localhost:7256/api/collection-methods`;
+    const url = `https://localhost:7256/api/collection-method`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
-
     });
     if (response.status && response.status >= 400) {
       const data = response.data as { message?: string };
