@@ -8,15 +8,19 @@ export interface ICollection {
   method: string;
 }
 
-// Para la respuesta paginada del listado:
-export interface ICollectionListResponse {
+export interface ICollectionList {
   items: ICollection[];
   totalItems: number;
   page: number;
   pageSize: number;
 }
 
-// Para el detalle de cobranza (GET /collections/{id}):
+type UpdateCollectionPayload = {
+  methodId: number;
+  observations: string;
+};
+
+// Para el detalle de cobranza
 export interface ICollectionDetail {
   id: number;
   receiptNumber: string;
