@@ -43,7 +43,7 @@ import PaymentMethodsCollection from "./pages/modules/collections/paymentMethods
 import NotFound from "./pages/not-found/page";
 import NotAuthorized from "./pages/unauthorized/page";
 import ProtectedRoute from "./components/protectedRoutes";
-import { Role } from "./helper/config";
+import { Role, ROLES } from "./helper/config";
 
 const AppRouter: React.FC = () => {
   const userName = sessionStorage.getItem("username");
@@ -52,102 +52,455 @@ const AppRouter: React.FC = () => {
   return (
     <Router>
       <Routes>
-        {/* Rutas públicas */}
+        {/* Rutas publicas */}
         <Route path="/auth/login" element={<Login />} />
 
         {/* Rutas privadas */}
-
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute user={{username:userName, role:userRole as Role}} >
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+            >
               <Dashboard />
-            </ProtectedRoute>            
+            </ProtectedRoute>
           }
         />
 
-        {/* seccion proveedores */}
-        <Route path="/proveedores" element={<AllSuppliers />} />
-        <Route path="/proveedores/crear" element={<CreateSupplier />} />
-        <Route path="/proveedores/editar/:id" element={<EditSupplier />} />
+        {/* seccion proveedores- ACCESO ADMIN Y GESTOR */}
+        <Route
+          path="/proveedores"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <AllSuppliers />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/proveedores/crear"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <CreateSupplier />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/proveedores/editar/:id"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <EditSupplier />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/proveedores/desactivar/:id"
-          element={<DeleteSupplier />}
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <DeleteSupplier />
+            </ProtectedRoute>
+          }
         />
+
         <Route
           path="/proveedores/tipos-servicio"
-          element={<ServiceTypeList />}
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <ServiceTypeList />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/proveedores/metodos-pago" element={<PaymentMethods />} />
 
-        {/* Seccion proveedores - servicios */}
-        <Route path="/proveedores/servicios" element={<AllServices />} />
+        <Route
+          path="/proveedores/metodos-pago"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <PaymentMethods />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Seccion proveedores - servicios- ACCESO ADMIN Y GESTOR */}
+        <Route
+          path="/proveedores/servicios"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <AllServices />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/proveedores/servicios/crear/"
-          element={<CreateService />}
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <CreateService />
+            </ProtectedRoute>
+          }
         />
+
         <Route
           path="/proveedores/servicios/editar/:id"
-          element={<EditService />}
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <EditService />
+            </ProtectedRoute>
+          }
         />
-        {/*<Route path="/proveedores/servicios/ver/:id" element={<ReadService />} />*/}
 
-        {/* Seccion asociados */}
-        <Route path="/asociados" element={<Associates />} />
-        <Route path="/asociados/crear" element={<CreateAssociate />} />
-        <Route path="/asociados/editar/:id" element={<EditAssociate />} />
-        <Route path="/asociados/eliminar/:id" element={<DeleteAssociate />} />
+        {/*<Route path="/proveedores/servicios/ver/:id" element={<ReadService />} />*/}
+        {/* <Route
+          path="/proveedores/servicios/ver/:id"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <ReadService />
+            </ProtectedRoute>
+          }
+        /> */}
+
+        {/* Seccion asociados - ACCESO ADMIN Y GESTOR*/}
+        <Route
+          path="/asociados"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <Associates />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/asociados/crear"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <CreateAssociate />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/asociados/editar/:id"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <EditAssociate />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/asociados/eliminar/:id"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <DeleteAssociate />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/asociados/reactivar/:id"
-          element={<ReactivateAssociate />}
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <ReactivateAssociate />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/asociados/detalle/:id" element={<ReadAssociate />} />
 
-        {/* Seccion asociados-familiares Gestor */}
+        <Route
+          path="/asociados/detalle/:id"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <ReadAssociate />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Seccion asociados-familiares GESTOR Y ADMIN */}
+
         <Route
           path="/asociados/crear/familiar/:associateId"
-          element={<CreateAssociateRelative />}
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <CreateAssociateRelative />
+            </ProtectedRoute>
+          }
         />
+
         <Route
           path="/asociados/:associateId/familiar/editar/:relativeId"
-          element={<EditRelativeAssociate />}
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <EditRelativeAssociate />
+            </ProtectedRoute>
+          }
         />
 
-        {/* seccion usuarios -- ADMIN ONLY*/}
-        <Route path="/usuarios" element={<UsersTable />} />
-        <Route path="/usuarios/crear" element={<CreateUser />} />
-        <Route path="/usuarios/editar/:id" element={<EditUser />} />
-        <Route path="/usuarios/eliminar/:id" element={<DeleteUser />} />
-        <Route path="/usuarios/reactivar/:id" element={<ReactivateUser />} />
-        <Route path="/usuarios/detalle/:id" element={<ReadUser />} />
+        {/* seccion usuarios -- SOLO ACCESO ADMIN*/}
+        <Route
+          path="/usuarios"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR]}
+            >
+              <UsersTable />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* seccion auditoria-- ADMIN ONLY */}
-        <Route path="/auditoria" element={<AuditTable />} />
+        <Route
+          path="/usuarios/crear"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR]}
+            >
+              <CreateUser />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* seccion prestamos Admin y Gestor*/}
-        <Route path="/prestamos" element={<Loans />} />
-        <Route path="/prestamos/solicitar" element={<RequestLoan />} />
-        <Route path="/prestamos/detalle/:id" element={<ReadLoan />} />
-        <Route path="/prestamos/tipo/crear" element={<CreateLoan />} />
+        <Route
+          path="/usuarios/editar/:id"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR]}
+            >
+              <EditUser />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/usuarios/eliminar/:id"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR]}
+            >
+              <DeleteUser />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/usuarios/reactivar/:id"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR]}
+            >
+              <ReactivateUser />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/usuarios/detalle/:id"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR]}
+            >
+              <ReadUser />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* seccion auditoria-- SOLO ACCESO ADMIN */}
+        <Route
+          path="/auditoria"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR]}
+            >
+              <AuditTable />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* seccion prestamos -- ACCESO ADMIN Y GESTOR*/}
+        <Route
+          path="/prestamos"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <Loans />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* SOLO EL GESTOR PUEDE SOLICITAR PRESTAMOS */}
+        <Route
+          path="/prestamos/solicitar"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.GESTOR]}
+            >
+              <RequestLoan />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/prestamos/detalle/:id"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.GESTOR, ROLES.ADMINISTRADOR]}
+            >
+              <ReadLoan />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/prestamos/tipo/crear"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.GESTOR, ROLES.ADMINISTRADOR]}
+            >
+              <CreateLoan />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Rutas de cobros */}
-        <Route path="/cobros" element={<Collection />} />
-        <Route path="/cobros/registrar" element={<RegisterCollection />} />
+        <Route
+          path="/cobros"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.GESTOR, ROLES.ADMINISTRADOR]}
+            >
+              <Collection />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/cobros/registrar"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.GESTOR, ROLES.ADMINISTRADOR]}
+            >
+              <RegisterCollection />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/collections/payment-methods"
-          element={<PaymentMethodsCollection />}
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.GESTOR, ROLES.ADMINISTRADOR]}
+            >
+              <PaymentMethodsCollection />
+            </ProtectedRoute>
+          }
         />
 
-        {/* seccion reportes y periodos */}
-        <Route path="/periodos" element={<AccountingPeriods />} />
+        {/* seccion reportes y periodos - ACCESO CONSULTOR-ADMIN-GESTOR*/}
+
+        <Route
+          path="/periodos"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[
+                ROLES.GESTOR,
+                ROLES.ADMINISTRADOR,
+                ROLES.CONSULTOR,
+              ]}
+            >
+              <AccountingPeriods />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/periodos/detalle/:id"
-          element={<ReadAccountingPeriod />}
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[
+                ROLES.GESTOR,
+                ROLES.ADMINISTRADOR,
+                ROLES.CONSULTOR,
+              ]}
+            >
+              <ReadAccountingPeriod />
+            </ProtectedRoute>
+          }
         />
 
-        {/* Redirección por defecto */}
+        {/* Redirecciónes por defecto */}
+        {/* inicio */}
+        <Route path="/" element={<Navigate to="/auth/login" replace />} />
+        {/* acceso no autorizado */}
         <Route path="/unauthorized" element={<NotAuthorized />} />
-
+        {/* ruta no encontrada */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
