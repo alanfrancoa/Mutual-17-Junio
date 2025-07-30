@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { ChevronDownIcon } from "@heroicons/react/24/solid"; 
+import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { useNavigate } from "react-router-dom";
 
 import {
   HomeIcon,
@@ -15,6 +16,7 @@ import {
 const Sidebar: React.FC = () => {
   const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
   const [isSuppliersOpen, setIsSuppliersOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleAdminMenu = () => {
     setIsAdminMenuOpen(!isAdminMenuOpen);
@@ -37,7 +39,6 @@ const Sidebar: React.FC = () => {
           className="h-16 w-16 object-contain"
         />
         <h2 className="ml-4 text-lg font-bold">Mutual 17 de Junio</h2>
-       
       </div>
 
       <nav className="flex-1 px-4 py-6 space-y-2">
@@ -163,6 +164,32 @@ const Sidebar: React.FC = () => {
           </>
         )}
       </nav>
+      <div className="px-4 pb-6">
+        <button
+          title="Cerrar sesión"
+          onClick={() => {
+            sessionStorage.clear();
+            navigate("/auth/login");
+          }}
+          className="w-full flex items-center gap-3 py-3 px-4 rounded-lg bg-blue-800 hover:bg-blue-900 transition font-medium"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            />
+          </svg>
+          Cerrar sesión
+        </button>
+      </div>
     </aside>
   );
 };
