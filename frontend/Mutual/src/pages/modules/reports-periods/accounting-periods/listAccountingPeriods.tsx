@@ -224,7 +224,7 @@ const AccountingPeriods: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {paginatedPeriods.length === 0 && !loading && !error ? ( 
+                        {paginatedPeriods.length === 0 && !loading && !error ? (
                           <tr>
                             <td
                               colSpan={8}
@@ -272,25 +272,25 @@ const AccountingPeriods: React.FC = () => {
                                 <div className="space-x-2 flex justify-end">
                                   <button
                                     onClick={() => handleViewReport(period)}
-                                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                                    className="bg-green-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
                                   >
-                                    Ver Periodo Financiero
+                                    Reporte Financiero
+                                  </button>
+                                  <button
+                                    onClick={() => handleViewReport(period)}
+                                    className="bg-orange-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                                  >
+                                    Reporte Morosidad
                                   </button>
                                   <button
                                     onClick={() => handleViewReport(period)}
                                     className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
                                   >
-                                    Ver Periodo Morosidad
+                                    Reporte Prestamos
                                   </button>
                                   <button
                                     onClick={() => handleViewReport(period)}
-                                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
-                                  >
-                                    Ver Periodo Prestamos
-                                  </button>
-                                  <button
-                                    onClick={() => handleViewReport(period)}
-                                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                                    className="bg-yellow-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
                                   >
                                     Ver Periodo
                                   </button>

@@ -65,7 +65,7 @@ const CloseAccountingPeriod: React.FC<CloseAccountingPeriodProps> = ({
       {userRole === "Administrador" && (
         <button
           onClick={handleOpenModal}
-          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded transition text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-red-500 hover:bg-orange-600 text-white px-4 py-1 rounded transition text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isLoading || isPeriodAlreadyClosed}
         >
           {isPeriodAlreadyClosed ? "Período Cerrado" : "Cerrar Período"}
