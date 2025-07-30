@@ -17,11 +17,25 @@ const Dashboard: React.FC<DashboardProps> = ({ hasNotifications = true }) => {
       <div className="pl-72">
         <Header hasNotifications={hasNotifications} />
 
-        <div className="w-full flex justify-center">
-          <div className="bg-blue-100 border border-blue-300 rounded-lg px-8 py-4 my-6 flex items-center shadow">
-            <span className="text-xl font-semibold text-blue-900 text-center">
-              ¡Bienvenido/a al sistema de gestión!
-            </span>
+        <div className="w-full flex justify-center mt-2">
+          <div className="relative w-full max-w-7xl rounded-xl shadow-lg overflow-hidden min-h-[180px]">
+            <img
+              src="/assets/plane-mutual.png"
+              alt="plane"
+              className="object-cover w-full
+               h-full absolute top-0 pointer-events-none"
+              style={{ zIndex: 0 }}
+            />
+            <div className="absolute inset-0 bg-blue-900 bg-opacity-70"></div>
+            <div className="relative z-10 flex flex-col items-start justify-center h-full p-8">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                ¡Bienvenido/a {sessionStorage.getItem("username")}!
+              </h2>
+              <p className="text-lg md:text-xl text-blue-100 mb-2">
+                Trabaja siempre organizado en el sistema de gestión Mutual 17 de
+                Junio.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -150,7 +164,7 @@ const Dashboard: React.FC<DashboardProps> = ({ hasNotifications = true }) => {
                       Ingresar
                     </button>
                   </div>
-                </div>               
+                </div>
 
                 {/* Préstamos */}
                 <div className="bg-blue-50 p-6 rounded-lg shadow">
