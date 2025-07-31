@@ -15,6 +15,9 @@ import EditSupplier from "./pages/modules/suppliers/editSuppliers";
 import DeleteSupplier from "./pages/modules/suppliers/deleteSupplier";
 import ServiceTypeList from "./pages/modules/suppliers/serviceType";
 import PaymentMethods from "./pages/modules/suppliers/paymentMethods";
+import InvoicesPage from "./pages/modules/suppliers/invoice";
+import EditInvoice from "./pages/modules/suppliers/editInvoice";
+import CreateInvoice from "./pages/modules/suppliers/createInvoice";
 import UsersTable from "./pages/modules/users/users";
 import CreateUser from "./pages/modules/users/createUser";
 import EditUser from "./pages/modules/users/editUser";
@@ -37,6 +40,8 @@ import CreateLoan from "./pages/modules/loans/loanTypes/createLoanType";
 import ReadLoan from "./pages/modules/loans/readLoan";
 import Collection from "./pages/modules/collections/Collections";
 import RegisterCollection from "./pages/modules/collections/RegisterCollection";
+import PaymentSchedule from "./pages/modules/collections/PaymentSchedule";
+import OverdueInstallments from "./pages/modules/collections/OverdueInstallments";
 import ReadAccountingPeriod from "./pages/modules/reports-periods/accounting-periods/readAccountingPeriod";
 import AccountingPeriods from "./pages/modules/reports-periods/accounting-periods/listAccountingPeriods";
 import PaymentMethodsCollection from "./pages/modules/collections/paymentMethodsCollection";
@@ -136,6 +141,42 @@ const AppRouter: React.FC = () => {
               authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
             >
               <PaymentMethods />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/proveedores/facturas"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR, ROLES.CONSULTOR]}
+            >
+              <InvoicesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/proveedores/facturas/crear"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <>
+                <CreateInvoice />
+              </>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/proveedores/facturas/editar/:id"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.ADMINISTRADOR, ROLES.GESTOR]}
+            >
+              <EditInvoice />
             </ProtectedRoute>
           }
         />
@@ -457,6 +498,30 @@ const AppRouter: React.FC = () => {
               authorizedRoles={[ROLES.GESTOR, ROLES.ADMINISTRADOR]}
             >
               <PaymentMethodsCollection />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/collections/payment-schedule"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.GESTOR, ROLES.ADMINISTRADOR]}
+            >
+              <PaymentSchedule />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/collections/overdue-installments"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.GESTOR, ROLES.ADMINISTRADOR]}
+            >
+              <OverdueInstallments />
             </ProtectedRoute>
           }
         />
