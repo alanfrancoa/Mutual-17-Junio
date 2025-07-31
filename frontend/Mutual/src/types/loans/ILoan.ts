@@ -12,6 +12,7 @@ export interface ILoanDetails {
 }
 
 export interface IInstallmentInfo {
+  id: number; 
   installmentNumber: number;
   dueDate: string;
   amount: number;
