@@ -1100,7 +1100,7 @@ RegisterInaesReport: async (periodId: number) => {
   return response.data;
 },
 
-  //---------------------------3. GENERAR PDF Reporte INAES---------------------///
+  //---------------------------3. GENERAR PDF Reporte INAES---------------------//
 
 GenerateInaesReportPdf: async (id: number) => {
   const url = `https://localhost:7256/api/reports/inaes/${id}/pdf`;
@@ -1113,5 +1113,44 @@ GenerateInaesReportPdf: async (id: number) => {
   });
   return response.data as Blob; 
 },
+
+
+  //---------------------------4. GENERAR PDF- Reporte FINANCIERO---------------------//
+ExportFinancialStatusPdf: async (accountingPeriodId: number): Promise<Blob> => {
+  const url = `https://localhost:7256/api/reports/financial/${accountingPeriodId}`;
+  const response = await Fetcher.get(url, {
+    headers: {
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+    responseType: "blob", 
+  });
+  return response.data as Blob;
+},
+  
+  //---------------------------5. GENERAR EXCEL -Reporte PRESTAMOS---------------------//
+  ExportLoansToExcel: async (accountingPeriodId: number): Promise<Blob> => {
+  const url = `https://localhost:7256/api/export/loans/${accountingPeriodId}`;
+  const response = await Fetcher.get(url, {
+    headers: {
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+    responseType: "blob", 
+  });
+  return response.data as Blob;
+},
+
+  
+  //---------------------------6. GENERAR PDF Reporte MOROSIDAD---------------------//
+  ExportDelinquencyReportPdf: async (accountingPeriodId: number): Promise<Blob> => {
+  const url = `https://localhost:7256/api/reports/delinquency/${accountingPeriodId}`;
+  const response = await Fetcher.get(url, {
+    headers: {
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+    responseType: "blob", 
+  });
+  return response.data as Blob;
+},
+
 
 };

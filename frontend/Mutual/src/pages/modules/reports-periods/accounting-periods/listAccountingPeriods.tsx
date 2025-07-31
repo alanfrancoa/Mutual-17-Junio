@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
+  DocumentArrowDownIcon,
   DocumentTextIcon,
+  TableCellsIcon,
 } from "@heroicons/react/24/solid";
 import toast from "react-hot-toast";
 import Header from "../../../dashboard/components/Header";
@@ -127,6 +129,68 @@ const AccountingPeriods: React.FC = () => {
     setShowCreateForm(false);
   };
 
+  //Variable para exportar descargas de periodos contables//
+  const handleExportFinancialPdf = async (
+    accountingPeriodId: number,
+    periodCode: string
+  ) => {
+    try {
+      const pdfBlob = await apiMutual.ExportFinancialStatusPdf(
+        accountingPeriodId
+      );
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Reporte_Financiero_${periodCode}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      alert("Error al descargar el PDF financiero");
+    }
+  };
+
+  const handleExportDelinquencyPdf = async (
+    accountingPeriodId: number,
+    periodCode: string
+  ) => {
+    try {
+      const pdfBlob = await apiMutual.ExportDelinquencyReportPdf(
+        accountingPeriodId
+      );
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Reporte_De_Morosidad_${periodCode}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      alert("Error al descargar el PDF de morosidad");
+    }
+  };
+
+  const handleExportLoansExcel = async (
+    accountingPeriodId: number,
+    periodCode: string
+  ) => {
+    try {
+      const excelBlob = await apiMutual.ExportLoansToExcel(accountingPeriodId);
+      const url = window.URL.createObjectURL(excelBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `ReportePrestamos_${periodCode}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      alert("Error al descargar el Excel de préstamos");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
@@ -135,9 +199,6 @@ const AccountingPeriods: React.FC = () => {
         <Header hasNotifications />
 
         <main className="flex-1 p-6 bg-gray-100">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">
-            Períodos Contables
-          </h1>
           <div className="flex-1 w-full">
             {showCreateForm ? (
               <div className="flex flex-col items-center py-8">
@@ -163,6 +224,9 @@ const AccountingPeriods: React.FC = () => {
               </div>
             ) : (
               <>
+                <h1 className="text-2xl font-bold text-gray-800 mb-4">
+                  Períodos Contables
+                </h1>
                 <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
                     <div className="flex gap-2 w-full md:w-auto flex-wrap">
@@ -309,25 +373,45 @@ const AccountingPeriods: React.FC = () => {
                               <td className="px-4 py-4 text-center">
                                 <div className="flex justify-center items-center gap-2">
                                   <button
-                                    onClick={() => handleViewReport(period)}
-                                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition text-xs font-medium flex items-center"
+                                    onClick={() =>
+                                      handleExportLoansExcel(
+                                        period.id,
+                                        period.code
+                                      )
+                                    }
+                                    className={`bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full transition text-xs font-medium flex items-center ${
+                                      period.status === "Abierto"
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
+                                    disabled={period.status === "Abierto"}
                                   >
-                                    <DocumentTextIcon className="h-4 w-4 mr-2" />
-                                     Reporte Prestamos
+                                    <TableCellsIcon  className="h-4 w-4 mr-2" />
+                                    Reporte Prestamos
                                   </button>
                                   <button
-                                    onClick={() => handleViewReport(period)}
-                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full transition text-xs font-medium flex items-center"
+                                    onClick={() =>
+                                      handleExportFinancialPdf(
+                                        period.id,
+                                        period.code
+                                      )
+                                    }
+                                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition text-xs font-medium flex items-center"
                                   >
                                     <DocumentTextIcon className="h-4 w-4 mr-2" />
                                     Reporte Financiero
                                   </button>
                                   <button
-                                    onClick={() => handleViewReport(period)}
-                                    className="bg-orange-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition text-xs font-medium flex items-center"
+                                    onClick={() =>
+                                      handleExportDelinquencyPdf(
+                                        period.id,
+                                        period.code
+                                      )
+                                    }
+                                    className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full transition text-xs font-medium flex items-center"
                                   >
                                     <DocumentTextIcon className="h-4 w-4 mr-2" />
-                                     Reporte Morosidad
+                                    Reporte Morosidad
                                   </button>
                                 </div>
                               </td>
@@ -367,7 +451,7 @@ const AccountingPeriods: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                
+
                 <GenerateReportForm
                   closedPeriods={accountingPeriods.filter(
                     (p) => p.status === "Cerrado"
