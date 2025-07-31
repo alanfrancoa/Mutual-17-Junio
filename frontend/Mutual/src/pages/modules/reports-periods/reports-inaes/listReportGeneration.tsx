@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { DocumentTextIcon, TableCellsIcon } from "@heroicons/react/24/solid";
 import toast from "react-hot-toast";
 import { IAccountingPeriodList } from "../../../../types/accountablePeriods/IAccountingPeriodList";
+import ListInaesReport from "./listInaesReport";
 
 interface GenerateReportFormProps {
   closedPeriods: IAccountingPeriodList[];
@@ -85,10 +86,10 @@ const GenerateReportForm: React.FC<GenerateReportFormProps> = ({
 
   return (
     <>
-      <h2 className="text-2xl font-bold text-blue-900 mt-12 mb-6">
-        Generar Reporte Contable INAES
+      <h2 className="text-2xl font-bold text-gray-800 mt-12 mb-6">
+        Reportes INAES
       </h2>
-      <div className="w-full max-w-full bg-white rounded-lg shadow p-8">
+      <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
         {message && (
           <div
             className={`p-3 mb-4 rounded-md ${
@@ -140,7 +141,7 @@ const GenerateReportForm: React.FC<GenerateReportFormProps> = ({
             <div className="w-full sm:w-auto mt-4 sm:mt-0">
               <button
                 type="submit"
-                className="w-full bg-green-600 hover:bg-green-700 text-white px-14 py-3 rounded font-semibold shadow transition"
+                className="w-full bg-green-600 hover:bg-green-700 text-white px-14 py-3 rounded-full font-semibold shadow transition"
               >
                 Registrar Reporte
               </button>
@@ -213,9 +214,15 @@ const GenerateReportForm: React.FC<GenerateReportFormProps> = ({
                         {reportResult.paymentsToSuppliers}
                     </div>
                 </div>
+                
             </div>
           </div>
         )}
+
+        {/* Lista de reportes INAES */}
+        <div className="mt-8">
+          <ListInaesReport />
+        </div>
       </div>
     </>
   );
