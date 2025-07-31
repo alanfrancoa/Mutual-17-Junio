@@ -80,9 +80,6 @@ const Collections: React.FC = () => {
                 <div className="flex flex-col items-center py-8">
                     <div className="w-full max-w-6xl bg-white rounded-lg shadow p-8">
                         <h2 className="text-2xl font-bold mb-6">Gestión de Cobros</h2>
-                        <div className="mb-6">
-                            <div className="bg-blue-100 rounded p-4 mb-2">Resumen de cobranzas (placeholder)</div>
-                        </div>
                         <div className="flex flex-wrap gap-4 mb-4">
                             <input
                                 type="text"
@@ -128,17 +125,24 @@ const Collections: React.FC = () => {
                             />
                         </div>
                         <div className="mb-4 flex gap-2">
-                            <button
-                                onClick={() => navigate("/collections/register")}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-                            >
-                                + Registrar nuevo cobro
-                            </button>
+
                             <button
                                 className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded"
                                 onClick={() => navigate("/collections/payment-methods")}
                             >
                                 Métodos de Cobro
+                            </button>
+                            <button
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded"
+                                onClick={() => navigate("/collections/overdue-installments")}
+                            >
+                                Cobros atrasados
+                            </button>
+                            <button
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded"
+                                onClick={() => navigate("/collections/payment-schedule")}
+                            >
+                                Cronograma de cobros
                             </button>
                         </div>
                         {error && <div className="text-red-600 mb-4">{error}</div>}
@@ -245,9 +249,6 @@ const Collections: React.FC = () => {
                                     Siguiente
                                 </button>
                             </div>
-                        </div>
-                        <div className="mt-8">
-                            <div className="bg-gray-100 rounded p-4">Dashboard de gráficos (placeholder)</div>
                         </div>
                     </div>
                 </div>

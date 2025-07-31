@@ -82,7 +82,7 @@ const ReadLoan: React.FC = () => {
         <Header hasNotifications={true} />
         <div className="flex-1 flex flex-col items-center justify-center">
           {" "}
-          
+
           <div className="w-full max-w-xl bg-white rounded-lg shadow p-8 text-center text-gray-500">
             Cargando detalles del préstamo...
           </div>
@@ -136,7 +136,7 @@ const ReadLoan: React.FC = () => {
     );
   }
 
-  
+
   const installmentsToDisplay = loan.installments;
 
   return (
@@ -279,6 +279,9 @@ const ReadLoan: React.FC = () => {
                           <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                             Estado
                           </th>
+                          <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Acciones
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
@@ -298,14 +301,29 @@ const ReadLoan: React.FC = () => {
                               </td>
                               <td className="px-4 py-4 whitespace-nowrap text-sm">
                                 <span
-                                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                    installment.collected === "Pagado"
-                                      ? "bg-green-100 text-green-800"
-                                      : "bg-yellow-100 text-yellow-800"
-                                  }`}
+                                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${installment.collected === "Pagado"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                                    }`}
                                 >
                                   {installment.collected}
                                 </span>
+                              </td>
+                              <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
+                                {installment.collected === "Pagado" ? (
+                                  <button
+                                    onClick={() => navigate(`/collections/edit/${installment.id}`)}
+                                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
+                                  >
+                                    Ver cobro
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => navigate(`/cobros/registrar?installmentId=${installment.id}&loanId=${loan.id}&associateId=${loan.associateDni}`)} className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs"
+                                  >
+                                    Cobrar
+                                  </button>
+                                )}
                               </td>
                             </tr>
                           )
@@ -315,7 +333,7 @@ const ReadLoan: React.FC = () => {
                   </div>
                 </div>
               )}
-              
+
             {/* Mensajes si no hay cuotas o no aplican */}
             {(loan.status === "Aprobado" || loan.status === "Finalizado") &&
               installmentsToDisplay.length === 0 && (

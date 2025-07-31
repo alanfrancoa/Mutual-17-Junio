@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../../dashboard/components/Sidebar";
 import Header from "../../dashboard/components/Header";
 import { apiMutual } from "../../../api/apiMutual";
@@ -9,6 +9,7 @@ import { IInstallmentInfo } from "../../../types/loans/ILoan";
 
 const RegisterCollection: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [associates, setAssociates] = useState<IAssociateList[]>([]);
   const [methods, setMethods] = useState<ICollectionMethod[]>([]);
   const [installments, setInstallments] = useState<IInstallmentInfo[]>([]);
@@ -21,13 +22,12 @@ const RegisterCollection: React.FC = () => {
     date: new Date().toISOString().slice(0, 10),
     methodId: "",
     receiptNumber: "",
-    observations: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Verificar rol del usuario (solo Administrador y Gestor pueden registrar cobros)
+  // Verificar rol del usuario
   useEffect(() => {
     const userRole = sessionStorage.getItem("userRole");
     if (userRole !== "Administrador" && userRole !== "Gestor") {
@@ -36,6 +36,32 @@ const RegisterCollection: React.FC = () => {
     }
   }, [navigate]);
 
+  // Manejar parámetros URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const installmentId = urlParams.get('installmentId');
+    const loanId = urlParams.get('loanId');
+    const associateDni = urlParams.get('associateId');
+    
+    if (installmentId && loanId && associateDni) {
+      // Buscar el asociado por DNI para obtener su ID
+      const findAssociateByDni = async () => {
+        try {
+          const associate = await apiMutual.GetAssociateByDni(associateDni);
+          setForm(prev => ({
+            ...prev,
+            installmentId,
+            loanId,
+            associateId: associate.id.toString() // Usar el ID numérico
+          }));
+        } catch (error) {
+          setError("No se pudo encontrar el asociado");
+        }
+      };
+      
+      findAssociateByDni();
+    }
+  }, [location.search]);
   // Cargar asociados y métodos de cobro al montar
   useEffect(() => {
     const fetchData = async () => {
@@ -45,7 +71,7 @@ const RegisterCollection: React.FC = () => {
           apiMutual.GetCollectionMethods(),
         ]);
         setAssociates(assoc);
-        setMethods(meth.filter(m => m.isActive)); // Solo métodos activos
+        setMethods(meth.filter(m => m.isActive));
       } catch {
         setError("Error al cargar datos iniciales");
       }
@@ -62,10 +88,8 @@ const RegisterCollection: React.FC = () => {
       if (!form.associateId) return;
 
       try {
-        const allLoans = await apiMutual.GetLoans();
-        // Filtrar por personId (campo correcto según tu backend)
+        const allLoans: any[] = await apiMutual.GetLoans();
         const loansOfAssociate = allLoans.filter((l: any) => l.personId === Number(form.associateId));
-        // Solo préstamos activos
         const activeLoans = loansOfAssociate.filter((l: any) => l.status === "Activo");
         setLoans(activeLoans);
       } catch {
@@ -85,7 +109,7 @@ const RegisterCollection: React.FC = () => {
 
       try {
         const installmentsList = await apiMutual.GetLoanInstallments(Number(form.loanId));
-        // Filtrar solo cuotas no cobradas (campo booleano)
+        // Filtrar solo cuotas no cobradas
         const pending = installmentsList.filter((i: any) => !i.collected);
         setInstallments(pending);
       } catch {
@@ -102,7 +126,7 @@ const RegisterCollection: React.FC = () => {
       setForm((prev) => ({ ...prev, amount: "" }));
       return;
     }
-    const selected = installments.find(i => i.installmentNumber === Number(form.installmentId));
+    const selected = installments.find(i => i.id === Number(form.installmentId));
     setForm((prev) => ({ ...prev, amount: selected ? String(selected.amount) : "" }));
   }, [form.installmentId, installments]);
 
@@ -145,11 +169,10 @@ const RegisterCollection: React.FC = () => {
         methodId: Number(form.methodId),
         receiptNumber: form.receiptNumber.trim(),
         collectionDate: form.date,
-        observations: form.observations.trim(),
       });
 
       setSuccess("Cobro registrado correctamente");
-      setTimeout(() => navigate("/collections"), 1500);
+      setTimeout(() => navigate("/cobros"), 1500);
     } catch (err: any) {
       setError(err.message || "Error al registrar el cobro");
     } finally {
@@ -233,7 +256,7 @@ const RegisterCollection: React.FC = () => {
                     {!form.loanId ? "Primero seleccione un préstamo" : "Seleccione una cuota..."}
                   </option>
                   {installments.map(i => (
-                    <option key={i.installmentNumber} value={i.installmentNumber}>
+                    <option key={i.id} value={i.id}>
                       Cuota #{i.installmentNumber} - Vence: {i.dueDate} - ${i.amount}
                     </option>
                   ))}
@@ -305,25 +328,10 @@ const RegisterCollection: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Observaciones</label>
-                <textarea
-                  name="observations"
-                  value={form.observations}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
-                  maxLength={255}
-                  rows={3}
-                  disabled={loading}
-                  placeholder="Observaciones adicionales (opcional)"
-                />
-                <small className="text-gray-500">{form.observations.length}/255 caracteres</small>
-              </div>
-
               <div className="flex justify-end gap-2 pt-4">
                 <button
                   type="button"
-                  onClick={() => navigate("/collections")}
+                  onClick={() => navigate("/cobros")}
                   className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors"
                   disabled={loading}
                 >

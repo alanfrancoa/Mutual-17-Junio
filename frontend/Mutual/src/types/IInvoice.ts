@@ -9,3 +9,13 @@ export interface IInvoice {
   Description: string;
   Paid: boolean;
 }
+
+export interface IEditInvoice {
+  supplierId: number;
+  invoiceNumber: string;
+  issueDate: string;
+  dueDate: string;
+  total: number;
+  serviceTypeId: number;
+  description: string;
+}
