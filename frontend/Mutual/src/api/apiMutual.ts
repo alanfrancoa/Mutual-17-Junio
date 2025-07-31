@@ -1071,4 +1071,47 @@ export const apiMutual = {
 
     return response.data as IAccountingPeriodList;
   },
+
+  
+  //---------------------------MODULO REPORTES-------------------------------//
+  //---------------------------1. Registrar Reporte INAES---------------------///
+RegisterInaesReport: async (periodId: number) => {
+  const url = `https://localhost:7256/api/reports/inaes?PeriodID=${periodId}`;
+  const response = await Fetcher.post(url, {}, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+  });
+  return response.data;
+},
+
+  //---------------------------2. Listar Reporte INAES---------------------///
+  GetInaesReports: async () => {
+  const url = `https://localhost:7256/api/reports/inaes`;
+  const response = await Fetcher.get(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+  });
+  // Si el backend devuelve un string cuando no hay reportes, puedes validar aquí:
+  if (typeof response.data === "string") return [];
+  return response.data;
+},
+
+  //---------------------------3. GENERAR PDF Reporte INAES---------------------///
+
+GenerateInaesReportPdf: async (id: number) => {
+  const url = `https://localhost:7256/api/reports/inaes/${id}/pdf`;
+  const response = await Fetcher.get(url, {
+    headers: {
+      "Content-Type": "application/pdf",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+    responseType: "blob", 
+  });
+  return response.data as Blob; 
+},
+
 };

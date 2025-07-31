@@ -10,10 +10,9 @@ import Header from "../../../dashboard/components/Header";
 import Sidebar from "../../../dashboard/components/Sidebar";
 import CloseAccountingPeriod from "./closeAccountingPeriod";
 import CreateAccountingPeriodForm from "./createAccountingPeriod";
-import GenerateReportForm from "../reports-inaes/listReportGeneration";
+import GenerateReportForm from "../reports-inaes/registerInaesReport";
 import { apiMutual } from "../../../../api/apiMutual";
 import { IAccountingPeriodList } from "../../../../types/accountablePeriods/IAccountingPeriodList";
-import DownloadSectionReports from "../reports-inaes/DownloadSectionReports";
 
 // Paginacion
 const PAGE_SIZE = 5;
@@ -308,13 +307,27 @@ const AccountingPeriods: React.FC = () => {
                               </td>
 
                               <td className="px-4 py-4 text-center">
-                                <div className="flex justify-center items-center">
+                                <div className="flex justify-center items-center gap-2">
                                   <button
                                     onClick={() => handleViewReport(period)}
                                     className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition text-xs font-medium flex items-center"
                                   >
                                     <DocumentTextIcon className="h-4 w-4 mr-2" />
-                                    Reporte Prestamos
+                                     Reporte Prestamos
+                                  </button>
+                                  <button
+                                    onClick={() => handleViewReport(period)}
+                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full transition text-xs font-medium flex items-center"
+                                  >
+                                    <DocumentTextIcon className="h-4 w-4 mr-2" />
+                                    Reporte Financiero
+                                  </button>
+                                  <button
+                                    onClick={() => handleViewReport(period)}
+                                    className="bg-orange-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition text-xs font-medium flex items-center"
+                                  >
+                                    <DocumentTextIcon className="h-4 w-4 mr-2" />
+                                     Reporte Morosidad
                                   </button>
                                 </div>
                               </td>
@@ -354,7 +367,7 @@ const AccountingPeriods: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                <DownloadSectionReports />
+                
                 <GenerateReportForm
                   closedPeriods={accountingPeriods.filter(
                     (p) => p.status === "Cerrado"

@@ -1,84 +1,20 @@
 import React from "react";
 import { DocumentTextIcon } from "@heroicons/react/24/solid";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
+import { InaesReport } from "../../../../types/reports/IReportInaes";
+import { apiMutual } from "../../../../api/apiMutual";
 
-// Ejemplo de datos de reportes INAES
-const inaesReports = [
-  {
-    id: 1,
-    periodCode: "2024-01",
-    periodType: "Mensual",
-    startDate: "2024-01-01",
-    endDate: "2024-01-31",
-    loansApproved: 8,
-    totalCollected: "$25,000.00",
-    delinquency: "3.1%",
-    paymentsToSuppliers: "$9,500.00",
-  },
-  {
-    id: 2,
-    periodCode: "2024-T1",
-    periodType: "Trimestral",
-    startDate: "2024-01-01",
-    endDate: "2024-03-31",
-    loansApproved: 12,
-    totalCollected: "$42,300.50",
-    delinquency: "5.2%",
-    paymentsToSuppliers: "$18,200.00",
-  },
-  {
-    id: 3,
-    periodCode: "2024-02",
-    periodType: "Mensual",
-    startDate: "2024-02-01",
-    endDate: "2024-02-28",
-    loansApproved: 10,
-    totalCollected: "$28,000.00",
-    delinquency: "2.8%",
-    paymentsToSuppliers: "$10,000.00",
-  },
-  {
-    id: 4,
-    periodCode: "2024-T2",
-    periodType: "Trimestral",
-    startDate: "2024-04-01",
-    endDate: "2024-06-30",
-    loansApproved: 15,
-    totalCollected: "$50,000.00",
-    delinquency: "4.0%",
-    paymentsToSuppliers: "$20,000.00",
-  },
-  {
-    id: 5,
-    periodCode: "2024-03",
-    periodType: "Mensual",
-    startDate: "2024-03-01",
-    endDate: "2024-03-31",
-    loansApproved: 9,
-    totalCollected: "$26,500.00",
-    delinquency: "3.5%",
-    paymentsToSuppliers: "$9,800.00",
-  },
-  {
-    id: 6,
-    periodCode: "2024-T3",
-    periodType: "Trimestral",
-    startDate: "2024-07-01",
-    endDate: "2024-09-30",
-    loansApproved: 13,
-    totalCollected: "$45,000.00",
-    delinquency: "4.5%",
-    paymentsToSuppliers: "$17,500.00",
-  },
-];
+interface ListInaesReportProps {
+  reports: InaesReport[];
+}
 
-const REPORTS_PER_PAGE = 3;
+const REPORTS_PER_PAGE = 2;
 
-const ListInaesReport: React.FC = () => {
+const ListInaesReport: React.FC<ListInaesReportProps> = ({ reports }) => {
   const [currentPage, setCurrentPage] = React.useState(1);
-  const totalPages = Math.ceil(inaesReports.length / REPORTS_PER_PAGE);
+  const totalPages = Math.ceil(reports.length / REPORTS_PER_PAGE);
 
-  const paginatedReports = inaesReports.slice(
+  const paginatedReports = reports.slice(
     (currentPage - 1) * REPORTS_PER_PAGE,
     currentPage * REPORTS_PER_PAGE
   );
@@ -88,6 +24,22 @@ const ListInaesReport: React.FC = () => {
   };
   const handleNext = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+    const handleExportPdf = async (id: number, code: string) => {
+    try {
+      const pdfBlob = await apiMutual.GenerateInaesReportPdf(id);
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Reporte_${code}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      alert("Error al descargar el PDF");
+    }
   };
 
   return (
@@ -104,9 +56,6 @@ const ListInaesReport: React.FC = () => {
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Fecha Inicio
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                Fecha Fin
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Descarga
@@ -127,23 +76,19 @@ const ListInaesReport: React.FC = () => {
                   className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
                 >
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {report.periodCode}
+                    {report.code}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {report.periodType}
+                    {report.type}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {new Date(report.startDate).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {new Date(report.endDate).toLocaleDateString()}
+                    {report.generationDate}
                   </td>
 
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                     <button
                       type="button"
-                      // onClick={""}
-                      // disabled={""}
+                      onClick={() => handleExportPdf(report.id, report.code)}
                       className="flex items-center justify-center bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full font-semibold shadow-md transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
                     >
                       <DocumentTextIcon className="h-5 w-5 mr-2" />
@@ -180,9 +125,12 @@ const ListInaesReport: React.FC = () => {
               </button>
             </div>
           </div>
-          <div className="flex-none flex justify-end" style={{ minWidth: "220px" }}>
+          <div
+            className="flex-none flex justify-end"
+            style={{ minWidth: "220px" }}
+          >
             <span className="text-gray-500 text-sm min-w-max">
-              {inaesReports.length} reporte(s) encontrado(s)
+              {reports.length} reporte(s) encontrado(s)
             </span>
           </div>
         </div>
