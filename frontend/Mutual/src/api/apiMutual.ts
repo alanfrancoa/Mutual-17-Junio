@@ -412,7 +412,7 @@ export const apiMutual = {
     code: string,
     name: string
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/services-type`;
+    const url = `https://localhost:7256/services-type`;
     const response = await Fetcher.post(
       url,
       { Code: code, Name: name },
@@ -434,7 +434,7 @@ export const apiMutual = {
   /* ----------------------- Obtener tipos de servicio ----------------------- */
 
   GetServiceTypes: async (): Promise<IServiceType[]> => {
-    const url = "https://localhost:7256/api/services-type";
+    const url = "https://localhost:7256/services-type";
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -452,7 +452,7 @@ export const apiMutual = {
 
   /* ----------------------- Obtener servicio por ID ----------------------- */
   GetServiceById: async (id: number): Promise<any> => {
-    const url = `https://localhost:7256/api/services/${id}`;
+    const url = `https://localhost:7256/services/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -473,7 +473,7 @@ export const apiMutual = {
     description: string;
     monthlyCost: number;
   }): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/services/${id}`;
+    const url = `https://localhost:7256/services/${id}`;
     const response = await Fetcher.patch(url, serviceData, {
       headers: {
         "Content-Type": "application/json",
@@ -493,7 +493,7 @@ export const apiMutual = {
     newStatus: boolean
   ): Promise<{ mensaje: string }> => {
     const url = `https://localhost:7256/api/services-type/${id}/status`;
-    const response = await Fetcher.patch(url, JSON.stringify(newStatus), {
+    const response = await Fetcher.patch(url, newStatus, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
@@ -512,7 +512,7 @@ export const apiMutual = {
   RegisterService: async (
     serviceDataData: IServiceRegister
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/service`;
+    const url = `https://localhost:7256/services`;
     const response = await Fetcher.post(url, serviceDataData, {
       headers: {
         "Content-Type": "application/json",
@@ -564,19 +564,48 @@ export const apiMutual = {
 
   /* ----------------------- Estado metodo de pago ----------------------- */
   PaymentMethodState: async (id: number) => {
-    const url = `https://localhost:7256/api/payment-method/${id}/status`;
-    const response = await fetch(url, {
-      method: "PATCH",
+  console.log(`=== LLAMANDO API PARA ID: ${id} ===`);
+  const url = `https://localhost:7256/api/payment-method/${id}/status`;
+  console.log(`URL: ${url}`);
+  
+  try {
+    const response = await Fetcher.patch(url, {}, {
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.mensaje || "No se pudo activar el método de pago");
+    
+    console.log(`Status de respuesta: ${response.status}`);
+    console.log(`Data de respuesta:`, response.data);
+    
+    if (response.status && response.status >= 400) {
+      const data = response.data as { mensaje?: string };
+      throw new Error(data?.mensaje || "No se pudo cambiar el estado del método de pago");
     }
-    return true;
-  },
+    return response.data;
+  } catch (error) {
+    console.error(`Error en la llamada API:`, error);
+    throw error;
+  }
+},
+
+  /* ----------------------- Actualizar metodo de pago ----------------------- */
+
+  UpdatePaymentMethod: async (id: number, data: { name: string; code: string }): Promise<{ message: string }> => {
+  const url = `https://localhost:7256/api/payment-method/${id}`;
+  const response = await Fetcher.put(url, data, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+  });
+  if (response.status && response.status >= 400) {
+    const data = response.data as { mensaje?: string };
+    throw new Error(data?.mensaje || "No se pudo actualizar el método de pago");
+  }
+  return response.data as { message: string };
+},
 
   /* ----------------------- Registrar factura ----------------------- */
   RegisterInvoice: async (invoiceData: {
@@ -1072,85 +1101,85 @@ export const apiMutual = {
     return response.data as IAccountingPeriodList;
   },
 
-  
+
   //---------------------------MODULO REPORTES-------------------------------//
   //---------------------------1. Registrar Reporte INAES---------------------///
-RegisterInaesReport: async (periodId: number) => {
-  const url = `https://localhost:7256/api/reports/inaes?PeriodID=${periodId}`;
-  const response = await Fetcher.post(url, {}, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-    },
-  });
-  return response.data;
-},
+  RegisterInaesReport: async (periodId: number) => {
+    const url = `https://localhost:7256/api/reports/inaes?PeriodID=${periodId}`;
+    const response = await Fetcher.post(url, {}, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    return response.data;
+  },
 
   //---------------------------2. Listar Reporte INAES---------------------///
   GetInaesReports: async () => {
-  const url = `https://localhost:7256/api/reports/inaes`;
-  const response = await Fetcher.get(url, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-    },
-  });
-  // Si el backend devuelve un string cuando no hay reportes, puedes validar aquí:
-  if (typeof response.data === "string") return [];
-  return response.data;
-},
+    const url = `https://localhost:7256/api/reports/inaes`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    // Si el backend devuelve un string cuando no hay reportes, puedes validar aquí:
+    if (typeof response.data === "string") return [];
+    return response.data;
+  },
 
   //---------------------------3. GENERAR PDF Reporte INAES---------------------//
 
-GenerateInaesReportPdf: async (id: number) => {
-  const url = `https://localhost:7256/api/reports/inaes/${id}/pdf`;
-  const response = await Fetcher.get(url, {
-    headers: {
-      "Content-Type": "application/pdf",
-      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-    },
-    responseType: "blob", 
-  });
-  return response.data as Blob; 
-},
+  GenerateInaesReportPdf: async (id: number) => {
+    const url = `https://localhost:7256/api/reports/inaes/${id}/pdf`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/pdf",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+      responseType: "blob",
+    });
+    return response.data as Blob;
+  },
 
 
   //---------------------------4. GENERAR PDF- Reporte FINANCIERO---------------------//
-ExportFinancialStatusPdf: async (accountingPeriodId: number): Promise<Blob> => {
-  const url = `https://localhost:7256/api/reports/financial/${accountingPeriodId}`;
-  const response = await Fetcher.get(url, {
-    headers: {
-      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-    },
-    responseType: "blob", 
-  });
-  return response.data as Blob;
-},
-  
+  ExportFinancialStatusPdf: async (accountingPeriodId: number): Promise<Blob> => {
+    const url = `https://localhost:7256/api/reports/financial/${accountingPeriodId}`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+      responseType: "blob",
+    });
+    return response.data as Blob;
+  },
+
   //---------------------------5. GENERAR EXCEL -Reporte PRESTAMOS---------------------//
   ExportLoansToExcel: async (accountingPeriodId: number): Promise<Blob> => {
-  const url = `https://localhost:7256/api/export/loans/${accountingPeriodId}`;
-  const response = await Fetcher.get(url, {
-    headers: {
-      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-    },
-    responseType: "blob", 
-  });
-  return response.data as Blob;
-},
+    const url = `https://localhost:7256/api/export/loans/${accountingPeriodId}`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+      responseType: "blob",
+    });
+    return response.data as Blob;
+  },
 
-  
+
   //---------------------------6. GENERAR PDF Reporte MOROSIDAD---------------------//
   ExportDelinquencyReportPdf: async (accountingPeriodId: number): Promise<Blob> => {
-  const url = `https://localhost:7256/api/reports/delinquency/${accountingPeriodId}`;
-  const response = await Fetcher.get(url, {
-    headers: {
-      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-    },
-    responseType: "blob", 
-  });
-  return response.data as Blob;
-},
+    const url = `https://localhost:7256/api/reports/delinquency/${accountingPeriodId}`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+      responseType: "blob",
+    });
+    return response.data as Blob;
+  },
 
 
 };

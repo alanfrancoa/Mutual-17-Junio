@@ -4,7 +4,6 @@ import Header from "../../dashboard/components/Header";
 import { apiMutual } from "../../../api/apiMutual";
 import { IPaymentMethod } from "../../../types/IPaymentMethod";
 
-
 interface NewPaymentMethod {
   code: string;
   name: string;
@@ -21,15 +20,14 @@ const PaymentMethods: React.FC = () => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editedRow, setEditedRow] = useState<Partial<IPaymentMethod>>({});
 
-
   useEffect(() => {
     fetchMethods();
   }, []);
 
- const fetchMethods = async () => {
+  const fetchMethods = async () => {
     setLoading(true);
     setError("");
-   try {
+    try {
       const data: any = await apiMutual.GetPaymentMethods();
       console.log("Respuesta de métodos de pago:", data);
       if (Array.isArray(data)) {
@@ -43,6 +41,7 @@ const PaymentMethods: React.FC = () => {
       setLoading(false);
     }
   };
+
   const handleAddRow = () => {
     setNewRows([...newRows, { code: "", name: "", active: true, wasEdited: false }]);
   };
@@ -89,16 +88,58 @@ const PaymentMethods: React.FC = () => {
     }
   };
 
+  //Activar/Desactivar
   const handleToggleState = async (id: number) => {
     try {
-      await apiMutual.PaymentMethodState(id);
-      fetchMethods();
-    } catch {
-      setError("Error al cambiar el estado del método de pago");
+      setError("");
+      setSuccess("");
+      
+      console.log(`=== INTENTANDO CAMBIAR ESTADO DEL ID: ${id} ===`);
+      
+      // Llamar a la API
+      const response = await apiMutual.PaymentMethodState(id);
+      console.log(`Respuesta exitosa:`, response);
+      
+      // Refrescar datos inmediatamente
+      await fetchMethods();
+      
+      setSuccess("Estado del método de pago actualizado correctamente");
+      
+    } catch (err: any) {
+      console.error("Error completo:", err);
+      setError(err.message || "Error al cambiar el estado del método de pago");
     }
   };
 
- return (
+  //Ediatr
+  const handleSaveEdit = async (index: number) => {
+    try {
+      setError("");
+      setSuccess("");
+      const method = methods[index];
+      
+      if (!editedRow.name?.trim() || !editedRow.code?.trim()) {
+        setError("El nombre y código no pueden estar vacíos");
+        return;
+      }
+
+      await apiMutual.UpdatePaymentMethod(method.id, {
+        name: editedRow.name ?? method.name,
+        code: editedRow.code ?? method.code,
+      });
+
+      await fetchMethods();
+      
+      setEditIndex(null);
+      setEditedRow({});
+      setSuccess("Método de pago actualizado correctamente");
+      
+    } catch (err: any) {
+      setError(err.message || "Error al actualizar el método de pago");
+    }
+  };
+
+  return (
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1" style={{ marginLeft: "18rem" }}>
@@ -157,17 +198,7 @@ const PaymentMethods: React.FC = () => {
                       {editIndex === index ? (
                         <>
                           <button
-                            onClick={() => {
-                              const updated = [...methods];
-                              updated[index] = {
-                                ...updated[index],
-                                name: editedRow.name ?? method.name,
-                                code: editedRow.code ?? method.code,
-                              };
-                              setMethods(updated);
-                              setEditIndex(null);
-                              setEditedRow({});
-                            }}
+                            onClick={() => handleSaveEdit(index)}
                             className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
                           >
                             Guardar
