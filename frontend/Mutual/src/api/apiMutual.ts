@@ -1006,7 +1006,7 @@ export const apiMutual = {
     code: string,
     periodType: PeriodType
   ): Promise<IAccountingPeriodResponse> => {
-    const url = `https://localhost:7256/accounting-periods`;
+    const url = `https://localhost:7256/api/accounting-periods`;
 
     const response = await Fetcher.post(
       url,
@@ -1035,7 +1035,7 @@ export const apiMutual = {
   GetAccountingPeriods: async (
     closed?: boolean
   ): Promise<IAccountingPeriodList[]> => {
-    let url = `https://localhost:7256/accounting-periods`;
+    let url = `https://localhost:7256/api/accounting-periods`;
     if (typeof closed === "boolean") {
       url += `?closed=${closed}`;
     }
@@ -1064,7 +1064,7 @@ export const apiMutual = {
   ): Promise<IAccountingPeriodResponse> => {
     try {
       const response = await Fetcher.patch(
-        `https://localhost:7256/accounting-periods/${id}/close`,
+        `https://localhost:7256/api/accounting-periods/${id}/close`,
         {},
         {
           headers: {
@@ -1083,7 +1083,7 @@ export const apiMutual = {
   GetAccountingPeriodById: async (
     id: number
   ): Promise<IAccountingPeriodList> => {
-    const url = `https://localhost:7256/accounting-periods/${id}`;
+    const url = `https://localhost:7256/api/accounting-periods/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
