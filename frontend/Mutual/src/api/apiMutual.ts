@@ -576,16 +576,12 @@ export const apiMutual = {
       },
     });
     
-    console.log(`Status de respuesta: ${response.status}`);
-    console.log(`Data de respuesta:`, response.data);
-    
     if (response.status && response.status >= 400) {
       const data = response.data as { mensaje?: string };
       throw new Error(data?.mensaje || "No se pudo cambiar el estado del método de pago");
     }
     return response.data;
   } catch (error) {
-    console.error(`Error en la llamada API:`, error);
     throw error;
   }
 },

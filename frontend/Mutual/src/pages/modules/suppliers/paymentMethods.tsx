@@ -20,6 +20,9 @@ const PaymentMethods: React.FC = () => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editedRow, setEditedRow] = useState<Partial<IPaymentMethod>>({});
 
+  //Opciones del dropdown
+  const paymentMethodOptions = ["Transferencia", "Efectivo", "Pagare"];
+
   useEffect(() => {
     fetchMethods();
   }, []);
@@ -29,7 +32,6 @@ const PaymentMethods: React.FC = () => {
     setError("");
     try {
       const data: any = await apiMutual.GetPaymentMethods();
-      console.log("Respuesta de métodos de pago:", data);
       if (Array.isArray(data)) {
         setMethods(data);
       } else {
@@ -96,19 +98,13 @@ const PaymentMethods: React.FC = () => {
     try {
       setError("");
       setSuccess("");
-
-      console.log(`=== INTENTANDO CAMBIAR ESTADO DEL ID: ${id} ===`);
-
-      // Llamar a la API
+      
       const response = await apiMutual.PaymentMethodState(id);
-      console.log(`Respuesta exitosa:`, response);
 
-      // Refrescar datos inmediatamente
       await fetchMethods();
 
       setSuccess("Estado del método de pago actualizado correctamente");
     } catch (err: any) {
-      console.error("Error completo:", err);
       setError(err.message || "Error al cambiar el estado del método de pago");
     }
   };
@@ -156,7 +152,7 @@ const PaymentMethods: React.FC = () => {
               <thead>
                 <tr>
                   <th className="px-4 py-2 text-left">Nombre</th>
-                  <th className="px-4 py-2 text-left">Código</th>
+                  <th className="px-4 py-2 text-left">Método de Pago</th>
                   <th className="px-4 py-2 text-left">Estado</th>
                   <th className="px-4 py-2 text-left">Acciones</th>
                 </tr>
@@ -180,14 +176,20 @@ const PaymentMethods: React.FC = () => {
                     </td>
                     <td className="px-4 py-2">
                       {editIndex === index ? (
-                        <input
-                          type="text"
+                        <select
                           value={editedRow.code ?? method.code}
                           onChange={(e) =>
                             setEditedRow({ ...editedRow, code: e.target.value })
                           }
                           className="border px-2 py-1 rounded w-full"
-                        />
+                        >
+                          <option value="">Seleccionar...</option>
+                          {paymentMethodOptions.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
                       ) : (
                         method.code
                       )}
@@ -262,17 +264,21 @@ const PaymentMethods: React.FC = () => {
                       />
                     </td>
                     <td className="px-4 py-2">
-                      <input
-                        type="text"
+                      <select
                         value={row.code}
                         onChange={(e) =>
                           handleNewRowChange(idx, "code", e.target.value)
                         }
-                        placeholder="Código"
-                        required
-                        maxLength={15}
                         className="border px-2 py-1 rounded w-full"
-                      />
+                        required
+                      >
+                        <option value="">Seleccionar...</option>
+                        {paymentMethodOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="px-4 py-2">Nuevo</td>
                     <td className="px-4 py-2 flex gap-2">
