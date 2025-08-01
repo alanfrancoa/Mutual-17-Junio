@@ -99,6 +99,12 @@ const Sidebar: React.FC = () => {
                   >
                     <ClipboardDocumentListIcon className="h-4 w-4" /> Servicios
                   </a>
+                  <a
+                    href="/proveedores/facturas"
+                    className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                  >
+                    <ClipboardDocumentListIcon className="h-4 w-4" /> Facturas
+                  </a>
                 </div>
               )}
             </div>

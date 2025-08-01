@@ -28,9 +28,17 @@ const ServiceTypeList: React.FC = () => {
     setLoading(true);
     setError("");
     try {
-      const data: any = await apiMutual.GetServiceTypes();
-      setServiceTypes(data);
+      const data = await apiMutual.GetServiceTypes();
+      // Validar que data sea un array
+      if (Array.isArray(data)) {
+        setServiceTypes(data);
+      } else {
+        setServiceTypes([]);
+        setError("Formato de datos incorrecto");
+      }
     } catch (err: any) {
+      console.error("Error al cargar tipos de servicio:", err);
+      setServiceTypes([]);
       setError(err.message || "Error al cargar los tipos de servicio");
     } finally {
       setLoading(false);

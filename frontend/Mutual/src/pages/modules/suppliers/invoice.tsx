@@ -106,14 +106,12 @@ const InvoicesPage: React.FC = () => {
         <div className="w-full max-w-6xl bg-white rounded-lg shadow p-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-blue-900">Gestión de Facturas</h2>
-            {(userRole === 'administrador' || userRole === 'gestor') && (
-              <button
-                onClick={() => navigate("/proveedores/facturas/crear")}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold"
-              >
-                Cargar Nueva Factura
-              </button>
-            )}
+            <button
+              onClick={() => navigate("/proveedores/facturas/crear")}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold"
+            >
+              Nueva Factura
+            </button>
           </div>
           <div className="mb-4">
             <input
