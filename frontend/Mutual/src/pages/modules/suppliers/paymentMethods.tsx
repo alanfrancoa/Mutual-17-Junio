@@ -43,7 +43,10 @@ const PaymentMethods: React.FC = () => {
   };
 
   const handleAddRow = () => {
-    setNewRows([...newRows, { code: "", name: "", active: true, wasEdited: false }]);
+    setNewRows([
+      ...newRows,
+      { code: "", name: "", active: true, wasEdited: false },
+    ]);
   };
 
   const handleNewRowChange = (
@@ -51,7 +54,7 @@ const PaymentMethods: React.FC = () => {
     field: keyof NewPaymentMethod,
     value: string | boolean
   ) => {
-    setNewRows(prevRows => {
+    setNewRows((prevRows) => {
       const updatedRows = [...prevRows];
       if (field === "active" || field === "wasEdited") {
         updatedRows[index][field] = Boolean(value);
@@ -93,18 +96,17 @@ const PaymentMethods: React.FC = () => {
     try {
       setError("");
       setSuccess("");
-      
+
       console.log(`=== INTENTANDO CAMBIAR ESTADO DEL ID: ${id} ===`);
-      
+
       // Llamar a la API
       const response = await apiMutual.PaymentMethodState(id);
       console.log(`Respuesta exitosa:`, response);
-      
+
       // Refrescar datos inmediatamente
       await fetchMethods();
-      
+
       setSuccess("Estado del método de pago actualizado correctamente");
-      
     } catch (err: any) {
       console.error("Error completo:", err);
       setError(err.message || "Error al cambiar el estado del método de pago");
@@ -117,7 +119,7 @@ const PaymentMethods: React.FC = () => {
       setError("");
       setSuccess("");
       const method = methods[index];
-      
+
       if (!editedRow.name?.trim() || !editedRow.code?.trim()) {
         setError("El nombre y código no pueden estar vacíos");
         return;
@@ -129,11 +131,10 @@ const PaymentMethods: React.FC = () => {
       });
 
       await fetchMethods();
-      
+
       setEditIndex(null);
       setEditedRow({});
       setSuccess("Método de pago actualizado correctamente");
-      
     } catch (err: any) {
       setError(err.message || "Error al actualizar el método de pago");
     }
@@ -143,10 +144,12 @@ const PaymentMethods: React.FC = () => {
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1" style={{ marginLeft: "18rem" }}>
-        <Header hasNotifications={true} />
+        <Header hasNotifications={true} loans={[]} />
         <div className="flex flex-col items-center py-8">
           <div className="w-full max-w-2xl bg-white rounded-lg shadow p-8">
-            <h2 className="text-2xl font-bold mb-6">Agregar/Desactivar medios de pago</h2>
+            <h2 className="text-2xl font-bold mb-6">
+              Agregar/Desactivar medios de pago
+            </h2>
             {success && <div className="text-green-600 mb-2">{success}</div>}
             {error && <div className="text-red-600 mb-2">{error}</div>}
             <table className="min-w-full divide-y divide-gray-200 mb-4">
@@ -166,7 +169,7 @@ const PaymentMethods: React.FC = () => {
                         <input
                           type="text"
                           value={editedRow.name ?? method.name}
-                          onChange={e =>
+                          onChange={(e) =>
                             setEditedRow({ ...editedRow, name: e.target.value })
                           }
                           className="border px-2 py-1 rounded w-full"
@@ -180,7 +183,7 @@ const PaymentMethods: React.FC = () => {
                         <input
                           type="text"
                           value={editedRow.code ?? method.code}
-                          onChange={e =>
+                          onChange={(e) =>
                             setEditedRow({ ...editedRow, code: e.target.value })
                           }
                           className="border px-2 py-1 rounded w-full"
@@ -190,7 +193,11 @@ const PaymentMethods: React.FC = () => {
                       )}
                     </td>
                     <td className="px-4 py-2">
-                      <span className={method.active ? "text-green-600" : "text-red-600"}>
+                      <span
+                        className={
+                          method.active ? "text-green-600" : "text-red-600"
+                        }
+                      >
                         {method.active ? "Activo" : "Inactivo"}
                       </span>
                     </td>
@@ -245,7 +252,9 @@ const PaymentMethods: React.FC = () => {
                       <input
                         type="text"
                         value={row.name}
-                        onChange={e => handleNewRowChange(idx, "name", e.target.value)}
+                        onChange={(e) =>
+                          handleNewRowChange(idx, "name", e.target.value)
+                        }
                         placeholder="Nombre"
                         required
                         maxLength={255}
@@ -256,7 +265,9 @@ const PaymentMethods: React.FC = () => {
                       <input
                         type="text"
                         value={row.code}
-                        onChange={e => handleNewRowChange(idx, "code", e.target.value)}
+                        onChange={(e) =>
+                          handleNewRowChange(idx, "code", e.target.value)
+                        }
                         placeholder="Código"
                         required
                         maxLength={15}
@@ -267,10 +278,18 @@ const PaymentMethods: React.FC = () => {
                     <td className="px-4 py-2 flex gap-2">
                       <button
                         type="button"
-                        onClick={() => setNewRows(newRows.filter((_, i) => i !== idx))}
-                        className={`bg-gray-400 text-white px-3 py-1 rounded text-sm ${row.wasEdited ? "opacity-50 cursor-not-allowed" : ""}`}
+                        onClick={() =>
+                          setNewRows(newRows.filter((_, i) => i !== idx))
+                        }
+                        className={`bg-gray-400 text-white px-3 py-1 rounded text-sm ${
+                          row.wasEdited ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                         disabled={row.wasEdited}
-                        title={row.wasEdited ? "No puedes quitar una línea que ya fue editada" : ""}
+                        title={
+                          row.wasEdited
+                            ? "No puedes quitar una línea que ya fue editada"
+                            : ""
+                        }
                       >
                         Quitar
                       </button>
