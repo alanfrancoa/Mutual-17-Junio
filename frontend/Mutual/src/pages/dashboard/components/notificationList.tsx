@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ILoanList } from "../../../types/loans/ILoanList";
 import { XMarkIcon, InformationCircleIcon } from "@heroicons/react/24/solid";
+import { apiMutual } from "../../../api/apiMutual";
 
 interface Notification {
   id: number;
@@ -15,30 +16,31 @@ interface NotificationListProps {
 const NotificationList: React.FC<NotificationListProps> = ({ loans }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [visible, setVisible] = useState(true);
+ // const [pendingLoans, setPendingLoans] = useState<ILoanList[]>([]);
   const userRole = sessionStorage.getItem("userRole") || "";
 
   useEffect(() => {
-    if (userRole === "Administrador") {
-      const pendingLoansCount = loans.filter(
-        (loan) => loan.status === "Pendiente"
-      ).length;
+    GetPendingLoans();
+  }, []);
 
-      if (pendingLoansCount > 0) {
-        setNotifications([
-          {
-            id: 1,
-            title: "Préstamos Pendientes",
-            message: `Hay ${pendingLoansCount} préstamo(s) pendiente(s) de aprobación.`,
-            
-          },
-        ]);
-      } else {
-        setNotifications([]);
-      }
-    } else {
+  const GetPendingLoans = async () => {
+    const response = await apiMutual.GetLoans();
+    let pending = response.filter((loan) => loan.status === "Pendiente");
+    //setPendingLoans(pending);
+
+    if (userRole !== "Administrador" || pending.length < 0) {
       setNotifications([]);
+      return;
     }
-  }, [loans, userRole]);
+
+    setNotifications([
+      {
+        id: 1,
+        title: "Préstamos Pendientes",
+        message: `Hay ${pending.length} préstamo(s) pendiente(s) de aprobación.`,
+      },
+    ]);
+  };
 
   if (!visible) return null;
 
@@ -56,11 +58,17 @@ const NotificationList: React.FC<NotificationListProps> = ({ loans }) => {
       {notifications.length === 0 ? (
         <div className="p-4 text-gray-500 text-sm">No hay notificaciones.</div>
       ) : (
+        // {loans.length > 0 && (
+
+        // )}
         <ul>
           {notifications.map((n) => (
-            <li key={n.id} className="p-4 border-b last:border-b-0 hover:bg-gray-50">
+            <li
+              key={n.id}
+              className="p-4 border-b last:border-b-0 hover:bg-gray-50"
+            >
               <div className="font-semibold text-black">{n.title}</div>
-            
+
               <div className="text-sm text-black">{n.message}</div>
             </li>
           ))}
