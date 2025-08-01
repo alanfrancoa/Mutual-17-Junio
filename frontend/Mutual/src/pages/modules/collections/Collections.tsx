@@ -76,7 +76,7 @@ const Collections: React.FC = () => {
         <div className="min-h-screen bg-gray-100 flex">
             <Sidebar />
             <div className="flex-1" style={{ marginLeft: "18rem" }}>
-                <Header hasNotifications={true} />
+     <Header hasNotifications={true} loans={[]}  />
                 <div className="flex flex-col items-center py-8">
                     <div className="w-full max-w-6xl bg-white rounded-lg shadow p-8">
                         <h2 className="text-2xl font-bold mb-6">Gestión de Cobros</h2>

@@ -49,7 +49,7 @@ const UsersTable: React.FC = () => {
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-        <Header />
+     <Header hasNotifications={true} loans={[]}  />
         <main className="flex-1 p-6 bg-gray-100">
           <div className="w-full max-w-6xl mx-auto">
             <h1 className="text-2xl font-bold text-gray-800 mb-4">Usuarios</h1>

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  DocumentArrowDownIcon,
   DocumentTextIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/solid";
@@ -15,9 +14,15 @@ import CreateAccountingPeriodForm from "./createAccountingPeriod";
 import GenerateReportForm from "../reports-inaes/registerInaesReport";
 import { apiMutual } from "../../../../api/apiMutual";
 import { IAccountingPeriodList } from "../../../../types/accountablePeriods/IAccountingPeriodList";
+import { ILoanList } from "../../../../types/loans/ILoanList";
 
 // Paginacion
 const PAGE_SIZE = 5;
+
+interface HeaderProps {
+  hasNotifications?: boolean;
+  loans: ILoanList[];
+}
 
 const AccountingPeriods: React.FC = () => {
   const navigate = useNavigate();
@@ -196,7 +201,7 @@ const AccountingPeriods: React.FC = () => {
       <Sidebar />
 
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-        <Header hasNotifications />
+        <Header hasNotifications={true} loans={[]} />
 
         <main className="flex-1 p-6 bg-gray-100">
           <div className="flex-1 w-full">
@@ -386,7 +391,7 @@ const AccountingPeriods: React.FC = () => {
                                     }`}
                                     disabled={period.status === "Abierto"}
                                   >
-                                    <TableCellsIcon  className="h-4 w-4 mr-2" />
+                                    <TableCellsIcon className="h-4 w-4 mr-2" />
                                     Reporte Prestamos
                                   </button>
                                   <button

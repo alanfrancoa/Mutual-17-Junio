@@ -3,9 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
-import { IAssociateList} from "../../../types/associates/IAssociateList";
+import { IAssociateList } from "../../../types/associates/IAssociateList";
 import { IAssociateRegister } from "../../../types/associates/IAssociateRegister";
-
 
 const estadoCivilOpciones = [
   { label: "Soltero/a", value: "Soltero" },
@@ -17,7 +16,7 @@ const estadoCivilOpciones = [
 const generosOpciones = [
   { label: "Masculino", value: "M" },
   { label: "Femenino", value: "F" },
-  { label: "Otro", value: "" }, 
+  { label: "Otro", value: "" },
 ];
 
 const provincias = [
@@ -48,7 +47,7 @@ const provincias = [
 
 const EditAssociate: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>(); 
+  const { id } = useParams<{ id: string }>();
   const associateId = id ? parseInt(id, 10) : null;
 
   const [form, setForm] = useState<IAssociateRegister>({
@@ -72,7 +71,10 @@ const EditAssociate: React.FC = () => {
   const [loadingInitialData, setLoadingInitialData] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     const fetchAssociateDetails = async () => {
@@ -83,34 +85,43 @@ const EditAssociate: React.FC = () => {
       }
       try {
         setLoadingInitialData(true);
-        const data: IAssociateList = await apiMutual.GetAssociateById(associateId);
+        const data: IAssociateList = await apiMutual.GetAssociateById(
+          associateId
+        );
         setForm({
           DNI: data.dni,
           LegalName: data.legalName,
           Address: data.address,
           City: data.city,
           Province: data.province,
-          Phone: data.phone || "", 
-          Email: data.email || "", 
-          CivilStatus: data.civilStatus || "", 
+          Phone: data.phone || "",
+          Email: data.email || "",
+          CivilStatus: data.civilStatus || "",
           CBU: data.cbu,
-          Gender: data.gender || "", 
+          Gender: data.gender || "",
           Organization: data.organization,
-          AffiliationDate: data.affiliationDate ? new Date(data.affiliationDate).toISOString().split('T')[0] : "",
+          AffiliationDate: data.affiliationDate
+            ? new Date(data.affiliationDate).toISOString().split("T")[0]
+            : "",
           WorkAddress: data.workAddress,
-          BirthDate: data.birthDate ? new Date(data.birthDate).toISOString().split('T')[0] : "",
+          BirthDate: data.birthDate
+            ? new Date(data.birthDate).toISOString().split("T")[0]
+            : "",
           Active: data.active,
         });
       } catch (err: any) {
         console.error("Error al cargar detalles del asociado:", err);
-        setError(err.response?.data?.message || "No se pudo cargar la información del asociado para edición.");
+        setError(
+          err.response?.data?.message ||
+            "No se pudo cargar la información del asociado para edición."
+        );
       } finally {
         setLoadingInitialData(false);
       }
     };
 
     fetchAssociateDetails();
-  }, [associateId]); 
+  }, [associateId]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -121,22 +132,27 @@ const EditAssociate: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (associateId === null) {
-      setMessage({ type: "error", text: "ID de asociado no válido para actualizar." });
+      setMessage({
+        type: "error",
+        text: "ID de asociado no válido para actualizar.",
+      });
       return;
     }
 
     setSubmitting(true);
-    setMessage(null); 
+    setMessage(null);
 
     try {
       const response = await apiMutual.UpdateAssociate(associateId, form);
       setMessage({ type: "success", text: response.mensaje });
       setTimeout(() => {
-        navigate("/asociados"); 
+        navigate("/asociados");
       }, 2000);
     } catch (err: any) {
       console.error("Error al actualizar asociado:", err);
-      const errorMessage = err.response?.data?.message || "Ocurrió un error al actualizar el asociado.";
+      const errorMessage =
+        err.response?.data?.message ||
+        "Ocurrió un error al actualizar el asociado.";
       setMessage({ type: "error", text: errorMessage });
     } finally {
       setSubmitting(false);
@@ -146,7 +162,8 @@ const EditAssociate: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Sidebar />
-      <Header hasNotifications={true} />
+      <Header hasNotifications={true} loans={[]} />
+
       <div className="flex flex-col items-center py-8 flex-1 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8">
           <h2 className="text-2xl font-bold mb-6 text-blue-900">
@@ -166,7 +183,9 @@ const EditAssociate: React.FC = () => {
           )}
 
           {loadingInitialData ? (
-            <div className="text-center py-8 text-gray-500">Cargando datos del asociado...</div>
+            <div className="text-center py-8 text-gray-500">
+              Cargando datos del asociado...
+            </div>
           ) : error ? (
             <div className="text-center py-8 text-red-600">{error}</div>
           ) : (

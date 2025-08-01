@@ -15,7 +15,7 @@ const Dashboard: React.FC<DashboardProps> = ({ hasNotifications = true }) => {
     <div className="min-h-screen bg-gray-100">
       <Sidebar />
       <div className="pl-72">
-        <Header hasNotifications={hasNotifications} />
+        <Header hasNotifications={true} loans={[]}  />
 
         <div className="w-full flex justify-center mt-2">
           <div className="relative w-full max-w-7xl rounded-xl shadow-lg overflow-hidden min-h-[180px]">

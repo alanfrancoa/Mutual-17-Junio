@@ -87,7 +87,7 @@ const Associates: React.FC<DashboardProps> = ({
       {/* Contenido principal desplazado a la derecha */}
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
         {/* Header */}
-        <Header hasNotifications={hasNotifications} />
+     <Header hasNotifications={true} loans={[]}  />
 
         {/* Main Content */}
         <main className="flex-1 p-6 bg-gray-100">

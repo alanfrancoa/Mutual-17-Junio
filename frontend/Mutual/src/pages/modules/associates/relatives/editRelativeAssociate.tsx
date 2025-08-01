@@ -125,7 +125,7 @@ const EditRelativeAssociate: React.FC = () => {
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-        <Header hasNotifications={true} />
+     <Header hasNotifications={true} loans={[]}  />
         <div className="flex flex-col items-center py-8 flex-1 px-4 sm:px-6 lg:px-8">
           <div className="w-full max-w-2xl bg-white rounded-lg shadow p-8">
             <h2 className="text-2xl font-bold mb-6 text-blue-900">

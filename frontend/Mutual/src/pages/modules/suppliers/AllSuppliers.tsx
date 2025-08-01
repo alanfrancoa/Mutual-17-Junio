@@ -48,7 +48,7 @@ const AllSuppliers: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Sidebar />
-      <Header hasNotifications={true} />
+     <Header hasNotifications={true} loans={[]}  />
       <div className="flex flex-col items-center py-8 flex-1">
         <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8">
           <div className="flex justify-between items-center mb-6">

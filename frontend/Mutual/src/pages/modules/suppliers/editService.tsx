@@ -162,7 +162,8 @@ useEffect(() => {
       <div className="min-h-screen bg-gray-100 flex">
         <Sidebar />
         <div className="flex-1" style={{ marginLeft: "18rem" }}>
-          <Header hasNotifications={true} />
+              <Header hasNotifications={true} loans={[]}  />
+
           <div className="flex items-center justify-center py-8">
             <div className="text-lg text-gray-600">Cargando servicio...</div>
           </div>
@@ -175,7 +176,7 @@ useEffect(() => {
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1" style={{ marginLeft: "18rem" }}>
-        <Header hasNotifications={true} />
+     <Header hasNotifications={true} loans={[]}  />
         <div className="container mx-auto px-4 py-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800">

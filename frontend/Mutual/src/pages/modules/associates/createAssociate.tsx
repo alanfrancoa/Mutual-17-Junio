@@ -101,7 +101,7 @@ const CreateAssociate: React.FC = () => {
       {/* Sidebar fija a la izquierda */}
       <Sidebar />
       {/* Header */}
-      <Header hasNotifications={true} />
+     <Header hasNotifications={true} loans={[]}  />
       <div className="flex flex-col items-center py-8 flex-1 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8">
           <h2 className="text-2xl font-bold mb-6 text-blue-900">

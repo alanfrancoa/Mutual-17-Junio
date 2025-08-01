@@ -1,30 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NotificationList from "./notificationList";
+import { ILoanList } from "../../../types/loans/ILoanList";
+import { useLoans } from "../../../context/LoansContext";
 
 interface HeaderProps {
   hasNotifications?: boolean;
+  loans: ILoanList[];
 }
 
 const Header: React.FC<HeaderProps> = ({ hasNotifications }) => {
+  const { loans } = useLoans();
+
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
-
-  const mockNotifications = [
-    {
-      id: 1,
-      title: "Prestamos pendientes",
-      message: "Usted tiene 8 prestamos pendientes.",
-      date: "2025-07-27 10:30",
-    },
-    {
-      id: 2,
-      title: "Período contable cerrado",
-      message: "El período contable 2025-06 ha sido cerrado.",
-      date: "2025-07-26 18:15",
-    },
-  ];
-
   const userName = sessionStorage.getItem("username");
   const userRole = sessionStorage.getItem("userRole");
 
@@ -59,9 +48,7 @@ const Header: React.FC<HeaderProps> = ({ hasNotifications }) => {
                   <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
                 )}
               </button>
-              {showNotifications && (
-                <NotificationList notifications={mockNotifications} />
-              )}
+              {showNotifications && <NotificationList loans={loans} />}
             </div>
           )}
 

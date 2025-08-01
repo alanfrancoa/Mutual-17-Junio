@@ -62,7 +62,7 @@ const ReadAccountingPeriod: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <Sidebar />
-        <Header hasNotifications={true} />
+     <Header hasNotifications={true} loans={[]}  />
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="w-full max-w-xl bg-white rounded-lg shadow p-8 text-center text-gray-500">
             Cargando detalles del período contable...
@@ -76,7 +76,7 @@ const ReadAccountingPeriod: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <Sidebar />
-        <Header hasNotifications={true} />
+     <Header hasNotifications={true} loans={[]}  />
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="w-full max-w-xl bg-white rounded-lg shadow p-8 text-center">
             <p className="text-red-600 mb-4">{error}</p>
@@ -97,7 +97,7 @@ const ReadAccountingPeriod: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <Sidebar />
-        <Header hasNotifications={true} />
+     <Header hasNotifications={true} loans={[]}  />
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="w-full max-w-xl bg-white rounded-lg shadow p-8 text-center text-red-500">
             Período contable no encontrado
@@ -121,7 +121,7 @@ const ReadAccountingPeriod: React.FC = () => {
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-        <Header hasNotifications={true} />
+     <Header hasNotifications={true} loans={[]}  />
 
         <main className="flex-1 p-6 bg-gray-100">
           <div className="flex justify-start mb-6">

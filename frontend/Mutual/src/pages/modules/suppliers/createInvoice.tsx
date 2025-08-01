@@ -68,7 +68,7 @@ const InvoiceCreatePage: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
             <Sidebar />
-            <Header hasNotifications={true} />
+     <Header hasNotifications={true} loans={[]}  />
             <main className="flex flex-col items-center py-8 flex-1 ml-0 md:ml-64 lg:ml-72">
                 <div className="w-full max-w-2xl bg-white rounded-lg shadow p-8">
                     <h2 className="text-2xl font-bold text-blue-900 mb-6">Cargar Nueva Factura</h2>

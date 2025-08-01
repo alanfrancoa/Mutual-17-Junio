@@ -1,4 +1,3 @@
-// src/components/LoanActions/RejectLoanButton.tsx
 import React, { useState } from "react";
 import { apiMutual } from "../../../api/apiMutual";
 import LoanStatusModal from "../../../components/LoanModal";

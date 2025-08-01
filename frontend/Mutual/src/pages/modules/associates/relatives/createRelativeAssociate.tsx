@@ -91,7 +91,7 @@ const CreateAssociateRelative: React.FC = () => {
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-        <Header hasNotifications={true} />
+     <Header hasNotifications={true} loans={[]}  />
         <div className="flex flex-col items-center py-8 flex-1">
           <div className="w-full max-w-xl">
             <h2 className="text-2xl font-bold mb-6 text-blue-900">

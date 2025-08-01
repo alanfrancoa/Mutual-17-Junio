@@ -8,6 +8,7 @@ import { apiMutual } from "../../../api/apiMutual";
 import { ILoanList } from "../../../types/loans/ILoanList";
 import RejectLoanButton from "./rejectLoan";
 import ApproveLoanButton from "../loans/approveLoan";
+import { useLoans } from "../../../context/LoansContext";
 
 // Paginacion
 const PAGE_SIZE = 5;
@@ -89,7 +90,7 @@ const Loans: React.FC = () => {
       <Sidebar />
 
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-        <Header hasNotifications />
+        <Header hasNotifications loans={loans} />
 
         <main className="flex-1 p-6 bg-gray-100">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Préstamos</h1>

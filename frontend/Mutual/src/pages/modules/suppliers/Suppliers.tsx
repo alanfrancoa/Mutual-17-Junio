@@ -44,7 +44,7 @@ const Suppliers: React.FC<DashboardProps> = ({
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-      <Header hasNotifications={hasNotifications}/>
+     <Header hasNotifications={true} loans={[]}  />
 
       <button
         className="md:hidden absolute top-4 left-4 z-20"

@@ -116,7 +116,7 @@ const AuditTable: React.FC = () => {
       {/* Contenido principal*/}
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
         {/* Header */}
-        <Header hasNotifications={false} />
+     <Header hasNotifications={true} loans={[]}  />
 
         {/* Main Content */}
         <main className="flex-1 p-6 bg-gray-100">

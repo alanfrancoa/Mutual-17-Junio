@@ -41,7 +41,7 @@ const CreateUser: React.FC = () => {
       {/* Contenido principal desplazado a la derecha */}
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
         {/* Header */}
-        <Header hasNotifications={true} />
+     <Header hasNotifications={true} loans={[]}  />
         <div className="flex flex-col items-center py-8 flex-1">
         
         <div className="w-full max-w-xl">
