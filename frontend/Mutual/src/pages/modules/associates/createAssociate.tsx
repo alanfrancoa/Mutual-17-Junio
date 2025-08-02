@@ -5,9 +5,9 @@ import Sidebar from "../../dashboard/components/Sidebar";
 import { IAssociateRegister } from "../../../types/associates/IAssociateRegister";
 import { apiMutual } from "../../../api/apiMutual";
 
-
 // Arrays de opciones para los selects
 const estadoCivilOpciones = [
+  { label: "Seleccione una opcion", value: "seleccione una opcion" },
   { label: "Soltero/a", value: "Soltero/a" },
   { label: "Casado/a", value: "Casado/a" },
   { label: "Divorciado/a", value: "Divorciado/a" },
@@ -15,12 +15,15 @@ const estadoCivilOpciones = [
 ];
 
 const generosOpciones = [
+  { label: "Seleccione una opcion", value: "seleccione una opcion" },
   { label: "Masculino", value: "M" },
   { label: "Femenino", value: "F" },
-  { label: "Otro", value: "Otro" }, 
+  { label: "Otro", value: "X" },
 ];
 
 const provincias = [
+  "Seleccione una opcion",
+  "Ciudad Autonoma de Buenos Aires",
   "Buenos Aires",
   "Catamarca",
   "Chaco",
@@ -60,14 +63,17 @@ const CreateAssociate: React.FC = () => {
     CBU: "",
     Gender: "",
     Organization: "",
-    AffiliationDate: new Date().toISOString().split('T')[0], // Establece la fecha afiliacion por defecto a la actual
+    AffiliationDate: new Date().toISOString().split("T")[0], // Establece la fecha afiliacion por defecto a la actual
     WorkAddress: "",
     BirthDate: "",
-    Active: true, 
+    Active: true,
   });
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -78,18 +84,20 @@ const CreateAssociate: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage(null); 
+    setMessage(null);
 
     try {
       const response = await apiMutual.RegisterAssociate(form);
       setMessage({ type: "success", text: response.mensaje });
-     
+
       setTimeout(() => {
         navigate("/asociados");
-      }, 2000); 
+      }, 2000);
     } catch (error: any) {
       console.error("Error al registrar asociado:", error);
-      const errorMessage = error.response?.data?.message || "Ocurrió un error al registrar el asociado.";
+      const errorMessage =
+        error.response?.data?.message ||
+        "Ocurrió un error al registrar el asociado.";
       setMessage({ type: "error", text: errorMessage });
     } finally {
       setLoading(false);
@@ -97,11 +105,12 @@ const CreateAssociate: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex">
       {/* Sidebar fija a la izquierda */}
       <Sidebar />
+
       {/* Header */}
-     <Header hasNotifications={true} loans={[]}  />
+      <Header hasNotifications={true} loans={[]} />
       <div className="flex flex-col items-center py-8 flex-1 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8">
           <h2 className="text-2xl font-bold mb-6 text-blue-900">
@@ -120,7 +129,6 @@ const CreateAssociate: React.FC = () => {
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-5">
-            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -160,7 +168,6 @@ const CreateAssociate: React.FC = () => {
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  
                   {estadoCivilOpciones.map((ec) => (
                     <option key={ec.value} value={ec.value}>
                       {ec.label}
@@ -179,7 +186,6 @@ const CreateAssociate: React.FC = () => {
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  
                   {generosOpciones.map((g) => (
                     <option key={g.value} value={g.value}>
                       {g.label}
@@ -195,7 +201,7 @@ const CreateAssociate: React.FC = () => {
                 <input
                   type="date"
                   name="BirthDate"
-                  value={form.BirthDate || ""} 
+                  value={form.BirthDate || ""}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -268,7 +274,6 @@ const CreateAssociate: React.FC = () => {
                   required
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                
                   {provincias.map((prov) => (
                     <option key={prov} value={prov}>
                       {prov}
