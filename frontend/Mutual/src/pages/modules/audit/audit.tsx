@@ -7,20 +7,12 @@ import { AuditLog } from "../../../types/auditLog";
 
 const SYSTEM_MODULES = [
   { value: "todos", label: "Todos los módulos" },
-  { value: "Usuarios", label: "Usuarios" },
   { value: "Proveedores", label: "Proveedores" },
+  { value: "Cobros", label: "Cobros" },
   { value: "Auditoria", label: "Auditoría" },
-  { value: "Prestamos", label: "Préstamos" },
-  { value: "Asociados", label: "Asociados" },
-];
-
-const ACTION_TYPES = [
-  { value: "todos", label: "Todas las acciones" },
-  { value: "Creación", label: "Creaciones" },
-  { value: "Modificación", label: "Modificaciones" },
-  { value: "Eliminación", label: "Eliminaciones" },
-  { value: "Consulta", label: "Consultas" },
-  { value: "Aprobación", label: "Aprobaciones" },
+  { value: "Préstamos", label: "Préstamos" },
+  { value: "Reportes Inaes", label: "Reportes Inaes" },
+  { value: "Períodos contables", label: "Períodos contables" },
 ];
 
 // Opciones de paginación
@@ -34,29 +26,23 @@ const AuditTable: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedModule, setSelectedModule] = useState<string>("todos");
-  const [selectedAction, setSelectedAction] = useState<string>("todos");
 
-  const getActionFromDescription = (description: string): string => {
-    if (!description) return "Desconocida";
-    if (description.includes("creó") || description.includes("Creación"))
-      return "Creación";
-    if (
-      description.includes("actualizó") ||
-      description.includes("Actualización") ||
-      description.includes("Modificación")
-    )
-      return "Modificación";
-    if (description.includes("eliminó") || description.includes("Eliminación"))
-      return "Eliminación";
-    if (description.includes("consultó") || description.includes("Consulta"))
-      return "Consulta";
-    if (
-      description.includes("aprobación") ||
-      description.includes("Aprobación")
-    )
-      return "Aprobación";
-    return "Desconocida";
+  const MODULE_NAME_MAP: Record<string, string> = {
+    LoanModel: "Préstamos",
+    SupplierModel: "Proveedores",
+    AuditModel: "Auditoría",
+    InaesReportModel: "Reportes Inaes",
+    AccountingPeriodModel: "Períodos contables",
+    CollectionsModel: "Cobros",
   };
+
+  const MODULE_NAME_MAP_INVERSE: Record<string, string> = Object.fromEntries(
+    Object.entries(MODULE_NAME_MAP).map(([key, value]) => [value, key])
+  );
+
+  function getModuleName(entityType: string): string {
+    return MODULE_NAME_MAP[entityType] || entityType;
+  }
 
   const fetchAuditLogs = useCallback(async () => {
     setLoading(true);
@@ -69,10 +55,15 @@ const AuditTable: React.FC = () => {
         data = await apiMutual.GetAuditLogsByEntityType(selectedModule);
       }
 
-      setAuditLogs(data);
+      if (!Array.isArray(data)) {
+        setAuditLogs([]);
+      } else {
+        setAuditLogs(data);
+      }
     } catch (err) {
       console.error("Error fetching audit logs:", err);
       setError("Error al cargar los registros de auditoría.");
+      setAuditLogs([]);
     } finally {
       setLoading(false);
     }
@@ -80,7 +71,7 @@ const AuditTable: React.FC = () => {
 
   useEffect(() => {
     fetchAuditLogs();
-  }, [fetchAuditLogs]);
+  }, []);
 
   const handleFilterChange =
     (setter: React.Dispatch<React.SetStateAction<string>>) =>
@@ -89,16 +80,37 @@ const AuditTable: React.FC = () => {
       setPage(1);
     };
 
-  const filteredAudits = auditLogs.filter((audit) => {
-    const auditAction = getActionFromDescription(audit.description ?? "");
-    const matchesAction =
-      selectedAction === "todos" || auditAction === selectedAction;
 
+    // funcion para tomar valores sin tilde 
+  const removeDiacritics = (str: string) =>
+    str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  const filteredAudits = auditLogs.filter((audit) => {
+    // Filtro por módulo
+    let matchesModule: any = true;
+    if (selectedModule !== "todos") {
+      const expectedEntityType = MODULE_NAME_MAP_INVERSE[selectedModule];
+      matchesModule =
+        expectedEntityType &&
+        audit.entityType
+          .trim()
+          .toLowerCase()
+          .includes(expectedEntityType.trim().toLowerCase());
+    }
+
+    // Filtro por búsqueda: usuario, detalle y fecha
+    const searchLower = search.toLowerCase();
     const matchesSearch =
-      audit.createdBy.toString().includes(search.toLowerCase()) ||
-      audit.description?.toLowerCase().includes(search.toLowerCase()) ||
-      new Date(audit.created_At).toLocaleString().includes(search);
-    return matchesAction && matchesSearch;
+      removeDiacritics(audit.description ?? "")
+        .toLowerCase()
+        .includes(searchLower) ||
+      audit.createdByUser?.username?.toLowerCase().includes(searchLower) ||
+      new Date(audit.created_At)
+        .toLocaleString()
+        .toLowerCase()
+        .includes(searchLower);
+
+    return matchesModule && matchesSearch;
   });
 
   // Paginación
@@ -116,7 +128,7 @@ const AuditTable: React.FC = () => {
       {/* Contenido principal*/}
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
         {/* Header */}
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
 
         {/* Main Content */}
         <main className="flex-1 p-6 bg-gray-100">
@@ -151,20 +163,6 @@ const AuditTable: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                  {/* Action Filter */}
-                  <select
-                    className="px-3 py-2 border border-gray-300 rounded bg-white text-gray-700"
-                    value={selectedAction}
-                    onChange={(e) =>
-                      handleFilterChange(setSelectedAction)(e.target.value)
-                    }
-                  >
-                    {ACTION_TYPES.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
                 </div>
               </div>
 
@@ -193,9 +191,6 @@ const AuditTable: React.FC = () => {
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Acción
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Detalle
-                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -218,21 +213,17 @@ const AuditTable: React.FC = () => {
                           }
                         >
                           <td className="px-4 py-4 border-b whitespace-nowrap">
-                            {new Date(audit.created_At).toLocaleString()}{" "}
+                            {new Date(audit.created_At).toLocaleString()}
                           </td>
                           <td className="px-4 py-4 border-b whitespace-nowrap">
-                            {audit.createdBy}{" "}
+                            {audit.createdByUser?.username}
                           </td>
                           <td className="px-4 py-4 border-b whitespace-nowrap">
-                            {audit.entityType}{" "}
+                            {getModuleName(audit.entityType)}
                           </td>
+
                           <td className="px-4 py-4 border-b whitespace-nowrap">
-                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
-                              getActionFromDescription(audit.description)
-                            </span>
-                          </td>
-                          <td className="px-4 py-4 border-b whitespace-nowrap">
-                            {audit.description}{" "}
+                            {audit.description}
                           </td>
                         </tr>
                       ))
