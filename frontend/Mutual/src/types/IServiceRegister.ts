@@ -1,15 +1,15 @@
 export interface IServiceRegister {
-    supplierId: string;
-    serviceType: string;
-    description: string;
-    monthlyCost: number;
+    ServiceTypeId: number;     
+    SupplierId: number;        
+    Description: string;
+    MonthlyCost: number;
 }
 
 export interface IServiceUpdate {
     id: number;
-    supplierId: string;
-    serviceType: string;
-    description: string;
+    ServiceTypeId: number; 
+    SupplierId: number; 
+    Description: string; 
     date: string;
     amount: number;
     active: boolean;
