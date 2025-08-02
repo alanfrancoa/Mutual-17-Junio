@@ -8,6 +8,7 @@ import Sidebar from "../../../dashboard/components/Sidebar";
 
 // Opciones de parentesco
 const relationshipsOptions = [
+  "Seleccione una opcion",
   "Hijo/a",  
   "Padre/Madre",
   "Hermano/a",

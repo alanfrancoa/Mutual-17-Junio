@@ -1,6 +1,9 @@
 import React, { useState, useEffect, FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { IRelativeList, IRelativeUpdate } from "../../../../types/associates/IRelative";
+import {
+  IRelativeList,
+  IRelativeUpdate,
+} from "../../../../types/associates/IRelative";
 import { apiMutual } from "../../../../api/apiMutual";
 import Sidebar from "../../../dashboard/components/Sidebar";
 import Header from "../../../dashboard/components/Header";
@@ -28,6 +31,7 @@ const EditRelativeAssociate: React.FC = () => {
 
   // Opciones para el campo parentesco
   const relationOptions = [
+    "Seleccione una opcion",
     "Hijo/a",
     "Padre/Madre",
     "Hermano/a",
@@ -125,7 +129,7 @@ const EditRelativeAssociate: React.FC = () => {
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
         <div className="flex flex-col items-center py-8 flex-1 px-4 sm:px-6 lg:px-8">
           <div className="w-full max-w-2xl bg-white rounded-lg shadow p-8">
             <h2 className="text-2xl font-bold mb-6 text-blue-900">
