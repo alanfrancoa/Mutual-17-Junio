@@ -49,22 +49,15 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
     useEffect(() => {
       const fetchSuppliers = async () => {
     try {
-      console.log("=== INICIANDO CARGA DE PROVEEDORES ===");
       const data = await apiMutual.GetAllSuppliers();
-      console.log("Datos brutos recibidos:", data);
-      console.log("Tipo de datos:", typeof data);
-      console.log("Es array:", Array.isArray(data));
       
       if (Array.isArray(data)) {
         const activeSuppliers = data.filter((s: Supplier) => s.active);
-        console.log("Proveedores activos:", activeSuppliers);
         setSuppliers(activeSuppliers);
       } else {
-        console.log("Los datos no son un array:", data);
         setSuppliers([]);
       }
     } catch (error) {
-      console.error("Error completo al cargar proveedores:", error);
       setSuppliers([]);
     }
   };
@@ -74,22 +67,15 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
   useEffect(() => {
     const fetchServiceTypes = async () => {
       try {
-        console.log("=== INICIANDO CARGA DE TIPOS DE SERVICIO ===");
         const data = await apiMutual.GetServiceTypes();
-        console.log("Datos brutos recibidos:", data);
-        console.log("Tipo de datos:", typeof data);
-        console.log("Es array:", Array.isArray(data));
         
         if (Array.isArray(data)) {
           const activeTypes = data.filter((t: ServiceType) => t.active);
-          console.log("Tipos de servicio activos:", activeTypes);
           setServiceTypes(activeTypes);
         } else {
-          console.log("Los datos no son un array:", data);
           setServiceTypes([]);
         }
       } catch (error) {
-        console.error("Error completo al cargar tipos de servicio:", error);
         setServiceTypes([]);
       }
     };
