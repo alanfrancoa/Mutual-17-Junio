@@ -74,8 +74,7 @@ const Login = () => {
 
       // Decodifica el JWT para obtener los datos del usuario
       const payload = parseJwt(response);
-      console.log("Payload decodificado:", payload); // <-- Agrega esto
-
+    
       if (payload && payload.role) {
         sessionStorage.setItem("userRole", payload.role);
       }
@@ -84,6 +83,7 @@ const Login = () => {
       }
 
       navigate("/dashboard");
+      window.location.reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
