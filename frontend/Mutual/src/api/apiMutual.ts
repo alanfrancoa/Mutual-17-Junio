@@ -407,6 +407,23 @@ export const apiMutual = {
     return response.data as { mensaje: string };
   },
 
+  /* ----------------------- Obtener lista de servicios ----------------------- */
+GetServices: async (): Promise<any[]> => {
+  const url = "https://localhost:7256/api/services";
+  const response = await Fetcher.get(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+  });
+  if (response.status && response.status >= 400) {
+    const data = response.data as { mensaje?: string };
+    throw new Error(data?.mensaje || "No se pudieron obtener los servicios");
+  }
+  return response.data as any[];
+},
+
+
   /* ----------------------- Crear tipo de servicio ----------------------- */
   RegisterServiceType: async (
     code: string,
