@@ -121,7 +121,7 @@ const Loans: React.FC = () => {
                 </div>
 
                 <div className="flex gap-2 w-full md:w-auto">
-                  {userRole !== "Administrador" && (
+                  {userRole === "Gestor" && (
                     <button
                       onClick={() => navigate("/prestamos/solicitar")}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded font-semibold shadow transition flex items-center gap-2"
