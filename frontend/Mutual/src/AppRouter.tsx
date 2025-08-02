@@ -6,8 +6,8 @@ import {
 } from "react-router-dom";
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
-
 import AllServices from "./pages/modules/suppliers/allServices";
+import AllSuppliers from "./pages/modules/suppliers/allSuppliers";
 import CreateSupplier from "./pages/modules/suppliers/createSupplier";
 import CreateService from "./pages/modules/suppliers/createService";
 import EditService from "./pages/modules/suppliers/editService";
@@ -33,7 +33,6 @@ import AuditTable from "./pages/modules/audit/audit";
 import ReactivateAssociate from "./pages/modules/associates/reactivateAssociate";
 import CreateAssociateRelative from "./pages/modules/associates/relatives/createRelativeAssociate";
 import EditRelativeAssociate from "./pages/modules/associates/relatives/editRelativeAssociate";
-import AllSuppliers from "./pages/modules/suppliers/allSuppliers";
 import Loans from "./pages/modules/loans/listLoans";
 import RequestLoan from "./pages/modules/loans/requestLoan";
 import CreateLoan from "./pages/modules/loans/loanTypes/createLoanType";

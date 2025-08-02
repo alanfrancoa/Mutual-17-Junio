@@ -37,7 +37,6 @@ const ServiceTypeList: React.FC = () => {
         setError("Formato de datos incorrecto");
       }
     } catch (err: any) {
-      console.error("Error al cargar tipos de servicio:", err);
       setServiceTypes([]);
       setError(err.message || "Error al cargar los tipos de servicio");
     } finally {
@@ -93,10 +92,41 @@ const ServiceTypeList: React.FC = () => {
 
   const handleToggleState = async (id: number, newStatus: boolean) => {
     try {
+      setError("");
+      setSuccess("");
+      
       await apiMutual.ServiceTypeState(id, newStatus);
-      fetchServiceTypes();
-    } catch {
-      setError("Error al cambiar el estado del tipo de servicio");
+      
+      setSuccess("Estado del tipo de servicio actualizado correctamente");
+      await fetchServiceTypes();
+    } catch (err: any) {
+      setError(err.message || "Error al cambiar el estado del tipo de servicio");
+    }
+  };
+
+  const handleSaveEdit = async (index: number) => {
+    try {
+      setError("");
+      setSuccess("");
+      const serviceType = serviceTypes[index];
+
+      if (!editedRow.name?.trim() || !editedRow.code?.trim()) {
+        setError("El nombre y código no pueden estar vacíos");
+        return;
+      }
+
+      await apiMutual.UpdateServiceType(serviceType.id, {
+        name: editedRow.name ?? serviceType.name,
+        code: editedRow.code ?? serviceType.code,
+      });
+
+      await fetchServiceTypes();
+
+      setEditIndex(null);
+      setEditedRow({});
+      setSuccess("Tipo de servicio actualizado correctamente");
+    } catch (err: any) {
+      setError(err.message || "Error al actualizar el tipo de servicio");
     }
   };
 
@@ -159,11 +189,7 @@ const ServiceTypeList: React.FC = () => {
                       {editIndex === index ? (
                         <>
                           <button
-                            onClick={() => {
-                              // Aquí podrías llamar a apiMutual.UpdateServiceType si lo implementas
-                              setEditIndex(null);
-                              setEditedRow({});
-                            }}
+                            onClick={() => handleSaveEdit(index)}
                             className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
                           >
                             Guardar

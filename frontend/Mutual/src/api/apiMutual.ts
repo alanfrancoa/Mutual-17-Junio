@@ -412,7 +412,7 @@ export const apiMutual = {
     code: string,
     name: string
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/services-type`;
+    const url = `https://localhost:7256/api/services-type`;
     const response = await Fetcher.post(
       url,
       { Code: code, Name: name },
@@ -434,7 +434,7 @@ export const apiMutual = {
   /* ----------------------- Obtener tipos de servicio ----------------------- */
 
   GetServiceTypes: async (): Promise<IServiceType[]> => {
-    const url = "https://localhost:7256/services-type";
+    const url = "https://localhost:7256/api/services-type";
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -452,7 +452,7 @@ export const apiMutual = {
 
   /* ----------------------- Obtener servicio por ID ----------------------- */
   GetServiceById: async (id: number): Promise<any> => {
-    const url = `https://localhost:7256/services/${id}`;
+    const url = `https://localhost:7256/api/services/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -473,7 +473,7 @@ export const apiMutual = {
     description: string;
     monthlyCost: number;
   }): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/services/${id}`;
+    const url = `https://localhost:7256/api/services/${id}`;
     const response = await Fetcher.patch(url, serviceData, {
       headers: {
         "Content-Type": "application/json",
@@ -487,32 +487,57 @@ export const apiMutual = {
     return response.data as { message: string };
   },
 
-  /* ----------------------- Cambiar estado del tipo de servicio ----------------------- */
-  ServiceTypeState: async (
-    id: number,
-    newStatus: boolean
-  ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/services-type/${id}/status`;
-    const response = await Fetcher.patch(url, newStatus, {
+  /* ----------------------- Actualizar tipo de servicio ----------------------- */
+  UpdateServiceType: async (id: number, data: { name: string; code: string }): Promise<{ mensaje: string }> => {
+    const url = `https://localhost:7256/api/services-type/${id}`;
+    const response = await Fetcher.put(url, {
+      Name: data.name,
+      Code: data.code
+    }, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
     if (response.status && response.status >= 400) {
-      const data = response.data as { mensaje?: string };
-      throw new Error(
-        data?.mensaje || "No se pudo cambiar el estado del tipo de servicio"
-      );
+      const responseData = response.data as { mensaje?: string };
+      throw new Error(responseData?.mensaje || "No se pudo actualizar el tipo de servicio");
     }
     return response.data as { mensaje: string };
+  },
+
+  /* ----------------------- Cambiar estado del tipo de servicio ----------------------- */
+  ServiceTypeState: async (
+    id: number,
+    newStatus: boolean
+  ): Promise<{ mensaje: string }> => {
+    const url = `https://localhost:7256/api/services-type/${id}/status`;
+    
+    try {
+      const response = await Fetcher.patch(url, {}, { 
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+        },
+      });
+      
+      if (response.status && response.status >= 400) {
+        const data = response.data as { mensaje?: string };
+        throw new Error(
+          data?.mensaje || "No se pudo cambiar el estado del tipo de servicio"
+        );
+      }
+      return response.data as { mensaje: string };
+    } catch (error) {
+      throw error;
+    }
   },
 
   /* ----------------------- Crear servicio ----------------------- */
   RegisterService: async (
     serviceDataData: IServiceRegister
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/services`;
+    const url = `https://localhost:7256/api/services`;
     const response = await Fetcher.post(url, serviceDataData, {
       headers: {
         "Content-Type": "application/json",
@@ -526,6 +551,8 @@ export const apiMutual = {
     }
     return response.data as { mensaje: string };
   },
+
+
 
   /* ----------------------- Metodos de pago ----------------------- */
   /* ----------------------- Crear metodo de pago ----------------------- */
@@ -564,44 +591,42 @@ export const apiMutual = {
 
   /* ----------------------- Estado metodo de pago ----------------------- */
   PaymentMethodState: async (id: number) => {
-  console.log(`=== LLAMANDO API PARA ID: ${id} ===`);
-  const url = `https://localhost:7256/api/payment-method/${id}/status`;
-  console.log(`URL: ${url}`);
-  
-  try {
-    const response = await Fetcher.patch(url, {}, {
+    const url = `https://localhost:7256/api/payment-method/${id}/status`;
+
+    try {
+      const response = await Fetcher.patch(url, {}, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+        },
+      });
+
+      if (response.status && response.status >= 400) {
+        const data = response.data as { mensaje?: string };
+        throw new Error(data?.mensaje || "No se pudo cambiar el estado del método de pago");
+      }
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /* ----------------------- Actualizar metodo de pago ----------------------- */
+
+  UpdatePaymentMethod: async (id: number, data: { name: string; code: string }): Promise<{ message: string }> => {
+    const url = `https://localhost:7256/api/payment-method/${id}`;
+    const response = await Fetcher.put(url, data, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
-    
     if (response.status && response.status >= 400) {
       const data = response.data as { mensaje?: string };
-      throw new Error(data?.mensaje || "No se pudo cambiar el estado del método de pago");
+      throw new Error(data?.mensaje || "No se pudo actualizar el método de pago");
     }
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-},
-
-  /* ----------------------- Actualizar metodo de pago ----------------------- */
-
-  UpdatePaymentMethod: async (id: number, data: { name: string; code: string }): Promise<{ message: string }> => {
-  const url = `https://localhost:7256/api/payment-method/${id}`;
-  const response = await Fetcher.put(url, data, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-    },
-  });
-  if (response.status && response.status >= 400) {
-    const data = response.data as { mensaje?: string };
-    throw new Error(data?.mensaje || "No se pudo actualizar el método de pago");
-  }
-  return response.data as { message: string };
-},
+    return response.data as { message: string };
+  },
 
   /* ----------------------- Registrar factura ----------------------- */
   RegisterInvoice: async (invoiceData: {
