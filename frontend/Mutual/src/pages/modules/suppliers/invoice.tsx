@@ -27,10 +27,10 @@ const InvoicesPage: React.FC = () => {
 
   const userRole = useMemo(
     () =>
-      (sessionStorage.getItem("userRole") || "consultante") as
+      (sessionStorage.getItem("userRole") || "Consultor") as
         | "administrador"
         | "gestor"
-        | "consultante",
+        | "consultor",
     []
   );
 
