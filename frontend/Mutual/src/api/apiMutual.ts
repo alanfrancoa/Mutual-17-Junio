@@ -408,20 +408,20 @@ export const apiMutual = {
   },
 
   /* ----------------------- Obtener lista de servicios ----------------------- */
-GetServices: async (): Promise<any[]> => {
-  const url = "https://localhost:7256/api/services";
-  const response = await Fetcher.get(url, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-    },
-  });
-  if (response.status && response.status >= 400) {
-    const data = response.data as { mensaje?: string };
-    throw new Error(data?.mensaje || "No se pudieron obtener los servicios");
-  }
-  return response.data as any[];
-},
+  GetServices: async (): Promise<any[]> => {
+    const url = "https://localhost:7256/api/services";
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const data = response.data as { mensaje?: string };
+      throw new Error(data?.mensaje || "No se pudieron obtener los servicios");
+    }
+    return response.data as any[];
+  },
 
 
   /* ----------------------- Crear tipo de servicio ----------------------- */
@@ -489,19 +489,19 @@ GetServices: async (): Promise<any[]> => {
     supplierId: number;
     description: string;
     monthlyCost: number;
-  }): Promise<{ message: string }> => {
+  }): Promise<{ mensaje: string }> => {
     const url = `https://localhost:7256/api/services/${id}`;
-    const response = await Fetcher.patch(url, serviceData, {
+    const response = await Fetcher.put(url, serviceData, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
     if (response.status && response.status >= 400) {
-      const data = response.data as { message?: string };
-      throw new Error(data?.message || "Error al actualizar el servicio");
+      const data = response.data as { mensaje?: string };
+      throw new Error(data?.mensaje || "Error al actualizar el servicio");
     }
-    return response.data as { message: string };
+    return response.data as { mensaje: string };
   },
 
   /* ----------------------- Actualizar tipo de servicio ----------------------- */
@@ -529,15 +529,15 @@ GetServices: async (): Promise<any[]> => {
     newStatus: boolean
   ): Promise<{ mensaje: string }> => {
     const url = `https://localhost:7256/api/services-type/${id}/status`;
-    
+
     try {
-      const response = await Fetcher.patch(url, {}, { 
+      const response = await Fetcher.patch(url, {}, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
         },
       });
-      
+
       if (response.status && response.status >= 400) {
         const data = response.data as { mensaje?: string };
         throw new Error(
