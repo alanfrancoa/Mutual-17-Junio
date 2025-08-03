@@ -39,7 +39,6 @@ import CreateLoan from "./pages/modules/loans/loanTypes/createLoanType";
 import ReadLoan from "./pages/modules/loans/readLoan";
 import Collection from "./pages/modules/collections/Collections";
 import RegisterCollection from "./pages/modules/collections/RegisterCollection";
-import PaymentSchedule from "./pages/modules/collections/PaymentSchedule";
 import OverdueInstallments from "./pages/modules/collections/OverdueInstallments";
 import ReadAccountingPeriod from "./pages/modules/reports-periods/accounting-periods/readAccountingPeriod";
 import AccountingPeriods from "./pages/modules/reports-periods/accounting-periods/listAccountingPeriods";
@@ -478,7 +477,7 @@ const AppRouter: React.FC = () => {
         />
 
         <Route
-          path="/cobros/registrar"
+          path="/cobros/registrar/:id"
           element={
             <ProtectedRoute
               user={{ username: userName, role: userRole as Role }}
@@ -497,18 +496,6 @@ const AppRouter: React.FC = () => {
               authorizedRoles={[ROLES.GESTOR, ROLES.ADMINISTRADOR]}
             >
               <PaymentMethodsCollection />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/collections/payment-schedule"
-          element={
-            <ProtectedRoute
-              user={{ username: userName, role: userRole as Role }}
-              authorizedRoles={[ROLES.GESTOR, ROLES.ADMINISTRADOR]}
-            >
-              <PaymentSchedule />
             </ProtectedRoute>
           }
         />
