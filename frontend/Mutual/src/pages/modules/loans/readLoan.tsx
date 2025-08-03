@@ -319,7 +319,7 @@ const ReadLoan: React.FC = () => {
                                   </button>
                                 ) : (
                                   <button
-                                    onClick={() => navigate(`/cobros/registrar?installmentId=${installment.id}&loanId=${loan.id}&associateId=${loan.associateDni}`)} className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs"
+                                    onClick={() => navigate(`/cobros/registrar/${installment.id}`)} className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs"
                                   >
                                     Cobrar
                                   </button>
