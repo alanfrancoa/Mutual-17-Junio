@@ -39,13 +39,13 @@ const AssociateRelativesTable: React.FC<AssociateRelativesTableProps> = ({
   return (
     <div className="mt-8 pt-8 border-t border-gray-200">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-bold text-blue-900">
+          <h2 className="text-2xl font-bold mb-6 text-blue-900">
           Familiares Registrados
-        </h3>
+        </h2>
         {associateId && (
           <button
             onClick={handleCreateRelative}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-semibold transition duration-200 ease-in-out"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full font-semibold transition duration-200 ease-in-out"
           >
             + Añadir Familiar
           </button>

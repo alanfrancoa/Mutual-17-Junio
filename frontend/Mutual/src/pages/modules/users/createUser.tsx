@@ -58,7 +58,9 @@ const CreateUser: React.FC = () => {
         form.confirmPassword,
         form.rol
       );
-      showSuccessToast({ message: "Usuario creado correctamente" });
+      showSuccessToast({
+          title: "Usuario creado",
+        message: "Usuario creado correctamente" });
       navigate("/usuarios");
     } catch (error: any) {
       const errorMsg =

@@ -4,6 +4,8 @@ import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { IAssociateRegister } from "../../../types/associates/IAssociateRegister";
 import { apiMutual } from "../../../api/apiMutual";
+import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import useAppToast from "../../../hooks/useAppToast";
 
 // Arrays de opciones para los selects
 const estadoCivilOpciones = [
@@ -63,7 +65,7 @@ const CreateAssociate: React.FC = () => {
     CBU: "",
     Gender: "",
     Organization: "",
-    AffiliationDate: new Date().toISOString().split("T")[0], // Establece la fecha afiliacion por defecto a la actual
+    AffiliationDate: new Date().toISOString().split("T")[0],
     WorkAddress: "",
     BirthDate: "",
     Active: true,
@@ -74,6 +76,7 @@ const CreateAssociate: React.FC = () => {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const { showSuccessToast, showErrorToast } = useAppToast();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -86,19 +89,113 @@ const CreateAssociate: React.FC = () => {
     setLoading(true);
     setMessage(null);
 
+    // Validaciones específicas
+  if (!form.LegalName) {
+    showErrorToast({ message: "El nombre legal es obligatorio." });
+    setLoading(false);
+    return;
+  }
+  if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(form.LegalName)) {
+    showErrorToast({ message: "El nombre legal solo puede contener letras y espacios." });
+    setLoading(false);
+    return;
+  }
+  if (!form.DNI || form.DNI.length < 8) {
+    showErrorToast({ message: "El DNI debe tener al menos 8 caracteres." });
+    setLoading(false);
+    return;
+  }
+  if (!form.Gender || form.Gender === "Seleccione una opcion") {
+    showErrorToast({ message: "El género es obligatorio." });
+    setLoading(false);
+    return;
+  }
+  if (!form.Province || form.Province === "Seleccione una opcion") {
+    showErrorToast({ message: "La provincia es obligatoria." });
+    setLoading(false);
+    return;
+  }
+  if (!form.CivilStatus || form.CivilStatus === "Seleccione una opcion") {
+    showErrorToast({ message: "El estado civil es obligatorio." });
+    setLoading(false);
+    return;
+  }
+  if (
+  !form.CBU ||
+  !/^\d{22}$/.test(form.CBU)
+) {
+  showErrorToast({ message: "El CBU debe tener exactamente 22 dígitos numéricos." });
+  setLoading(false);
+  return;
+}
+   if (!form.BirthDate) {
+    showErrorToast({ message: "La fecha de nacimiento es obligatoria." });
+    setLoading(false);
+    return;
+  }
+  // Validación de fecha de nacimiento (no mayor a 120 años)
+  const birthDate = new Date(form.BirthDate);
+  const today = new Date();
+  const maxAgeDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+  if (birthDate < maxAgeDate) {
+    showErrorToast({ message: "La fecha de nacimiento no puede corresponder a una persona mayor a 120 años." });
+    setLoading(false);
+    return;
+  }
+    // Validación de todos los campos obligatorios
+    if (
+      !form.LegalName ||
+      !form.DNI ||
+      form.CivilStatus === "Seleccione una opcion" ||
+      form.Gender === "Seleccione una opcion" ||
+      form.Province === "Seleccione una opcion" ||
+      !form.BirthDate ||
+      !form.Organization ||
+      !form.Address ||
+      !form.WorkAddress ||
+      !form.City ||
+      !form.Phone ||
+      !form.Email ||
+      !form.CBU
+    ) {
+      showErrorToast({ message: "Por favor, complete todos los campos." });
+      setLoading(false);
+      return;
+    }
+
+    if (form.CBU.length < 22) {
+      showErrorToast({ message: "El CBU debe tener al menos 22 caracteres." });
+      setLoading(false);
+      return;
+    }
+
+    if (form.Phone.length < 8) {
+      showErrorToast({
+        message: "El teléfono debe tener al menos 8 caracteres.",
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await apiMutual.RegisterAssociate(form);
-      setMessage({ type: "success", text: response.mensaje });
+      showSuccessToast({
+        title: "Asociado creado",
+        message:
+          response.mensaje || "El asociado fue registrado correctamente.",
+      });
 
       setTimeout(() => {
         navigate("/asociados");
       }, 2000);
     } catch (error: any) {
-      console.error("Error al registrar asociado:", error);
       const errorMessage =
-        error.response?.data?.message ||
-        "Ocurrió un error al registrar el asociado.";
-      setMessage({ type: "error", text: errorMessage });
+        error?.response?.data?.message ||
+        "Error de sistema al registrar el asociado.";
+      showErrorToast({
+        title: "Error",
+        message: errorMessage,
+      });
     } finally {
       setLoading(false);
     }
@@ -106,30 +203,27 @@ const CreateAssociate: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar fija a la izquierda */}
       <Sidebar />
-
-      {/* Header */}
-      <Header hasNotifications={true} loans={[]} />
-      <div className="flex flex-col items-center py-8 flex-1 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8">
-          <h2 className="text-2xl font-bold mb-6 text-blue-900">
-            Nuevo Asociado
-          </h2>
-          {message && (
-            <div
-              className={`p-3 rounded-md mb-4 text-sm font-medium ${
-                message.type === "success"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-              role="alert"
-            >
-              {message.text}
+      <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
+        <Header hasNotifications={true} loans={[]} />
+        <div className="flex flex-col items-center py-8 flex-1">
+          <div className="w-full max-w-xl">
+            <div className="flex justify-start mb-6">
+              <button
+                onClick={() => navigate("/asociados")}
+                className="text-gray-600 hover:text-gray-800 flex items-center"
+                aria-label="Volver a Usuarios"
+              >
+                <ChevronLeftIcon className="h-5 w-5" />
+                <span className="ml-1">Volver</span>
+              </button>
             </div>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <h2 className="text-2xl font-bold mb-6 text-blue-900">
+              Nuevo Asociado
+            </h2>
+          </div>
+          <div className="w-full max-w-xl bg-white rounded-lg shadow p-8">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Apellido y Nombre Legal
@@ -143,7 +237,6 @@ const CreateAssociate: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   N° Documento (DNI)
@@ -157,7 +250,6 @@ const CreateAssociate: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Estado Civil
@@ -175,7 +267,6 @@ const CreateAssociate: React.FC = () => {
                   ))}
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Género
@@ -193,7 +284,6 @@ const CreateAssociate: React.FC = () => {
                   ))}
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Fecha de Nacimiento
@@ -206,7 +296,6 @@ const CreateAssociate: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Organismo
@@ -220,7 +309,6 @@ const CreateAssociate: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Dirección
@@ -234,7 +322,6 @@ const CreateAssociate: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Dirección Laboral
@@ -248,7 +335,6 @@ const CreateAssociate: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Ciudad
@@ -262,7 +348,6 @@ const CreateAssociate: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Provincia
@@ -281,7 +366,6 @@ const CreateAssociate: React.FC = () => {
                   ))}
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Teléfono
@@ -294,7 +378,6 @@ const CreateAssociate: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
@@ -307,7 +390,6 @@ const CreateAssociate: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   CBU
@@ -321,25 +403,24 @@ const CreateAssociate: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <button
-                type="button"
-                onClick={() => navigate("/asociados")}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md transition duration-200 ease-in-out"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-semibold transition duration-200 ease-in-out disabled:opacity-50"
-                disabled={loading}
-              >
-                {loading ? "Guardando..." : "Guardar"}
-              </button>
-            </div>
-          </form>
+              <div className="flex justify-end gap-2 pt-4">
+                <button
+                  type="button"
+                  onClick={() => navigate("/asociados")}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-full transition duration-200 ease-in-out"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold transition duration-200 ease-in-out disabled:opacity-50"
+                  disabled={loading}
+                >
+                  {loading ? "Guardando..." : "Guardar"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>

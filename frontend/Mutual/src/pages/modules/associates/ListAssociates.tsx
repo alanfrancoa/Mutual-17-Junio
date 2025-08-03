@@ -5,6 +5,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
 import { IAssociateList } from "../../../types/associates/IAssociateList";
+import useAppToast from "../../../hooks/useAppToast";
 
 // Paginación y búsqueda
 const PAGE_SIZE = 10;
@@ -15,20 +16,17 @@ interface DashboardProps {
   hasNotifications?: boolean;
 }
 
-const Associates: React.FC<DashboardProps> = ({
-  userName = "Fernando",
-  userRole = "administrador",
-  hasNotifications = true,
-}) => {
+const Associates: React.FC<DashboardProps> = ({}) => {
   const navigate = useNavigate();
-  const [associates, setAssociates] = useState<IAssociateList[]>([]); 
-  const [loading, setLoading] = useState<boolean>(true); 
-  const [error, setError] = useState<string | null>(null); 
+  const [associates, setAssociates] = useState<IAssociateList[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [estadoFiltro, setEstadoFiltro] = useState<
     "Todos" | "Activo" | "Inactivo"
   >("Todos");
+  const { showErrorToast, showSuccessToast } = useAppToast();
 
   const fetchAssociates = async () => {
     setLoading(true);
@@ -38,7 +36,14 @@ const Associates: React.FC<DashboardProps> = ({
       setAssociates(data);
     } catch (err: any) {
       console.error("Error fetching associates:", err);
-      setError(err.response?.data?.message || "Error al cargar los asociados.");
+      const errorMsg =
+        err.response?.data?.message ||
+        "Error de sistema al cargar los asociados.";
+      setError(errorMsg);
+      showErrorToast({
+        title: "Error",
+        message: errorMsg,
+      });
     } finally {
       setLoading(false);
     }
@@ -46,7 +51,7 @@ const Associates: React.FC<DashboardProps> = ({
 
   useEffect(() => {
     fetchAssociates();
-  }, []); 
+  }, []);
 
   // Filtrado por busqueda y estado
   const filteredAssociates = associates.filter((a) => {
@@ -87,11 +92,12 @@ const Associates: React.FC<DashboardProps> = ({
       {/* Contenido principal desplazado a la derecha */}
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
         {/* Header */}
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
 
         {/* Main Content */}
         <main className="flex-1 p-6 bg-gray-100">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Asociados</h1>
+          <h1 className="text-2xl font-bold text-blue-900 mb-4">Asociados</h1>
+
           <div className="flex-1 w-full">
             <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
               {/* Buscador, filtro y botón agregar asociado */}
@@ -126,7 +132,7 @@ const Associates: React.FC<DashboardProps> = ({
                 </div>
                 <button
                   onClick={() => navigate("/asociados/crear")}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded font-semibold shadow transition w-full md:w-auto"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full font-semibold shadow transition w-full md:w-auto"
                 >
                   + Agregar Asociado
                 </button>
@@ -196,7 +202,7 @@ const Associates: React.FC<DashboardProps> = ({
                               className={`px-3 py-1 rounded-full text-xs font-semibold ${
                                 asociado.active
                                   ? "bg-green-100 text-green-800"
-                                  : "bg-yellow-100 text-yellow-800"
+                                  : "bg-red-100 text-red-800"
                               }`}
                             >
                               {asociado.active ? "Activo" : "Inactivo"}
@@ -220,9 +226,8 @@ const Associates: React.FC<DashboardProps> = ({
                           </td>
                           <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
                             <div className="space-x-2 flex justify-end">
-                              
                               <button
-                                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                                className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
                                 onClick={() =>
                                   navigate(`/asociados/editar/${asociado.id}`)
                                 }
@@ -230,24 +235,36 @@ const Associates: React.FC<DashboardProps> = ({
                                 Editar
                               </button>
                               <button
-                                className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                                className={`bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full transition text-xs font-medium ${
+                                  !asociado.active
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                                }`}
                                 onClick={() =>
                                   navigate(`/asociados/eliminar/${asociado.id}`)
                                 }
+                                disabled={!asociado.active}
                               >
                                 Dar de baja
                               </button>
                               <button
-                                className="bg-blue-500 hover:bg-gray-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                                className={`bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full transition text-xs font-medium ${
+                                  asociado.active
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                                }`}
                                 onClick={() =>
-                                  navigate(`/asociados/reactivar/${asociado.id}`)
+                                  navigate(
+                                    `/asociados/reactivar/${asociado.id}`
+                                  )
                                 }
+                                disabled={asociado.active}
                               >
-                                Alta
+                                Reactivar
                               </button>
 
                               <button
-                                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
                                 onClick={() =>
                                   navigate(`/asociados/detalle/${asociado.id}`)
                                 }

@@ -5,21 +5,24 @@ import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
 import { IAssociateList } from "../../../types/associates/IAssociateList";
 import { IAssociateRegister } from "../../../types/associates/IAssociateRegister";
+import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import useAppToast from "../../../hooks/useAppToast";
 
 const estadoCivilOpciones = [
-  { label: "Soltero/a", value: "Soltero" },
-  { label: "Casado/a", value: "Casado" },
-  { label: "Divorciado/a", value: "Divorciado" },
-  { label: "Viudo/a", value: "Viudo" },
+  { label: "Soltero/a", value: "Soltero/a" },
+  { label: "Casado/a", value: "Casado/a" },
+  { label: "Divorciado/a", value: "Divorciado/a" },
+  { label: "Viudo/a", value: "Viudo/a" },
 ];
 
 const generosOpciones = [
   { label: "Masculino", value: "M" },
   { label: "Femenino", value: "F" },
-  { label: "Otro", value: "" },
+  { label: "Otro", value: "X" },
 ];
 
 const provincias = [
+  "Ciudad Autonoma de Buenos Aires",
   "Buenos Aires",
   "Catamarca",
   "Chaco",
@@ -75,12 +78,15 @@ const EditAssociate: React.FC = () => {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const { showSuccessToast, showErrorToast } = useAppToast();
 
   useEffect(() => {
     const fetchAssociateDetails = async () => {
       if (associateId === null) {
-        setError("ID de asociado no proporcionado.");
-        setLoadingInitialData(false);
+        showErrorToast({
+          title: "Error",
+          message: "ID de asociado no válido para actualizar.",
+        });
         return;
       }
       try {
@@ -129,6 +135,37 @@ const EditAssociate: React.FC = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Validaciones avanzadas
+  const validateForm = () => {
+    if (!form.LegalName.match(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)) {
+      return "El nombre legal solo puede contener letras y espacios.";
+    }
+    if (!form.DNI || form.DNI.length < 8) {
+      return "El DNI debe tener al menos 8 caracteres.";
+    }
+    if (!form.CBU.match(/^\d{22}$/)) {
+      return "El CBU debe tener exactamente 22 dígitos.";
+    }
+    if (!form.Gender) {
+      return "El género es obligatorio.";
+    }
+    if (!form.Province) {
+      return "La provincia es obligatoria.";
+    }
+    if (!form.CivilStatus) {
+      return "El estado civil es obligatorio.";
+    }
+    if (form.BirthDate) {
+      const birth = new Date(form.BirthDate);
+      const today = new Date();
+      const age = today.getFullYear() - birth.getFullYear();
+      if (age > 120) {
+        return "La fecha de nacimiento no puede ser mayor a 120 años.";
+      }
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (associateId === null) {
@@ -139,12 +176,26 @@ const EditAssociate: React.FC = () => {
       return;
     }
 
+    const validationError = validateForm();
+    if (validationError) {
+      showErrorToast({
+        title: "Validación",
+        message: validationError,
+      });
+      setSubmitting(false);
+      return;
+    }
+
     setSubmitting(true);
+
     setMessage(null);
 
     try {
       const response = await apiMutual.UpdateAssociate(associateId, form);
-      setMessage({ type: "success", text: response.mensaje });
+      showSuccessToast({
+        title: "Cambio exitoso",
+        message: response.mensaje || "Asociado actualizado correctamente.",
+      });
       setTimeout(() => {
         navigate("/asociados");
       }, 2000);
@@ -153,245 +204,259 @@ const EditAssociate: React.FC = () => {
       const errorMessage =
         err.response?.data?.message ||
         "Ocurrió un error al actualizar el asociado.";
-      setMessage({ type: "error", text: errorMessage });
+      showErrorToast({
+        title: "Error",
+        message: errorMessage,
+      });
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
-      <Header hasNotifications={true} loans={[]} />
-
-      <div className="flex flex-col items-center py-8 flex-1 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8">
-          <h2 className="text-2xl font-bold mb-6 text-blue-900">
-            Editar Asociado
-          </h2>
-          {message && (
-            <div
-              className={`p-3 rounded-md mb-4 text-sm font-medium ${
-                message.type === "success"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-              role="alert"
-            >
-              {message.text}
+      <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
+        <Header hasNotifications={true} loans={[]} />
+        <div className="flex flex-col items-center py-8 flex-1">
+          <div className="w-full max-w-xl">
+            <div className="flex justify-start mb-6">
+              <button
+                onClick={() => navigate("/asociados")}
+                className="text-gray-600 hover:text-gray-800 flex items-center"
+                aria-label="Volver a Asociados"
+              >
+                <ChevronLeftIcon className="h-5 w-5" />
+                <span className="ml-1">Volver</span>
+              </button>
             </div>
-          )}
+            <h2 className="text-2xl font-bold mb-6 text-blue-900">
+              Editar Asociado
+            </h2>
+            <div className="w-full max-w-xl bg-white rounded-lg shadow p-8">
+              {message && (
+                <div
+                  className={`p-3 rounded-md mb-4 text-sm font-medium ${
+                    message.type === "success"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                  role="alert"
+                >
+                  {message.text}
+                </div>
+              )}
 
-          {loadingInitialData ? (
-            <div className="text-center py-8 text-gray-500">
-              Cargando datos del asociado...
+              {loadingInitialData ? (
+                <div className="text-center py-8 text-gray-500">
+                  Cargando datos del asociado...
+                </div>
+              ) : error ? (
+                <div className="text-center py-8 text-red-600">{error}</div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Apellido y Nombre Legal
+                    </label>
+                    <input
+                      type="text"
+                      name="LegalName"
+                      value={form.LegalName}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      N° Documento (DNI)
+                    </label>
+                    <input
+                      type="text"
+                      name="DNI"
+                      value={form.DNI}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Estado Civil
+                    </label>
+                    <select
+                      name="CivilStatus"
+                      value={form.CivilStatus}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Selecciona una opción</option>
+                      {estadoCivilOpciones.map((ec) => (
+                        <option key={ec.value} value={ec.value}>
+                          {ec.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Género
+                    </label>
+                    <select
+                      name="Gender"
+                      value={form.Gender}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Selecciona una opción</option>
+                      {generosOpciones.map((g) => (
+                        <option key={g.value} value={g.value}>
+                          {g.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Fecha de Nacimiento
+                    </label>
+                    <input
+                      type="date"
+                      name="BirthDate"
+                      value={form.BirthDate || ""}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Organismo
+                    </label>
+                    <input
+                      type="text"
+                      name="Organization"
+                      value={form.Organization}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Dirección
+                    </label>
+                    <input
+                      type="text"
+                      name="Address"
+                      value={form.Address}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Dirección Laboral
+                    </label>
+                    <input
+                      type="text"
+                      name="WorkAddress"
+                      value={form.WorkAddress}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Ciudad
+                    </label>
+                    <input
+                      type="text"
+                      name="City"
+                      value={form.City}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Provincia
+                    </label>
+                    <select
+                      name="Province"
+                      value={form.Province}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Selecciona una opción</option>
+                      {provincias.map((prov) => (
+                        <option key={prov} value={prov}>
+                          {prov}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Teléfono
+                    </label>
+                    <input
+                      type="text"
+                      name="Phone"
+                      value={form.Phone || ""}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      name="Email"
+                      value={form.Email || ""}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      CBU
+                    </label>
+                    <input
+                      type="text"
+                      name="CBU"
+                      value={form.CBU}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => navigate("/asociados")}
+                      className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-full transition duration-200 ease-in-out"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold transition duration-200 ease-in-out disabled:opacity-50"
+                      disabled={submitting}
+                    >
+                      {submitting ? "Guardando..." : "Guardar Cambios"}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
-          ) : error ? (
-            <div className="text-center py-8 text-red-600">{error}</div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Apellido y Nombre Legal
-                  </label>
-                  <input
-                    type="text"
-                    name="LegalName"
-                    value={form.LegalName}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    N° Documento (DNI)
-                  </label>
-                  <input
-                    type="text"
-                    name="DNI"
-                    value={form.DNI}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Estado Civil
-                  </label>
-                  <select
-                    name="CivilStatus"
-                    value={form.CivilStatus}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {estadoCivilOpciones.map((ec) => (
-                      <option key={ec.value} value={ec.value}>
-                        {ec.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Género
-                  </label>
-                  <select
-                    name="Gender"
-                    value={form.Gender}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {generosOpciones.map((g) => (
-                      <option key={g.value} value={g.value}>
-                        {g.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fecha de Nacimiento
-                  </label>
-                  <input
-                    type="date"
-                    name="BirthDate"
-                    value={form.BirthDate || ""}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Organismo
-                  </label>
-                  <input
-                    type="text"
-                    name="Organization"
-                    value={form.Organization}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Dirección
-                  </label>
-                  <input
-                    type="text"
-                    name="Address"
-                    value={form.Address}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Dirección Laboral
-                  </label>
-                  <input
-                    type="text"
-                    name="WorkAddress"
-                    value={form.WorkAddress}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Ciudad
-                  </label>
-                  <input
-                    type="text"
-                    name="City"
-                    value={form.City}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Provincia
-                  </label>
-                  <select
-                    name="Province"
-                    value={form.Province}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {provincias.map((prov) => (
-                      <option key={prov} value={prov}>
-                        {prov}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Teléfono
-                  </label>
-                  <input
-                    type="text"
-                    name="Phone"
-                    value={form.Phone || ""}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="Email"
-                    value={form.Email || ""}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    CBU
-                  </label>
-                  <input
-                    type="text"
-                    name="CBU"
-                    value={form.CBU}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4">
-                <button
-                  type="button"
-                  onClick={() => navigate("/asociados")}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md transition duration-200 ease-in-out"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-semibold transition duration-200 ease-in-out disabled:opacity-50"
-                  disabled={submitting}
-                >
-                  {submitting ? "Guardando..." : "Guardar Cambios"}
-                </button>
-              </div>
-            </form>
-          )}
+          </div>
         </div>
       </div>
     </div>
