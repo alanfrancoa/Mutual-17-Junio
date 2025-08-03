@@ -108,7 +108,6 @@ const AllSuppliers: React.FC = () => {
                         </button>
                         <button
                           onClick={() => {
-                            console.log("desactivar proveedor:", s.id);
                             navigate(`/proveedores/desactivar/${s.id}`);
                           }}
                           className={(
