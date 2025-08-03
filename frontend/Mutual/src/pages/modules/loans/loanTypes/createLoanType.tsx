@@ -125,7 +125,7 @@ const CreateLoan: React.FC = () => {
               </button>
             </div>
             <h2 className="text-2xl font-bold text-blue-900 mb-6">
-              Crear Préstamo
+              Crear Tipo de Préstamo
             </h2>
           </div>
           <div className="w-full max-w-xl bg-white rounded-lg shadow p-8">
