@@ -41,12 +41,12 @@ const InvoicesPage: React.FC = () => {
       const data = await apiMutual.GetInvoices();
       const mappedData = data.map((i: any) => ({
         Id: i.id,
-        Supplier: i.supplier ?? "N/A",
+        Supplier: i.supplierName ?? "N/A",
         InvoiceNumber: i.invoiceNumber ?? "N/A",
         IssueDate: new Date(i.issueDate).toLocaleDateString(),
         DueDate: new Date(i.dueDate).toLocaleDateString(),
         Total: i.total ?? 0,
-        TypeService: i.typeService ?? "N/A",
+        TypeService: i.serviceType ?? "N/A",
         Description: i.description ?? "",
         Paid: i.paid,
       }));
