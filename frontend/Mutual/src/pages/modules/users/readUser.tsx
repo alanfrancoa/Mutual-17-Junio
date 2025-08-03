@@ -4,12 +4,15 @@ import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
 import { User } from "../../../types/user";
+import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import useAppToast from "../../../hooks/useAppToast";
 
 const ReadUser: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { showErrorToast } = useAppToast();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -18,7 +21,7 @@ const ReadUser: React.FC = () => {
         const data = await apiMutual.GetUserById(Number(id));
         setUser(data);
       } catch (error) {
-        alert("Error al obtener el usuario");
+      showErrorToast({ message: "Error de sistema al obtener el usuario" });
       }
       setLoading(false);
     };
@@ -26,12 +29,23 @@ const ReadUser: React.FC = () => {
   }, [id]);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+   <div className="min-h-screen bg-gray-100 flex">
+      
       <Sidebar />
-          <Header hasNotifications={true} loans={[]}  />
-
-      <div className="flex flex-col items-center py-8 flex-1">
-        <div className="w-full max-w-xl">
+      <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
+        <Header hasNotifications={true} loans={[]} />
+        <div className="flex flex-col items-center py-8 flex-1">
+          <div className="w-full max-w-xl">
+            <div className="flex justify-start mb-6">
+              <button
+                onClick={() => navigate("/usuarios")}
+                className="text-gray-600 hover:text-gray-800 flex items-center"
+                aria-label="Volver a Usuarios"
+              >
+                <ChevronLeftIcon className="h-5 w-5" />
+                <span className="ml-1">Volver</span>
+              </button>
+            </div>
           <h2 className="text-2xl font-bold mb-6 text-blue-900">
             Detalles del Usuario
           </h2>
@@ -99,7 +113,7 @@ const ReadUser: React.FC = () => {
               {user.deletedAt && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Eliminado el
+                    Fecha de baja
                   </label>
                   <input
                     type="text"
@@ -113,7 +127,7 @@ const ReadUser: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/usuarios")}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-semibold"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full font-semibold"
                 >
                   Volver
                 </button>
@@ -127,6 +141,7 @@ const ReadUser: React.FC = () => {
         </div>
       </div>
     </div>
+     </div>
   );
 };
 

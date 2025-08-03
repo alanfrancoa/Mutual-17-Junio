@@ -4,12 +4,12 @@ import Header from "../../dashboard/components/Header";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { apiMutual } from "../../../api/apiMutual";
 import { AuditLog } from "../../../types/auditLog";
+import useAppToast from "../../../hooks/useAppToast";
 
 const SYSTEM_MODULES = [
   { value: "todos", label: "Todos los módulos" },
-  { value: "Proveedores", label: "Proveedores" },
+  { value: "Pagos", label: "Pagos" },
   { value: "Cobros", label: "Cobros" },
-  { value: "Auditoria", label: "Auditoría" },
   { value: "Préstamos", label: "Préstamos" },
   { value: "Reportes Inaes", label: "Reportes Inaes" },
   { value: "Períodos contables", label: "Períodos contables" },
@@ -26,14 +26,15 @@ const AuditTable: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedModule, setSelectedModule] = useState<string>("todos");
+  const { showErrorToast } = useAppToast();
 
   const MODULE_NAME_MAP: Record<string, string> = {
     LoanModel: "Préstamos",
-    SupplierModel: "Proveedores",
-    AuditModel: "Auditoría",
     InaesReportModel: "Reportes Inaes",
     AccountingPeriodModel: "Períodos contables",
-    CollectionsModel: "Cobros",
+    CollectionModel: "Cobros",
+    InvoiceModel: "Facturas",
+    PaymentModel: "Pagos",
   };
 
   const MODULE_NAME_MAP_INVERSE: Record<string, string> = Object.fromEntries(
@@ -62,6 +63,10 @@ const AuditTable: React.FC = () => {
       }
     } catch (err) {
       console.error("Error fetching audit logs:", err);
+      showErrorToast({
+        message: "Error al cargar los registros de auditoría.",
+      });
+
       setError("Error al cargar los registros de auditoría.");
       setAuditLogs([]);
     } finally {
@@ -80,8 +85,7 @@ const AuditTable: React.FC = () => {
       setPage(1);
     };
 
-
-    // funcion para tomar valores sin tilde 
+  // funcion para tomar valores sin tilde
   const removeDiacritics = (str: string) =>
     str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
@@ -132,7 +136,7 @@ const AuditTable: React.FC = () => {
 
         {/* Main Content */}
         <main className="flex-1 p-6 bg-gray-100">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Auditoría</h1>
+          <h1 className="text-2xl font-bold text-blue-900 mb-4">Auditorías</h1>
 
           <div className="flex-1 w-full">
             <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
@@ -200,8 +204,9 @@ const AuditTable: React.FC = () => {
                           colSpan={5}
                           className="text-center py-8 text-gray-400"
                         >
-                          No hay registros de auditoría con los filtros
-                          aplicados
+                          {search.trim() || selectedModule !== "todos"
+                            ? "No hay registros de auditoría con ese criterio de búsqueda"
+                            : "No hay registros de auditoría"}
                         </td>
                       </tr>
                     ) : (

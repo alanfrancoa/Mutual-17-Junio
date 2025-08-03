@@ -138,12 +138,6 @@ const Collections: React.FC = () => {
                             >
                                 Cobros atrasados
                             </button>
-                            <button
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded"
-                                onClick={() => navigate("/collections/payment-schedule")}
-                            >
-                                Cronograma de cobros
-                            </button>
                         </div>
                         {error && <div className="text-red-600 mb-4">{error}</div>}
                         <table className="min-w-full divide-y divide-gray-200 mb-4">

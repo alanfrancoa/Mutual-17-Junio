@@ -14,7 +14,7 @@ const CreateLoan: React.FC = () => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    code: loanCodeOptions[0].value,
+    code: "",
     name: "",
     interestRate: 0,
     maxAmount: 0,
@@ -125,7 +125,7 @@ const CreateLoan: React.FC = () => {
               </button>
             </div>
             <h2 className="text-2xl font-bold text-blue-900 mb-6">
-              Crear Préstamo
+              Crear Tipo de Préstamo
             </h2>
           </div>
           <div className="w-full max-w-xl bg-white rounded-lg shadow p-8">
@@ -155,6 +155,7 @@ const CreateLoan: React.FC = () => {
                   className="w-full border border-gray-300 rounded px-3 py-2"
                   required
                 >
+                  <option value="">Seleccione un código...</option>
                   {loanCodeOptions.map((lc) => (
                     <option key={lc.value} value={lc.value}>
                       {lc.label}

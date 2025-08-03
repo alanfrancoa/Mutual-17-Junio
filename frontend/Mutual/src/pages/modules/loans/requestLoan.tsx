@@ -15,7 +15,7 @@ const RequestLoan: React.FC = () => {
     associateDni: "",
     associateName: "",
     applicationDate: "",
-    loanTypeId: 0,
+    loanTypeId: "", // <-- Cambiado a string vacío
     amount: 0,
     termMonths: 0,
   });
@@ -24,15 +24,9 @@ const RequestLoan: React.FC = () => {
     const fetchLoanTypes = async () => {
       try {
         const allTypes = await apiMutual.GetLoanTypes();
-        // Filtrar solo los activos
         const activos = allTypes.filter((type) => type.active === "Activo");
         setLoanTypes(activos);
-        if (activos.length > 0) {
-          setForm((prev) => ({
-            ...prev,
-            loanTypeId: activos[0].id,
-          }));
-        }
+        // Quitar la selección automática del primer tipo
       } catch (error) {
         setLoanTypes([]);
       }
@@ -57,9 +51,7 @@ const RequestLoan: React.FC = () => {
     e.preventDefault();
     setMessage(null);
 
-   
     // Validaciones por campos
-
     if (!form.associateDni.trim()) {
       setMessage({
         type: "error",
@@ -96,21 +88,21 @@ const RequestLoan: React.FC = () => {
       return;
     }
 
+    // Convertir loanTypeId a number antes de enviar
+    const payload = {
+      ...form,
+      loanTypeId: Number(form.loanTypeId),
+    };
+
     try {
-      console.log("Datos del nuevo préstamo a enviar:", {
-        dni: form.associateDni,
-        associateName: form.associateName,
-        loanType: form.loanTypeId,
-        amount: form.amount,
-        termMonths: form.termMonths,
-      });
+      console.log("Datos del nuevo préstamo a enviar:", payload);
 
       setMessage({ type: "success", text: "¡Préstamo solicitado con éxito!" });
 
       setForm({
         associateDni: "",
         associateName: "",
-        loanTypeId: loanTypes[0].id,
+        loanTypeId: "",
         amount: 0,
         termMonths: 0,
         applicationDate: "",
@@ -124,7 +116,7 @@ const RequestLoan: React.FC = () => {
     }
 
     try {
-      const response = await apiMutual.CreateLoan(form);
+      const response = await apiMutual.CreateLoan(payload);
       setMessage({ type: "success", text: response.message });
 
       setTimeout(() => {
@@ -233,6 +225,7 @@ const RequestLoan: React.FC = () => {
                   required
                   className="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
+                  <option value="">Seleccione un tipo de préstamo...</option>
                   {loanTypes.map((type) => (
                     <option key={type.id} value={type.id}>
                       {type.name}
