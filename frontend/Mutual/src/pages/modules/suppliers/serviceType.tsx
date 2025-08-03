@@ -94,9 +94,9 @@ const ServiceTypeList: React.FC = () => {
     try {
       setError("");
       setSuccess("");
-      
+
       await apiMutual.ServiceTypeState(id, newStatus);
-      
+
       setSuccess("Estado del tipo de servicio actualizado correctamente");
       await fetchServiceTypes();
     } catch (err: any) {
@@ -134,7 +134,7 @@ const ServiceTypeList: React.FC = () => {
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1" style={{ marginLeft: "18rem" }}>
-        <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
         <div className="flex flex-col items-center py-8">
           <div className="w-full max-w-2xl bg-white rounded-lg shadow p-8">
             <h2 className="text-2xl font-bold mb-6">Agregar/Desactivar tipos de servicio</h2>
@@ -168,14 +168,19 @@ const ServiceTypeList: React.FC = () => {
                     </td>
                     <td className="px-4 py-2">
                       {editIndex === index ? (
-                        <input
-                          type="text"
+                        <select
                           value={editedRow.code ?? type.code}
                           onChange={e =>
                             setEditedRow({ ...editedRow, code: e.target.value })
                           }
+                          required
                           className="border px-2 py-1 rounded w-full"
-                        />
+                        >
+                          <option value="">Seleccione un código...</option>
+                          <option value="Servicios">Servicios</option>
+                          <option value="Productos">Productos</option>
+                          <option value="Otros">Otros</option>
+                        </select>
                       ) : (
                         type.code
                       )}
@@ -217,11 +222,10 @@ const ServiceTypeList: React.FC = () => {
                           </button>
                           <button
                             onClick={() => handleToggleState(type.id, !type.active)}
-                            className={`${
-                              type.active
-                                ? "bg-red-600 hover:bg-red-700"
-                                : "bg-green-600 hover:bg-green-700"
-                            } text-white px-3 py-1 rounded text-sm`}
+                            className={`${type.active
+                              ? "bg-red-600 hover:bg-red-700"
+                              : "bg-green-600 hover:bg-green-700"
+                              } text-white px-3 py-1 rounded text-sm`}
                           >
                             {type.active ? "Desactivar" : "Activar"}
                           </button>
@@ -244,15 +248,17 @@ const ServiceTypeList: React.FC = () => {
                       />
                     </td>
                     <td className="px-4 py-2">
-                      <input
-                        type="text"
+                      <select
                         value={row.code}
                         onChange={e => handleNewRowChange(idx, "code", e.target.value)}
-                        placeholder="Código"
                         required
-                        maxLength={50}
                         className="border px-2 py-1 rounded w-full"
-                      />
+                      >
+                        <option value="">Seleccione un código...</option>
+                        <option value="Servicios">Servicios</option>
+                        <option value="Productos">Productos</option>
+                        <option value="Otros">Otros</option>
+                      </select>
                     </td>
                     <td className="px-4 py-2">Nuevo</td>
                     <td className="px-4 py-2 flex gap-2">
