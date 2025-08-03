@@ -33,8 +33,23 @@ const InvoiceCreatePage: React.FC = () => {
 
     useEffect(() => {
         // Cargar proveedores y tipos de servicio
-        apiMutual.GetAllSuppliers().then(setSuppliers);
-        apiMutual.GetServiceTypes().then(setServiceTypes);
+        apiMutual.GetAllSuppliers().then((data) => {
+            if (Array.isArray(data)) {
+                // Filtra solo los activos (usa 'active' o 'Active' según tu backend)
+                const activos = data.filter((s: any) => s.active || s.Active);
+                setSuppliers(activos);
+            } else {
+                setSuppliers([]);
+            }
+        });
+        apiMutual.GetServiceTypes().then((data) => {
+            if (Array.isArray(data)) {
+                const activos = data.filter((t: any) => t.active || t.Active);
+                setServiceTypes(activos);
+            } else {
+                setServiceTypes([]);
+            }
+        });
     }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
