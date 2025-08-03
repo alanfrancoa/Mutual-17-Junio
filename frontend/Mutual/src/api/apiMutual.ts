@@ -491,7 +491,7 @@ GetServices: async (): Promise<any[]> => {
     monthlyCost: number;
   }): Promise<{ message: string }> => {
     const url = `https://localhost:7256/api/services/${id}`;
-    const response = await Fetcher.patch(url, serviceData, {
+    const response = await Fetcher.put(url, serviceData, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
