@@ -7,9 +7,8 @@ import { AuditLog } from "../../../types/auditLog";
 
 const SYSTEM_MODULES = [
   { value: "todos", label: "Todos los módulos" },
-  { value: "Proveedores", label: "Proveedores" },
+  { value: "Pagos", label: "Pagos" },
   { value: "Cobros", label: "Cobros" },
-  { value: "Auditoria", label: "Auditoría" },
   { value: "Préstamos", label: "Préstamos" },
   { value: "Reportes Inaes", label: "Reportes Inaes" },
   { value: "Períodos contables", label: "Períodos contables" },
@@ -29,11 +28,11 @@ const AuditTable: React.FC = () => {
 
   const MODULE_NAME_MAP: Record<string, string> = {
     LoanModel: "Préstamos",
-    SupplierModel: "Proveedores",
-    AuditModel: "Auditoría",
     InaesReportModel: "Reportes Inaes",
     AccountingPeriodModel: "Períodos contables",
-    CollectionsModel: "Cobros",
+    CollectionModel: "Cobros",
+    InvoiceModel: "Facturas",
+    PaymentModel: "Pagos",
   };
 
   const MODULE_NAME_MAP_INVERSE: Record<string, string> = Object.fromEntries(
