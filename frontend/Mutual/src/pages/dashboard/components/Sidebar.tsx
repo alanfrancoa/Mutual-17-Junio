@@ -110,7 +110,7 @@ const Sidebar: React.FC = () => {
             </div>
 
             <a
-              href=" "
+              href="/cobros"
               className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
             >
               <CreditCardIcon className="h-5 w-5" />
