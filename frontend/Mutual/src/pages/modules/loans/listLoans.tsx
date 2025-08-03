@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import Sidebar from "../../dashboard/components/Sidebar";
@@ -8,10 +8,9 @@ import { apiMutual } from "../../../api/apiMutual";
 import { ILoanList } from "../../../types/loans/ILoanList";
 import RejectLoanButton from "./rejectLoan";
 import ApproveLoanButton from "../loans/approveLoan";
-import { useLoans } from "../../../context/LoansContext";
 
-// Paginacion
-const PAGE_SIZE = 5;
+// limite de prestamos mostrados
+const DEFAULT_PAGE_SIZE = 5;
 
 const Loans: React.FC = () => {
   const navigate = useNavigate();
@@ -46,7 +45,7 @@ const Loans: React.FC = () => {
     fetchLoans();
   }, []);
 
-  // useEffect para aplicar los filtrado y busqueda
+  // useEffect  filtrado y busqueda
   useEffect(() => {
     let currentFiltered = loans;
 
@@ -69,14 +68,21 @@ const Loans: React.FC = () => {
     }
 
     setFilteredAndSearchedLoans(currentFiltered);
-    setPage(1);
   }, [search, estadoFiltro, loans]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [search, estadoFiltro]);
+
   // Calculo de paginacion segun filtrado
-  const totalPages = Math.ceil(filteredAndSearchedLoans.length / PAGE_SIZE);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredAndSearchedLoans.length / DEFAULT_PAGE_SIZE)
+  );
+
   const paginatedLoans = filteredAndSearchedLoans.slice(
-    (page - 1) * PAGE_SIZE,
-    page * PAGE_SIZE
+    (page - 1) * DEFAULT_PAGE_SIZE,
+    page * DEFAULT_PAGE_SIZE
   );
 
   const handlePageChange = (newPage: number) => {
@@ -124,7 +130,7 @@ const Loans: React.FC = () => {
                   {userRole === "Gestor" && (
                     <button
                       onClick={() => navigate("/prestamos/solicitar")}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded font-semibold shadow transition flex items-center gap-2"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-semibold shadow transition flex items-center gap-2"
                     >
                       Solicitar Préstamo
                     </button>
@@ -180,7 +186,7 @@ const Loans: React.FC = () => {
                     ) : (
                       paginatedLoans.map((loan, idx) => (
                         <tr
-                          key={loan.associateDni}
+                          key={loan.id}
                           className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
                         >
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
@@ -220,16 +226,20 @@ const Loans: React.FC = () => {
                           <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
                             <div className="space-x-2 flex justify-end">
                               {/* acciones rechazo y aprobacion */}
-                              <RejectLoanButton
-                                loan={loan}
-                                onRefreshLoans={fetchLoans}
-                              />
-                              <ApproveLoanButton
-                                loan={loan}
-                                onRefreshLoans={fetchLoans}
-                              />
+                              {userRole !== "Gestor" && (
+                                <>
+                                  <RejectLoanButton
+                                    loan={loan}
+                                    onRefreshLoans={fetchLoans}
+                                  />
+                                  <ApproveLoanButton
+                                    loan={loan}
+                                    onRefreshLoans={fetchLoans}
+                                  />
+                                </>
+                              )}
                               <button
-                                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded-full transition text-xs font-medium"
                                 onClick={() =>
                                   navigate(`/prestamos/detalle/${loan.id}`)
                                 }
