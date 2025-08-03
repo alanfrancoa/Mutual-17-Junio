@@ -4,43 +4,23 @@ import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
 import { IServiceType } from "../../../types/IServiceType";
-
-interface Supplier {
-  id: number;
-  cuit: string;
-  legalName: string;
-  address: string;
-  phone?: string;
-  email?: string;
-  active: boolean;
-  createdAt: string;
-}
-
-interface ServiceType {
-  id: number;
-  code: string;
-  name: string;
-  isActive: boolean;
-}
-
-interface ServiceForm {
-  ServiceTypeId: number | "";
-  SupplierId: number | "";
-  Description: string;
-  MonthlyCost: string;
-}
+import { ISupplier } from "../../../types/ISupplier"; 
+import { IServiceUpdate } from "../../../types/IServiceRegister";
 
 const EditService: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
-  const [form, setForm] = useState<ServiceForm>({
-    ServiceTypeId: "",
-    SupplierId: "",
+  const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
+  const [serviceTypes, setServiceTypes] = useState<IServiceType[]>([]);
+  const [form, setForm] = useState<IServiceUpdate>({
+    id: 0,
+    ServiceTypeId: 0,
+    SupplierId: 0,
     Description: "",
-    MonthlyCost: "",
+    date: new Date().toISOString().split('T')[0],
+    amount: 0,
+    active: true,
   });
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState("");
@@ -54,12 +34,11 @@ const EditService: React.FC = () => {
     }
   }, [navigate]);
 
-  // proveedores activos
   useEffect(() => {
     const fetchSuppliers = async () => {
       try {
         const data = await apiMutual.GetAllSuppliers();
-        setSuppliers(data.filter((s: Supplier) => s.active));
+        setSuppliers(data.filter((s: ISupplier) => s.active));
       } catch (err) {
         console.error("Error al cargar proveedores:", err);
         setSuppliers([]);
@@ -69,29 +48,19 @@ const EditService: React.FC = () => {
     fetchSuppliers();
   }, []);
 
-// Cargar tipos de servicio activos
-useEffect(() => {
-  const fetchServiceTypes = async () => {
-    try {
-      const data = await apiMutual.GetServiceTypes();
-      setServiceTypes(
-        data
-          .filter((t: IServiceType) => t.active)
-          .map((t: IServiceType) => ({
-            id: t.id,
-            code: t.code,
-            name: t.name,
-            isActive: t.active,
-          }))
-      );
-    } catch (err: any) {
-      console.error("Error al cargar tipos de servicio:", err);
-      setServiceTypes([]);
-      setError("Error al cargar tipos de servicio");
-    }
-  };
-  fetchServiceTypes();
-}, []);
+  useEffect(() => {
+    const fetchServiceTypes = async () => {
+      try {
+        const data = await apiMutual.GetServiceTypes();
+        setServiceTypes(data.filter((t: IServiceType) => t.active));
+      } catch (err: any) {
+        console.error("Error al cargar tipos de servicio:", err);
+        setServiceTypes([]);
+        setError("Error al cargar tipos de servicio");
+      }
+    };
+    fetchServiceTypes();
+  }, []);
 
   useEffect(() => {
     const fetchService = async () => {
@@ -104,11 +73,15 @@ useEffect(() => {
       setLoading(true);
       try {
         const data = await apiMutual.GetServiceById(Number(id));
+        
         setForm({
-          ServiceTypeId: data.serviceTypeId ?? "",
-          SupplierId: data.supplierId ?? "",
+          id: data.id || 0,
+          ServiceTypeId: data.serviceTypeId ?? 0,
+          SupplierId: data.supplierId ?? 0,
           Description: data.description ?? "",
-          MonthlyCost: data.monthlyCost?.toString() ?? "",
+          date: new Date().toISOString().split('T')[0],
+          amount: data.monthlyCost ?? 0,
+          active: data.active ?? true,
         });
       } catch (err: any) {
         setError(err.message || "Error al cargar el servicio");
@@ -132,7 +105,7 @@ useEffect(() => {
     setSuccess("");
     setError("");
 
-    if (!form.ServiceTypeId || !form.SupplierId || !form.Description || !form.MonthlyCost) {
+    if (!form.ServiceTypeId || !form.SupplierId || !form.Description || !form.amount) {
       setError("Completa todos los campos obligatorios.");
       return;
     }
@@ -147,7 +120,7 @@ useEffect(() => {
         serviceTypeId: Number(form.ServiceTypeId),
         supplierId: Number(form.SupplierId),
         description: form.Description,
-        monthlyCost: Number(form.MonthlyCost),
+        monthlyCost: Number(form.amount),
       });
 
       setSuccess("Servicio actualizado correctamente.");
@@ -224,6 +197,7 @@ useEffect(() => {
                   required
                 >
                   <option value="">Seleccione un tipo de servicio...</option>
+
                   {serviceTypes.map((type) => (
                     <option key={type.id} value={type.id}>
                       {type.name} ({type.code})
@@ -275,8 +249,8 @@ useEffect(() => {
                 </label>
                 <input
                   type="number"
-                  name="MonthlyCost"
-                  value={form.MonthlyCost}
+                  name="amount" 
+                  value={form.amount}
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
                   min="0"
