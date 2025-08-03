@@ -232,44 +232,48 @@ const PaymentMethodsCollection: React.FC = () => {
             <form onSubmit={handleCreateMethod}>
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-2">Código</label>
-                <input
-                  type="text"
-                  value={newMethod.code}
-                  onChange={(e) => setNewMethod({ ...newMethod, code: e.target.value })}
-                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Nombre</label>
-                <input
-                  type="text"
-                  value={newMethod.name}
-                  onChange={(e) => setNewMethod({ ...newMethod, name: e.target.value })}
-                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
-                  required
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    setNewMethod({ code: "", name: "" });
-                    setError("");
-                  }}
-                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-                >
-                  Guardar
-                </button>
-              </div>
-            </form>
+                <select
+      value={newMethod.code}
+      onChange={(e) => setNewMethod({ ...newMethod, code: e.target.value })}
+      className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+      required
+    >
+      <option value="">Seleccione un código...</option>
+      <option value="Automatico">Automático</option>
+      <option value="Transferencia">Transferencia</option>
+      <option value="Efectivo">Efectivo</option>
+    </select>
+  </div>
+  <div className="mb-4">
+    <label className="block text-sm font-medium mb-2">Nombre</label>
+    <input
+      type="text"
+      value={newMethod.name}
+      onChange={(e) => setNewMethod({ ...newMethod, name: e.target.value })}
+      className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+      required
+    />
+  </div>
+  <div className="flex justify-end gap-2">
+    <button
+      type="button"
+      onClick={() => {
+        setShowModal(false);
+        setNewMethod({ code: "", name: "" });
+        setError("");
+      }}
+      className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+    >
+      Cancelar
+    </button>
+    <button
+      type="submit"
+      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+    >
+      Guardar
+    </button>
+  </div>
+</form>
           </div>
         </div>
       )}
