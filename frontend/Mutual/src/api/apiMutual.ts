@@ -1053,6 +1053,22 @@ export const apiMutual = {
     });
     return response.data as IInstallmentInfo[];
   },
+
+  /* ----------------------- 9 Obtener cuota por ID ----------------------- */
+  GetInstallmentById: async (id: number): Promise<IInstallmentInfo> => {
+  const url = `https://localhost:7256/api/installments/${id}`;
+  const response = await Fetcher.get(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+  });
+  if (response.status && response.status >= 400) {
+    const data = response.data as { message?: string };
+    throw new Error(data?.message || "No se pudo obtener la cuota");
+  }
+  return response.data as IInstallmentInfo;
+},
   /* -----------------------------Modulo Periodos y Reportes---------------------- */
 
   /* ----------------------- 1. Crear periodo contable ----------------------- */
