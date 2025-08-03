@@ -1,4 +1,4 @@
-export interface IInvoice {
+export interface IInvoiceList {
   Id: number;
   Supplier: string;
   InvoiceNumber: string;
@@ -10,7 +10,7 @@ export interface IInvoice {
   Paid: boolean;
 }
 
-export interface IEditInvoice {
+export interface IInvoiceCreate {
   supplierId: number;
   invoiceNumber: string;
   issueDate: string;
@@ -19,3 +19,19 @@ export interface IEditInvoice {
   serviceTypeId: number;
   description: string;
 }
+
+export interface IInvoiceUpdate {
+  supplierId: number;
+  invoiceNumber: string;
+  issueDate: string;
+  dueDate: string;
+  total: number;
+  serviceTypeId: number;
+  description: string;
+}
+
+/** @deprecated Use IInvoiceList instead */
+export interface IInvoice extends IInvoiceList {}
+
+/** @deprecated Use IInvoiceUpdate instead */
+export interface IEditInvoice extends IInvoiceUpdate {}

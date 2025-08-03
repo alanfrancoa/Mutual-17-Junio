@@ -36,6 +36,7 @@ import {
 } from "../types/accountablePeriods/IAccountingPeriod";
 import { IAccountingPeriodList } from "../types/accountablePeriods/IAccountingPeriodList";
 import { IEditInvoice } from "../types/IInvoice";
+import { IPaymentCreate, IPaymentList, IPaymentMethod } from "../types/IPayment";
 
 /* -----------------------Llamadas API----------------------- */
 
@@ -605,22 +606,22 @@ export const apiMutual = {
     return true;
   },
   /* ----------------------- Listar metodos de pago ----------------------- */
-  GetPaymentMethods: async () => {
-    const url = "https://localhost:7256/api/payment-method";
-    const response = await Fetcher.get(url, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-      },
-    });
-    if (response.status && response.status >= 400) {
-      const data = response.data as { mensaje?: string };
-      throw new Error(
-        data?.mensaje || "No se pudieron obtener los métodos de pago"
-      );
-    }
-    return response.data;
-  },
+  GetPaymentMethods: async (): Promise<IPaymentMethod[]> => {
+  const url = "https://localhost:7256/api/payment-method";
+  const response = await Fetcher.get(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+  });
+  if (response.status && response.status >= 400) {
+    const data = response.data as { mensaje?: string };
+    throw new Error(
+      data?.mensaje || "No se pudieron obtener los métodos de pago"
+    );
+  }
+  return response.data as IPaymentMethod[];
+},
 
   /* ----------------------- Estado metodo de pago ----------------------- */
   PaymentMethodState: async (id: number) => {
@@ -703,17 +704,19 @@ export const apiMutual = {
 
   /* ----------------------- Obtener factura por ID ----------------------- */
   GetInvoiceById: async (id: number): Promise<any> => {
-    const url = `https://localhost:7256/api/invoices/${id}/payments`;
+    const url = `https://localhost:7256/api/invoices/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
+
     if (response.status && response.status >= 400) {
-      const data = response.data as { mesagge?: string };
-      throw new Error(data?.mesagge || "No se pudo obtener la factura");
+      const data = response.data as { message?: string };
+      throw new Error(data?.message || "Error al obtener la factura");
     }
+
     return response.data;
   },
 
@@ -746,6 +749,101 @@ export const apiMutual = {
     if (response.status && response.status >= 400) {
       const data = response.data as { message?: string };
       throw new Error(data?.message || "Error al actualizar el estado de la factura");
+    }
+
+    return response.data as { message: string };
+  },
+
+  /* ----------------------- Registrar pago de proveedor ----------------------- */
+  RegisterSupplierPayment: async (paymentData: IPaymentCreate): Promise<{ message: string }> => {
+    const url = `https://localhost:7256/api/supplier-payments`;
+
+    try {
+      const response = await Fetcher.post(url, paymentData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+        },
+      });
+
+      return response.data as { message: string };
+    } catch (error: any) {
+      console.error("Error en RegisterSupplierPayment:", error);
+
+      // ✅ CAMBIO: Manejo específico de errores
+      if (error.response) {
+        // El servidor respondió con un código de error
+        const status = error.response.status;
+        const data = error.response.data;
+
+        if (status === 409) {
+          // Conflicto - número de recibo duplicado
+          throw new Error(data?.message || "El número de recibo ya existe para esta factura");
+        } else if (status === 400) {
+          // Bad request - validaciones del backend
+          throw new Error(data?.message || "Datos inválidos");
+        } else if (status === 404) {
+          // Not found - factura, método de pago, etc.
+          throw new Error(data?.message || "Recurso no encontrado");
+        } else if (status >= 500) {
+          // Error del servidor
+          throw new Error(data?.message || "Error interno del servidor");
+        } else {
+          throw new Error(data?.message || `Error ${status}`);
+        }
+      } else if (error.request) {
+        // La petición se hizo pero no hubo respuesta
+        throw new Error("No se pudo conectar con el servidor");
+      } else {
+        // Error al configurar la petición
+        throw new Error(error.message || "Error desconocido");
+      }
+    }
+  },
+
+  /* ----------------------- Obtener pagos de factura ----------------------- */
+  GetSupplierPayments: async (status?: string): Promise<any[]> => {
+    let url = `https://localhost:7256/api/supplier-payments`;
+    if (status) {
+      url += `?status=${encodeURIComponent(status)}`;
+    }
+
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+
+    if (response.status && response.status >= 400) {
+      const data = response.data as { message?: string };
+      throw new Error(data?.message || "Error al obtener los pagos");
+    }
+
+    if (
+      response.data &&
+      typeof response.data === "object" &&
+      "message" in response.data
+    ) {
+      return [];
+    }
+
+    return response.data as any[];
+  },
+
+  /* ----------------------- Cancelar pago ----------------------- */
+  CancelSupplierPayment: async (id: number, reason: string): Promise<{ message: string }> => {
+    const url = `https://localhost:7256/api/supplier-payments/${id}/status`;
+    const response = await Fetcher.patch(url, { reason }, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+
+    if (response.status && response.status >= 400) {
+      const data = response.data as { message?: string };
+      throw new Error(data?.message || "Error al cancelar el pago");
     }
 
     return response.data as { message: string };

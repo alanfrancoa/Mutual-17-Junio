@@ -32,9 +32,26 @@ const InvoiceCreatePage: React.FC = () => {
     const [success, setSuccess] = useState<string | null>(null);
 
     useEffect(() => {
-        // Cargar proveedores y tipos de servicio
-        apiMutual.GetAllSuppliers().then(setSuppliers);
-        apiMutual.GetServiceTypes().then(setServiceTypes);
+        const loadData = async () => {
+            try {
+                // Carga proveedores activos
+                const suppliersData = await apiMutual.GetAllSuppliers();
+                const activeSuppliers = suppliersData.filter((supplier: any) => supplier.active === true);
+                setSuppliers(activeSuppliers);
+
+                // Carga tipos de servicio activos
+                const serviceTypesData = await apiMutual.GetServiceTypes();
+                const activeServiceTypes = serviceTypesData.filter((serviceType: any) => serviceType.active === true);
+                setServiceTypes(activeServiceTypes);
+            } catch (error) {
+                console.error("Error al cargar datos:", error);
+
+                setSuppliers([]);
+                setServiceTypes([]);
+            }
+        };
+
+        loadData();
     }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -54,7 +71,7 @@ const InvoiceCreatePage: React.FC = () => {
                 total: Number(form.Total),
                 serviceTypeId: Number(form.ServiceTypeId),
                 description: form.Description,
-                supplierId: Number(form.SupplierId), // Make sure to include this if required
+                supplierId: Number(form.SupplierId),
             });
             setSuccess("Factura registrada correctamente.");
             setTimeout(() => navigate("/proveedores/facturas"), 1200);
@@ -68,7 +85,7 @@ const InvoiceCreatePage: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
             <Sidebar />
-     <Header hasNotifications={true} loans={[]}  />
+            <Header hasNotifications={true} loans={[]} />
             <main className="flex flex-col items-center py-8 flex-1 ml-0 md:ml-64 lg:ml-72">
                 <div className="w-full max-w-2xl bg-white rounded-lg shadow p-8">
                     <h2 className="text-2xl font-bold text-blue-900 mb-6">Cargar Nueva Factura</h2>
@@ -82,7 +99,7 @@ const InvoiceCreatePage: React.FC = () => {
                                 required
                                 className="w-full border border-gray-300 rounded px-3 py-2"
                             >
-                                <option value="">Seleccione...</option>
+                                <option value="">Seleccione...</option> 
                                 {suppliers.map((s) => (
                                     <option key={s.id} value={s.id}>{s.legalName}</option>
                                 ))}

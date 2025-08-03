@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../../dashboard/components/Sidebar";
 import Header from "../../dashboard/components/Header";
+import PaymentManagement from "../suppliers/paymentManagement";
 import { apiMutual } from "../../../api/apiMutual";
 import { IEditInvoice } from "../../../types/IInvoice";
 import { ISupplierList } from "../../../types/ISupplierList";
@@ -52,26 +53,63 @@ const EditInvoice: React.FC = () => {
           apiMutual.GetServiceTypes(),
         ]);
 
-        // Verificar si la factura está pagada
-        setInvoicePaid(invoice.Paid);
+        console.log("=== DEBUG: Datos de la factura ===", invoice);
 
-        // Cargar datos de la factura
-        setForm({
-          supplierId: invoice.Proveedor ? 
-            suppliersData.find((s: any) => s.legalName === invoice.Proveedor)?.id || 0 : 0,
-          invoiceNumber: invoice.InvoiceNumber || "",
-          issueDate: new Date(invoice.IssueDate).toISOString().slice(0, 10),
-          dueDate: new Date(invoice.DueDate).toISOString().slice(0, 10),
-          total: invoice.Total || 0,
-          serviceTypeId: invoice.TipoServicio ? 
-            serviceTypesData.find((st: IServiceType) => st.name === invoice.TipoServicio)?.id || 0 : 0,
-          description: invoice.Description || "",
-        });
+        setInvoicePaid(invoice.Paid || invoice.paid);
 
-        // Cargar proveedores y tipos de servicio activos
+        const formatDateForInput = (dateValue: any): string => {
+          if (!dateValue) return "";
+
+          try {
+            let date: Date;
+
+            if (dateValue instanceof Date) {
+              date = dateValue;
+            }
+            else if (typeof dateValue === 'string') {
+              const dateOnly = dateValue.split('T')[0];
+              date = new Date(dateOnly + 'T00:00:00');
+            }
+            else if (typeof dateValue === 'number') {
+              date = new Date(dateValue);
+            }
+            else {
+              console.warn("Formato de fecha desconocido:", dateValue);
+              return "";
+            }
+            if (isNaN(date.getTime())) {
+              console.warn("Fecha inválida:", dateValue);
+              return "";
+            }
+
+            return date.toISOString().split('T')[0];
+          } catch (error) {
+            console.error("Error al formatear fecha:", dateValue, error);
+            return "";
+          }
+        };
+
+        const formData = {
+          supplierId: invoice.SupplierName || invoice.supplierName ?
+            suppliersData.find((s: any) =>
+              s.legalName === (invoice.SupplierName || invoice.supplierName)
+            )?.id || 0 : 0,
+          invoiceNumber: invoice.InvoiceNumber || invoice.invoiceNumber || "",
+          issueDate: formatDateForInput(invoice.IssueDate || invoice.issueDate),
+          dueDate: formatDateForInput(invoice.DueDate || invoice.dueDate),
+          total: invoice.Total || invoice.total || 0,
+          serviceTypeId: invoice.ServiceType || invoice.serviceType ?
+            serviceTypesData.find((st: IServiceType) =>
+              st.name === (invoice.ServiceType || invoice.serviceType)
+            )?.id || 0 : 0,
+          description: invoice.Description || invoice.description || "",
+        };
+
+        setForm(formData);
         setSuppliers(suppliersData.filter((s: any) => s.active));
         setServiceTypes(serviceTypesData.filter((st: IServiceType) => st.active));
       } catch (err: any) {
+        console.error("=== ERROR al cargar datos ===", err);
         setError(err.message || "Error al cargar los datos");
       } finally {
         setDataLoading(false);
@@ -80,6 +118,15 @@ const EditInvoice: React.FC = () => {
 
     loadData();
   }, [id]);
+
+  const handlePaymentsUpdate = async () => {
+    try {
+      const invoice = await apiMutual.GetInvoiceById(Number(id));
+      setInvoicePaid(invoice.Paid || invoice.paid);
+    } catch (error) {
+      console.error("Error al actualizar estado de la factura:", error);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -135,7 +182,6 @@ const EditInvoice: React.FC = () => {
       setSuccess("Factura actualizada correctamente");
       setTimeout(() => navigate("/proveedores/facturas"), 1500);
     } catch (err: any) {
-      // Manejar errores específicos del backend
       if (err.message.includes("No se puede editar una factura que ya ha sido pagada")) {
         setError("No se puede editar una factura que ya ha sido pagada");
       } else if (err.message.includes("Ya existe otra factura con ese número")) {
@@ -155,7 +201,7 @@ const EditInvoice: React.FC = () => {
       <div className="min-h-screen bg-gray-100 flex">
         <Sidebar />
         <div className="flex-1" style={{ marginLeft: "18rem" }}>
-               <Header hasNotifications={true} loans={[]}  />
+          <Header hasNotifications={true} loans={[]} />
 
           <div className="flex flex-col items-center justify-center py-8">
             <div className="w-full max-w-lg bg-white rounded-lg shadow p-8 text-center">
@@ -171,10 +217,10 @@ const EditInvoice: React.FC = () => {
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1" style={{ marginLeft: "18rem" }}>
-             <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
 
         <div className="flex flex-col items-center py-8">
-          <div className="w-full max-w-lg bg-white rounded-lg shadow p-8">
+          <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8">
             <h2 className="text-2xl font-bold mb-6 text-blue-900">Editar Factura</h2>
 
             {invoicePaid && (
@@ -299,7 +345,7 @@ const EditInvoice: React.FC = () => {
                 <label className="block text-sm font-medium mb-1">Descripción</label>
                 <textarea
                   name="description"
-                  value={form.description}
+                  value={form.description || ""}
                   onChange={handleChange}
                   maxLength={500}
                   rows={3}
@@ -307,7 +353,7 @@ const EditInvoice: React.FC = () => {
                   disabled={loading || invoicePaid}
                   placeholder="Descripción opcional de la factura"
                 />
-                <small className="text-gray-500">{form.description.length}/500 caracteres</small>
+                <small className="text-gray-500">{(form.description || "").length}/500 caracteres</small>
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
@@ -330,6 +376,14 @@ const EditInvoice: React.FC = () => {
                 )}
               </div>
             </form>
+
+            {/* componente para gestión de pagos */}
+            <PaymentManagement
+              invoiceId={Number(id)}
+              invoiceTotal={form.total}
+              invoicePaid={invoicePaid}
+              onPaymentsUpdate={handlePaymentsUpdate}
+            />
           </div>
         </div>
       </div>
