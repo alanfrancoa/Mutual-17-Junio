@@ -2,8 +2,8 @@
 import React, { useState } from "react";
 import { apiMutual } from "../../../api/apiMutual";
 import LoanStatusModal from "../../../components/LoanModal";
-import useAppToast from "../../../hooks/useAppToast";
 import { ILoanList } from "../../../types/loans/ILoanList";
+import useAppToast from "../../../hooks/useAppToast";
 
 
 interface ApproveLoanButtonProps {
@@ -69,7 +69,7 @@ const ApproveLoanButton: React.FC<ApproveLoanButtonProps> = ({
   return (
     <>
       <button
-        className="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded transition text-xs font-medium disabled:opacity-50"
+        className="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded-full transition text-xs font-medium disabled:opacity-50"
         onClick={handleOpenModal}
         disabled={loan.status !== "Pendiente" || loading}
       >

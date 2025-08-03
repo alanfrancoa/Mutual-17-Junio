@@ -3,12 +3,15 @@ import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
+import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import useAppToast from "../../../hooks/useAppToast";
 
 const ReactivateUser: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [usuario, setUsuario] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { showSuccessToast, showErrorToast } = useAppToast();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -17,7 +20,7 @@ const ReactivateUser: React.FC = () => {
         const data = await apiMutual.GetUserById(Number(id));
         setUsuario(data);
       } catch (error) {
-        alert("Error al obtener el usuario");
+        showErrorToast({ message: "Error al obtener el usuario" });
       }
       setLoading(false);
     };
@@ -27,80 +30,98 @@ const ReactivateUser: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
+    
+    // llamada api
     try {
       await apiMutual.ReactivateUser(Number(id));
-      alert("Usuario reactivado correctamente");
+      showSuccessToast({ message: "Usuario reactivado correctamente" });
       navigate("/usuarios");
-    } catch (error) {
-      alert("Error al reactivar usuario");
+    } catch (error: any) {
+      const errorMsg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Error de sistema al reactivar usuario";
+      showErrorToast({ message: errorMsg });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
-     <Header hasNotifications={true} loans={[]}  />
-      <div className="flex flex-col items-center py-8 flex-1">
-        <div className="w-full max-w-lg">
-          <h2 className="text-2xl font-bold mb-6 text-blue-900">
-            Reactivar Usuario
-          </h2>
-        </div>
-        <div className="w-full max-w-lg bg-white rounded-lg shadow p-8">
-          {loading || !usuario ? (
-            <div className="text-center text-gray-500 py-8">Cargando...</div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre de usuario
-                </label>
-                <input
-                  type="text"
-                  value={usuario.username}
-                  disabled
-                  className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Rol
-                </label>
-                <input
-                  type="text"
-                  value={usuario.role}
-                  disabled
-                  className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Estado
-                </label>
-                <input
-                  type="text"
-                  value={usuario.status || "Inactivo"}
-                  disabled
-                  className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-4">
-                <button
-                  type="button"
-                  onClick={() => navigate("/usuarios")}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-semibold"
-                >
-                  Reactivar
-                </button>
-              </div>
-            </form>
-          )}
+      <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
+        <Header hasNotifications={true} loans={[]} />
+        <div className="flex flex-col items-center py-8 flex-1">
+          <div className="w-full max-w-xl">
+            <div className="flex justify-start mb-6">
+              <button
+                onClick={() => navigate("/usuarios")}
+                className="text-gray-600 hover:text-gray-800 flex items-center"
+                aria-label="Volver a Usuarios"
+              >
+                <ChevronLeftIcon className="h-5 w-5" />
+                <span className="ml-1">Volver</span>
+              </button>
+            </div>
+            <h2 className="text-2xl font-bold mb-6 text-blue-900">
+              Reactivar Usuario
+            </h2>
+          </div>
+          <div className="w-full max-w-xl bg-white rounded-lg shadow p-8">
+            {loading || !usuario ? (
+              <div className="text-center text-gray-500 py-8">Cargando...</div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nombre de usuario
+                  </label>
+                  <input
+                    type="text"
+                    value={usuario.username}
+                    disabled
+                    className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Rol
+                  </label>
+                  <input
+                    type="text"
+                    value={usuario.role}
+                    disabled
+                    className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Estado
+                  </label>
+                  <input
+                    type="text"
+                    value={usuario.status || "Inactivo"}
+                    disabled
+                    className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/usuarios")}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-full"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold"
+                  >
+                    Reactivar
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </div>

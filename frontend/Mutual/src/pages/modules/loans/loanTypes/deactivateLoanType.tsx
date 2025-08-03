@@ -1,8 +1,7 @@
-// src/components/LoanTypes/DeactivateLoanTypeButton.tsx
 import React, { ReactNode, useState } from 'react';
 import { apiMutual } from '../../../../api/apiMutual'; 
-import useAppToast from '../../../../hooks/useAppToast'; 
 import DeactivateLoanTypeModal from '../../../../components/ui/loanTypeDeactivateModal';
+import useAppToast from '../../../../hooks/useAppToast';
 
 interface DeactivateLoanTypeButtonProps {
   loanTypeId: number;

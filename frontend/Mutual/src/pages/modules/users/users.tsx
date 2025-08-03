@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "../../dashboard/components/Sidebar";
 import Header from "../../dashboard/components/Header";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
-import { apiMutual } from "../../../api/apiMutual"; // Asegúrate de tener este import
+import { apiMutual } from "../../../api/apiMutual";
 import { User } from "../../../types/user";
+import { useNavigate } from "react-router-dom";
+import useAppToast from "../../../hooks/useAppToast";
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 5;
 
 const UsersTable: React.FC = () => {
+  const navigate = useNavigate();
   const [usuarios, setUsuarios] = useState<User[]>([]);
   const [search, setSearch] = useState("");
   const [estadoFiltro, setEstadoFiltro] = useState<
@@ -15,6 +18,7 @@ const UsersTable: React.FC = () => {
   >("Todos");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const { showErrorToast } = useAppToast();
 
   // Fetch usuarios desde la API
   useEffect(() => {
@@ -24,7 +28,7 @@ const UsersTable: React.FC = () => {
         const data = await apiMutual.GetUsers();
         setUsuarios(data);
       } catch (error) {
-        alert("Error al obtener usuarios");
+        showErrorToast({ message: "Error de sistema al obtener usuarios" });
       }
       setLoading(false);
     };
@@ -34,9 +38,7 @@ const UsersTable: React.FC = () => {
   // Filtrado por busqeuda y estado
   const filtered = usuarios.filter(
     (u) =>
-      (estadoFiltro === "Todos" ||
-        (estadoFiltro === "Activo" && u.status) ||
-        (estadoFiltro === "Inactivo" && !u.status)) &&
+      (estadoFiltro === "Todos" || u.status === estadoFiltro) &&
       ((u.username?.toLowerCase() || "").includes(search.toLowerCase()) ||
         (u.role?.toLowerCase() || "").includes(search.toLowerCase()))
   );
@@ -49,10 +51,10 @@ const UsersTable: React.FC = () => {
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
         <main className="flex-1 p-6 bg-gray-100">
-          <div className="w-full max-w-6xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-800 mb-4">Usuarios</h1>
+          <div className="flex-1 w-full">
+            <h1 className="text-2xl font-bold text-blue-900 mb-4">Usuarios</h1>
             <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
                 <div className="flex gap-2 w-full md:w-auto">
@@ -83,8 +85,8 @@ const UsersTable: React.FC = () => {
                   </select>
                 </div>
                 <button
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-semibold shadow transition w-full md:w-auto"
-                  onClick={() => (window.location.href = "/usuarios/crear")}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full font-semibold shadow transition w-full md:w-auto"
+                  onClick={() => navigate("/usuarios/crear")}
                 >
                   + Agregar Usuario
                 </button>
@@ -106,7 +108,10 @@ const UsersTable: React.FC = () => {
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Estado
                       </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Fecha de creacion
+                      </th>
+                      <th className="px-4 py-3  text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Acciones
                       </th>
                     </tr>
@@ -118,7 +123,10 @@ const UsersTable: React.FC = () => {
                           colSpan={5}
                           className="text-center py-8 text-gray-400"
                         >
-                          No hay usuarios registrados
+                        
+                          {search.trim() || estadoFiltro !== "Todos"
+                            ? "No hay usuarios con ese criterio de búsqueda"
+                            : "No hay usuarios registrados"}
                         </td>
                       </tr>
                     ) : (
@@ -133,51 +141,61 @@ const UsersTable: React.FC = () => {
                           <td className="px-4 py-4 border-b whitespace-nowrap">
                             {user.role}
                           </td>
-                          <td>
+                          <td className="px-4 py-4 border-b whitespace-nowrap">
                             <span
-                              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              className={`px-3 py-1 rounded-full text-xs font-semibold  ${
                                 user.status === "Activo"
                                   ? "bg-green-100 text-green-800"
-                                  : "bg-yellow-100 text-yellow-800"
+                                  : "bg-red-100 text-red-800"
                               }`}
                             >
                               {user.status}
                             </span>
                           </td>
-                          <td>
+                          <td className="px-4 py-4 border-b whitespace-nowrap">
                             {user.createdAt &&
                               new Date(user.createdAt).toLocaleDateString()}
                           </td>
 
                           <td className="px-4 py-4 border-b text-right space-x-2 whitespace-nowrap">
                             <button
-                              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                              className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
                               onClick={() =>
-                                (window.location.href = `/usuarios/editar/${user.id}`)
+                                navigate(`/usuarios/editar/${user.id}`)
                               }
                             >
                               Editar
                             </button>
                             <button
-                              className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                              className={`bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full transition text-xs font-medium ${
+                                user.status === "Inactivo"
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
                               onClick={() =>
-                                (window.location.href = `/usuarios/eliminar/${user.id}`)
+                                navigate(`/usuarios/eliminar/${user.id}`)
                               }
+                              disabled={user.status === "Inactivo"}
                             >
                               Baja
                             </button>
                             <button
-                              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                              className={`bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full transition text-xs font-medium ${
+                                user.status === "Activo"
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
                               onClick={() =>
-                                (window.location.href = `/usuarios/reactivar/${user.id}`)
+                                navigate(`/usuarios/reactivar/${user.id}`)
                               }
+                              disabled={user.status === "Activo"}
                             >
                               Activar
                             </button>
                             <button
-                              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded transition text-xs font-medium"
+                              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
                               onClick={() =>
-                                (window.location.href = `/usuarios/detalle/${user.id}`)
+                                navigate(`/usuarios/detalle/${user.id}`)
                               }
                             >
                               Ver
