@@ -504,6 +504,22 @@ export const apiMutual = {
     return response.data as { mensaje: string };
   },
 
+  /* ----------------------- Cambiar estado del servicio ----------------------- */
+  UpdateServiceStatus: async (id: number): Promise<{ mensaje: string }> => {
+    const url = `https://localhost:7256/api/services/${id}/status`;
+    const response = await Fetcher.patch(url, {}, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const data = response.data as { mensaje?: string };
+      throw new Error(data?.mensaje || "Error al cambiar el estado del servicio");
+    }
+    return response.data as { mensaje: string };
+  },
+
   /* ----------------------- Actualizar tipo de servicio ----------------------- */
   UpdateServiceType: async (id: number, data: { name: string; code: string }): Promise<{ mensaje: string }> => {
     const url = `https://localhost:7256/api/services-type/${id}`;

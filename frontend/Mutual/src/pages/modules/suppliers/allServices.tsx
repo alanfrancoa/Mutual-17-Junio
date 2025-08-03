@@ -46,7 +46,7 @@ const AllServicesPage: React.FC = () => {
   const filteredServices = services.filter((service) =>
     (service.Id?.toString() || "").includes(search) ||
     (service.Supplier || "").toLowerCase().includes(search.toLowerCase()) ||
-    (service.Description || "").toLowerCase().includes(search.toLowerCase())
+    (service.Active ? "activo" : "inactivo").includes(search.toLowerCase())
   );
 
   const handleEditClick = (service: ServiceList) => {
@@ -55,6 +55,35 @@ const AllServicesPage: React.FC = () => {
       return;
     }
     navigate(`/proveedores/servicios/editar/${service.Id}`);
+  };
+
+  const handleToggleStatus = async (service: ServiceList) => {
+    if (userRole !== "Administrador" && userRole !== "Gestor") {
+      alert('Solo usuarios con rol "Administrador" o "Gestor" pueden cambiar el estado.');
+      return;
+    }
+
+    const action = service.Active ? 'desactivar' : 'activar';
+    const confirmMessage = `¿Está seguro que desea ${action} el servicio "${service.Description}"?`;
+
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      await apiMutual.UpdateServiceStatus(service.Id);
+      alert(`Servicio ${action === 'desactivar' ? 'desactivado' : 'activado'} correctamente`);
+      setServices(prevServices =>
+        prevServices.map(s =>
+          s.Id === service.Id
+            ? { ...s, Active: !s.Active }
+            : s
+        )
+      );
+    } catch (error: any) {
+      console.error("Error al cambiar estado:", error);
+      alert(`Error al ${action} el servicio: ${error.message}`);
+    }
   };
 
   return (
@@ -93,7 +122,7 @@ const AllServicesPage: React.FC = () => {
           <div className="mb-4 flex flex-col md:flex-row gap-2">
             <input
               type="text"
-              placeholder="Buscar por ID, proveedor o descripción"
+              placeholder="Buscar por ID, proveedor o estado"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full border border-gray-300 rounded px-3 py-2"
@@ -105,8 +134,8 @@ const AllServicesPage: React.FC = () => {
                 <tr>
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Proveedor</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Costo Mensual</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                 </tr>
               </thead>
@@ -122,17 +151,40 @@ const AllServicesPage: React.FC = () => {
                     <tr key={service.Id || index}>
                       <td className="px-4 py-2">{service.Id || "N/A"}</td>
                       <td className="px-4 py-2">{service.Supplier || "Sin proveedor"}</td>
-                      <td className="px-4 py-2">{service.Description || "Sin descripción"}</td>
                       <td className="px-4 py-2">${(service.MonthlyCost || 0).toLocaleString()}</td>
-                      <td className="px-4 py-2 flex gap-2">
-                        {(userRole === "Administrador" || userRole === "Gestor") && (
-                          <button
-                            onClick={() => handleEditClick(service)}
-                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
-                          >
-                            Editar
-                          </button>
-                        )}
+
+                      <td className="px-4 py-2">
+                        <span className={`px-2 py-1 text-xs rounded-full ${service.Active
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                          }`}>
+                          {service.Active ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
+
+                      <td className="px-4 py-2">
+                        <div className="flex gap-2 flex-wrap">
+                          {(userRole === "Administrador" || userRole === "Gestor") && (
+                            <button
+                              onClick={() => handleEditClick(service)}
+                              className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
+                            >
+                              Editar
+                            </button>
+                          )}
+
+                          {(userRole === "Administrador" || userRole === "Gestor") && (
+                            <button
+                              onClick={() => handleToggleStatus(service)}
+                              className={`px-3 py-1 rounded text-sm text-white ${service.Active
+                                  ? 'bg-red-500 hover:bg-red-600'
+                                  : 'bg-green-500 hover:bg-green-600'
+                                }`}
+                            >
+                              {service.Active ? 'Desactivar' : 'Activar'}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))
