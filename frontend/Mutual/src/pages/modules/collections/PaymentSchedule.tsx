@@ -168,7 +168,7 @@ const PaymentSchedule: React.FC = () => {
      <Header hasNotifications={true} loans={[]}  />
                 <div className="p-6">
                     <div className="bg-white rounded-lg shadow p-6">
-                        <h2 className="text-2xl font-bold mb-6">Cronograma de Pagos por Usuario</h2>
+                        <h2 className="text-2xl font-bold mb-6">Cronograma de Pagos por Asociado</h2>
 
                         {error && (
                             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
