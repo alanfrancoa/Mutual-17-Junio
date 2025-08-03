@@ -105,7 +105,7 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
       MonthlyCost: Number(form.monthlyCost),
     });
     setSuccess("Servicio registrado correctamente.");
-    setTimeout(() => navigate("/servicios"), 1200);
+    setTimeout(() => navigate("/proveedores/servicios"), 1200);
   } catch (err: any) {
     setError(err.message || "Error de red o servidor.");
   }
