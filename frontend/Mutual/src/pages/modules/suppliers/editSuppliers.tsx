@@ -75,7 +75,7 @@ const EditSupplier: React.FC = () => {
         Email: form.Email,
       });
       setMessage({ type: "success", text: "Proveedor actualizado correctamente" });
-      setTimeout(() => navigate("/proveedores/allsuppliers"), 1200);
+      setTimeout(() => navigate("/proveedores"), 1200);
     } catch (error: any) {
       setMessage({ type: "error", text: error.message });
     } finally {
