@@ -35,6 +35,12 @@ const Login = () => {
   const [showForgotPassModal, setShowForgotPassModal] = useState(false);
 
   useEffect(() => {
+    if (sessionStorage.getItem("token")) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
+
+  useEffect(() => {
     if (username) {
       // Verifica si por Username ya aceptó los términos y condiciones y la política de privacidad
       const termsAccepted = checkUserAcceptance(username, "terms");
