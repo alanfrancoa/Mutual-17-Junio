@@ -203,10 +203,32 @@ const Collections: React.FC = () => {
                                                             );
                                                             if (!response.ok) throw new Error("No se pudo generar el PDF");
                                                             const blob = await response.blob();
+                                                            let fileName = `Cobro_${c.id}.pdf`;
+                                                            const disposition = response.headers.get("Content-Disposition");
+                                                            
+                                                            if (disposition) {
+
+                                                                let match = disposition.match(/filename\*\s*=\s*UTF-8''"?([^;"\n]+)"?/i);
+                                                                if (match && match[1]) {
+                                                                    fileName = decodeURIComponent(match[1]);
+                                                                } else {
+                                                                    
+                                                                    match = disposition.match(/filename="([^"]+)"/i);
+                                                                    if (match && match[1]) {
+                                                                        fileName = match[1];
+                                                                    } else {
+                                                                        
+                                                                        match = disposition.match(/filename=([^;]+)/i);
+                                                                        if (match && match[1]) {
+                                                                            fileName = match[1].trim();
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
                                                             const url = window.URL.createObjectURL(blob);
                                                             const link = document.createElement("a");
                                                             link.href = url;
-                                                            link.download = `Cobro_${c.id}.pdf`;
+                                                            link.download = fileName;
                                                             document.body.appendChild(link);
                                                             link.click();
                                                             link.remove();
