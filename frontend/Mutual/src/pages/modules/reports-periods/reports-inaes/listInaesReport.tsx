@@ -26,7 +26,7 @@ const ListInaesReport: React.FC<ListInaesReportProps> = ({ reports }) => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
-    const handleExportPdf = async (id: number, code: string) => {
+  const handleExportPdf = async (id: number, code: string) => {
     try {
       const pdfBlob = await apiMutual.GenerateInaesReportPdf(id);
       const url = window.URL.createObjectURL(pdfBlob);
@@ -55,7 +55,7 @@ const ListInaesReport: React.FC<ListInaesReportProps> = ({ reports }) => {
                 Tipo
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                Fecha Inicio
+                Fecha Emisión
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Descarga
@@ -82,7 +82,9 @@ const ListInaesReport: React.FC<ListInaesReportProps> = ({ reports }) => {
                     {report.type}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {report.generationDate}
+                    {report.generationDate
+                      ? new Date(report.generationDate).toLocaleDateString()
+                      : ""}
                   </td>
 
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
