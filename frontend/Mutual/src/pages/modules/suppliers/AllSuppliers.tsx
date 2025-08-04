@@ -12,6 +12,8 @@ const AllSuppliers: React.FC = () => {
   const [search, setSearch] = useState("");
   const [suppliers, setSuppliers] = useState<ISupplierList[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     const fetchSuppliers = async () => {
@@ -78,6 +80,16 @@ const AllSuppliers: React.FC = () => {
       (s.email && s.email.toLowerCase().includes(search.toLowerCase()))
   );
 
+  // Calcular la paginación
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredSuppliers.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredSuppliers.length / itemsPerPage);
+
+  const paginate = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex">
       {/* Sidebar fija a la izquierda */}
@@ -130,14 +142,14 @@ const AllSuppliers: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredSuppliers.length === 0 ? (
+                    {currentItems.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="text-center py-8 text-gray-400">
                           No hay proveedores registrados que coincidan con la búsqueda.
                         </td>
                       </tr>
                     ) : (
-                      filteredSuppliers.map((s, idx) => (
+                      currentItems.map((s, idx) => (
                         <tr key={s.id} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                           <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{s.id}</td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{s.legalName}</td>
@@ -168,6 +180,52 @@ const AllSuppliers: React.FC = () => {
                     )}
                   </tbody>
                 </table>
+              )}
+
+              {/* Agregar los controles de paginación */}
+              {filteredSuppliers.length > 0 && (
+                <div className="mt-4 flex justify-between items-center">
+                  <div className="text-sm text-gray-700">
+                    Mostrando {indexOfFirstItem + 1} a {Math.min(indexOfLastItem, filteredSuppliers.length)} de {filteredSuppliers.length} resultados
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => paginate(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-1 rounded-md ${
+                        currentPage === 1
+                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      Anterior
+                    </button>
+                    {[...Array(totalPages)].map((_, index) => (
+                      <button
+                        key={index + 1}
+                        onClick={() => paginate(index + 1)}
+                        className={`px-3 py-1 rounded-md ${
+                          currentPage === index + 1
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white text-blue-600 hover:bg-blue-50'
+                        }`}
+                      >
+                        {index + 1}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => paginate(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`px-3 py-1 rounded-md ${
+                        currentPage === totalPages
+                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      Siguiente
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           </div>
