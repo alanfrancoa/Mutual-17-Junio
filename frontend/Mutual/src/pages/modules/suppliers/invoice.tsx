@@ -31,6 +31,8 @@ const InvoicesPage: React.FC = () => {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [processing, setProcessing] = useState(false); 
   const [page, setPage] = useState(1);
+  // Agregar este nuevo estado
+  const [estadoFiltro, setEstadoFiltro] = useState<"Todos" | "Pagada" | "Pendiente">("Todos");
 
   const userRole = useMemo(
     () =>
@@ -74,16 +76,19 @@ const InvoicesPage: React.FC = () => {
     fetchInvoices();
   }, []);
 
+  // Modificar el filteredInvoices para incluir el nuevo filtro
   const filteredInvoices = useMemo(
     () =>
       invoices.filter(
         (invoice) =>
-          invoice.InvoiceNumber.toLowerCase().includes(search.toLowerCase()) ||
-          invoice.Supplier.toLowerCase().includes(search.toLowerCase()) ||
-          invoice.TypeService.toLowerCase().includes(search.toLowerCase()) ||
-          invoice.Description.toLowerCase().includes(search.toLowerCase())
+          (estadoFiltro === "Todos" || 
+           (estadoFiltro === "Pagada" ? invoice.Paid : !invoice.Paid)) &&
+          (invoice.InvoiceNumber.toLowerCase().includes(search.toLowerCase()) ||
+           invoice.Supplier.toLowerCase().includes(search.toLowerCase()) ||
+           invoice.TypeService.toLowerCase().includes(search.toLowerCase()) ||
+           invoice.Description.toLowerCase().includes(search.toLowerCase()))
       ),
-    [search, invoices]
+    [search, invoices, estadoFiltro]
   );
 
   const totalPages = Math.ceil(filteredInvoices.length / PAGE_SIZE);
@@ -173,6 +178,19 @@ const InvoicesPage: React.FC = () => {
                     }}
                     className="w-full md:w-72 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                  <select
+                    name="estadoFiltro"
+                    value={estadoFiltro}
+                    onChange={(e) => {
+                      setEstadoFiltro(e.target.value as "Todos" | "Pagada" | "Pendiente");
+                      setPage(1);
+                    }}
+                    className="px-3 py-2 border border-gray-300 rounded bg-white text-gray-700"
+                  >
+                    <option value="Todos">Todos</option>
+                    <option value="Pagada">Pagadas</option>
+                    <option value="Pendiente">Pendientes</option>
+                  </select>
                 </div>
                 <button
                   onClick={() => navigate("/proveedores/facturas/crear")}
@@ -264,19 +282,7 @@ const InvoicesPage: React.FC = () => {
                             >
                               Editar y Ver
                             </button>
-                            <button
-                              className={`${
-                                invoice.Paid 
-                                  ? "bg-red-500 hover:bg-red-600" 
-                                  : "bg-green-500 hover:bg-green-600"
-                              } text-white px-6 py-2 rounded-full transition text-xs font-medium w-36 ${
-                                processing ? "opacity-50 cursor-not-allowed" : ""
-                              }`}
-                              onClick={() => handleAskTogglePaidStatus(invoice)}
-                              disabled={processing}
-                            >
-                              {invoice.Paid ? "Marcar Pendiente" : "Marcar Pagada"}
-                            </button>
+
                           </td>
                         </tr>
                       ))
