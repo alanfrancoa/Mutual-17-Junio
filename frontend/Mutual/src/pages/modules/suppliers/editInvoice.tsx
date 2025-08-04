@@ -7,6 +7,8 @@ import { apiMutual } from "../../../api/apiMutual";
 import { IEditInvoice } from "../../../types/IInvoice";
 import { ISupplierList } from "../../../types/ISupplierList";
 import { IServiceType } from "../../../types/IServiceType";
+import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import useAppToast from "../../../hooks/useAppToast";
 
 const EditInvoice: React.FC = () => {
   const navigate = useNavigate();
@@ -15,9 +17,9 @@ const EditInvoice: React.FC = () => {
   const [serviceTypes, setServiceTypes] = useState<IServiceType[]>([]);
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [invoicePaid, setInvoicePaid] = useState(false);
+  const { showSuccessToast, showErrorToast } = useAppToast();
+  
   const [form, setForm] = useState<IEditInvoice>({
     supplierId: 0,
     invoiceNumber: "",
@@ -40,7 +42,7 @@ const EditInvoice: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       if (!id) {
-        setError("ID de factura no válido");
+        showErrorToast({ message: "ID de factura no válido" });
         setDataLoading(false);
         return;
       }
@@ -53,16 +55,14 @@ const EditInvoice: React.FC = () => {
           apiMutual.GetServiceTypes(),
         ]);
 
-        console.log("=== DEBUG: Datos de la factura ===", invoice);
-
         setInvoicePaid(invoice.Paid || invoice.paid);
 
         const formatDateForInput = (dateValue: any): string => {
           if (!dateValue) return "";
-
+          
           try {
             let date: Date;
-
+            
             if (dateValue instanceof Date) {
               date = dateValue;
             }
@@ -74,24 +74,21 @@ const EditInvoice: React.FC = () => {
               date = new Date(dateValue);
             }
             else {
-              console.warn("Formato de fecha desconocido:", dateValue);
               return "";
             }
             if (isNaN(date.getTime())) {
-              console.warn("Fecha inválida:", dateValue);
               return "";
             }
 
             return date.toISOString().split('T')[0];
           } catch (error) {
-            console.error("Error al formatear fecha:", dateValue, error);
             return "";
           }
         };
 
         const formData = {
           supplierId: invoice.SupplierName || invoice.supplierName ?
-            suppliersData.find((s: any) =>
+            suppliersData.find((s: any) => 
               s.legalName === (invoice.SupplierName || invoice.supplierName)
             )?.id || 0 : 0,
           invoiceNumber: invoice.InvoiceNumber || invoice.invoiceNumber || "",
@@ -99,7 +96,7 @@ const EditInvoice: React.FC = () => {
           dueDate: formatDateForInput(invoice.DueDate || invoice.dueDate),
           total: invoice.Total || invoice.total || 0,
           serviceTypeId: invoice.ServiceType || invoice.serviceType ?
-            serviceTypesData.find((st: IServiceType) =>
+            serviceTypesData.find((st: IServiceType) => 
               st.name === (invoice.ServiceType || invoice.serviceType)
             )?.id || 0 : 0,
           description: invoice.Description || invoice.description || "",
@@ -109,8 +106,7 @@ const EditInvoice: React.FC = () => {
         setSuppliers(suppliersData.filter((s: any) => s.active));
         setServiceTypes(serviceTypesData.filter((st: IServiceType) => st.active));
       } catch (err: any) {
-        console.error("=== ERROR al cargar datos ===", err);
-        setError(err.message || "Error al cargar los datos");
+        showErrorToast({ message: err.message || "Error al cargar los datos" });
       } finally {
         setDataLoading(false);
       }
@@ -140,56 +136,57 @@ const EditInvoice: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
     setLoading(true);
 
     try {
       // Validaciones
       if (!form.supplierId || !form.serviceTypeId) {
-        setError("Debe seleccionar un proveedor y un tipo de servicio");
+        showErrorToast({ message: "Debe seleccionar un proveedor y un tipo de servicio" });
         setLoading(false);
         return;
       }
 
       if (!form.invoiceNumber.trim()) {
-        setError("El número de factura es obligatorio");
+        showErrorToast({ message: "El número de factura es obligatorio" });
         setLoading(false);
         return;
       }
 
       if (form.total <= 0) {
-        setError("El total debe ser mayor a cero");
+        showErrorToast({ message: "El total debe ser mayor a cero" });
         setLoading(false);
         return;
       }
 
       if (new Date(form.issueDate) > new Date(form.dueDate)) {
-        setError("La fecha de vencimiento no puede ser anterior a la fecha de emisión");
+        showErrorToast({ message: "La fecha de vencimiento no puede ser anterior a la fecha de emisión" });
         setLoading(false);
         return;
       }
 
-      // Validar que las fechas no sean futuras
       const today = new Date().toISOString().slice(0, 10);
       if (form.issueDate > today) {
-        setError("La fecha de emisión no puede ser futura");
+        showErrorToast({ message: "La fecha de emisión no puede ser futura" });
         setLoading(false);
         return;
       }
 
       await apiMutual.UpdateInvoice(Number(id), form);
-      setSuccess("Factura actualizada correctamente");
+      showSuccessToast({ 
+        title: "Factura actualizada",
+        message: "La factura se actualizó correctamente" 
+      });
+      
       setTimeout(() => navigate("/proveedores/facturas"), 1500);
     } catch (err: any) {
       if (err.message.includes("No se puede editar una factura que ya ha sido pagada")) {
-        setError("No se puede editar una factura que ya ha sido pagada");
+        showErrorToast({ message: "No se puede editar una factura que ya ha sido pagada" });
       } else if (err.message.includes("Ya existe otra factura con ese número")) {
-        setError("Ya existe otra factura con ese número para este proveedor");
+        showErrorToast({ message: "Ya existe otra factura con ese número para este proveedor" });
       } else if (err.message.includes("No hay un período contable activo")) {
-        setError("No hay un período contable activo para actualizar la factura");
+        showErrorToast({ message: "No hay un período contable activo para actualizar la factura" });
       } else {
-        setError(err.message || "Error al actualizar la factura");
+        showErrorToast({ message: err.message || "Error al actualizar la factura" });
       }
     } finally {
       setLoading(false);
@@ -200,11 +197,10 @@ const EditInvoice: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-100 flex">
         <Sidebar />
-        <div className="flex-1" style={{ marginLeft: "18rem" }}>
+        <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
           <Header hasNotifications={true} loans={[]} />
-
-          <div className="flex flex-col items-center justify-center py-8">
-            <div className="w-full max-w-lg bg-white rounded-lg shadow p-8 text-center">
+          <div className="flex flex-col items-center justify-center py-8 flex-1">
+            <div className="w-full max-w-xl bg-white rounded-lg shadow p-8 text-center">
               <div className="text-lg text-gray-600">Cargando datos de la factura...</div>
             </div>
           </div>
@@ -216,34 +212,37 @@ const EditInvoice: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
-      <div className="flex-1" style={{ marginLeft: "18rem" }}>
+      <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
         <Header hasNotifications={true} loans={[]} />
-
-        <div className="flex flex-col items-center py-8">
+        <div className="flex flex-col items-center py-8 flex-1">
+          <div className="w-full max-w-5xl">
+            <div className="flex justify-start mb-6">
+              <button
+                onClick={() => navigate("/proveedores/facturas")}
+                className="text-gray-600 hover:text-gray-800 flex items-center"
+                aria-label="Volver a Facturas"
+              >
+                <ChevronLeftIcon className="h-5 w-5" />
+                <span className="ml-1">Volver</span>
+              </button>
+            </div>
+            <h2 className="text-2xl font-bold mb-6 text-blue-900">
+              Editar Factura
+            </h2>
+          </div>
+          
           <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8">
-            <h2 className="text-2xl font-bold mb-6 text-blue-900">Editar Factura</h2>
-
             {invoicePaid && (
-              <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+              <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6">
                 <strong>Advertencia:</strong> Esta factura ya ha sido pagada y no puede ser editada.
               </div>
             )}
 
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {success}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium mb-1">Número de Factura *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Número de Factura *
+                </label>
                 <input
                   type="text"
                   name="invoiceNumber"
@@ -251,20 +250,22 @@ const EditInvoice: React.FC = () => {
                   onChange={handleChange}
                   required
                   maxLength={100}
-                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                   disabled={loading || invoicePaid}
                   placeholder="Ej: FAC-001"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Proveedor *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Proveedor *
+                </label>
                 <select
                   name="supplierId"
                   value={form.supplierId}
                   onChange={handleChange}
                   required
-                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                   disabled={loading || invoicePaid}
                 >
                   <option value="">Seleccione un proveedor...</option>
@@ -277,13 +278,15 @@ const EditInvoice: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Tipo de Servicio *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tipo de Servicio *
+                </label>
                 <select
                   name="serviceTypeId"
                   value={form.serviceTypeId}
                   onChange={handleChange}
                   required
-                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                   disabled={loading || invoicePaid}
                 >
                   <option value="">Seleccione un tipo de servicio...</option>
@@ -297,7 +300,9 @@ const EditInvoice: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Fecha de Emisión *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha de Emisión *
+                  </label>
                   <input
                     type="date"
                     name="issueDate"
@@ -305,13 +310,15 @@ const EditInvoice: React.FC = () => {
                     onChange={handleChange}
                     required
                     max={new Date().toISOString().slice(0, 10)}
-                    className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                     disabled={loading || invoicePaid}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Fecha de Vencimiento *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha de Vencimiento *
+                  </label>
                   <input
                     type="date"
                     name="dueDate"
@@ -319,14 +326,16 @@ const EditInvoice: React.FC = () => {
                     onChange={handleChange}
                     required
                     min={form.issueDate}
-                    className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                     disabled={loading || invoicePaid}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Total *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Total *
+                </label>
                 <input
                   type="number"
                   name="total"
@@ -335,21 +344,23 @@ const EditInvoice: React.FC = () => {
                   required
                   min="0.01"
                   step="0.01"
-                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                   disabled={loading || invoicePaid}
                   placeholder="0.00"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Descripción</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descripción
+                </label>
                 <textarea
                   name="description"
                   value={form.description || ""}
                   onChange={handleChange}
                   maxLength={500}
                   rows={3}
-                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                   disabled={loading || invoicePaid}
                   placeholder="Descripción opcional de la factura"
                 />
@@ -360,15 +371,14 @@ const EditInvoice: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/proveedores/facturas")}
-                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors"
-                  disabled={loading}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-full transition duration-200 ease-in-out"
                 >
                   Cancelar
                 </button>
                 {!invoicePaid && (
                   <button
                     type="submit"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors disabled:bg-blue-400"
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold transition duration-200 ease-in-out disabled:opacity-50"
                     disabled={loading}
                   >
                     {loading ? "Actualizando..." : "Actualizar Factura"}
@@ -377,7 +387,6 @@ const EditInvoice: React.FC = () => {
               </div>
             </form>
 
-            {/* componente para gestión de pagos */}
             <PaymentManagement
               invoiceId={Number(id)}
               invoiceTotal={form.total}

@@ -29,8 +29,19 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
   }, [invoiceId]);
 
   useEffect(() => {
-    setRemainingBalance(invoiceTotal - totalPaid);
-  }, [invoiceTotal, totalPaid]);
+    const activePaidAmount = savedPayments
+      .filter(p => p.status === 'Activo')
+      .reduce((sum, p) => sum + p.amount, 0);
+    
+    setTotalPaid(activePaidAmount);
+    setRemainingBalance(invoiceTotal - activePaidAmount);
+    
+    console.log("=== RECALCULO DE SALDOS ===");
+    console.log("Pagos guardados:", savedPayments);
+    console.log("Pagos activos:", savedPayments.filter(p => p.status === 'Activo'));
+    console.log("Total pagado (solo activos):", activePaidAmount);
+    console.log("Saldo restante:", invoiceTotal - activePaidAmount);
+  }, [invoiceTotal, savedPayments]);
 
   const loadInitialData = async () => {
     try {
@@ -47,7 +58,9 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
 
   const loadSavedPayments = async () => {
     try {
-      //Obtener todos los pagos (activos y cancelados)
+      console.log("=== CARGANDO PAGOS ===");
+      
+      // Obtener todos los pagos (activos y cancelados)
       const [activePayments, cancelledPayments] = await Promise.all([
         apiMutual.GetSupplierPayments("Activo"),
         apiMutual.GetSupplierPayments("Cancelado")
@@ -57,11 +70,9 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
       const allPayments = [...activePayments, ...cancelledPayments];
       const invoicePayments = allPayments.filter((p: IPaymentList) => p.invoiceId === invoiceId);
       setSavedPayments(invoicePayments);
-      
-      const activeInvoicePayments = invoicePayments.filter((p: IPaymentList) => p.status === 'Activo');
-      const totalPaidAmount = activeInvoicePayments.reduce((sum: number, p: IPaymentList) => sum + p.amount, 0);
-      setTotalPaid(totalPaidAmount);
-      setRemainingBalance(invoiceTotal - totalPaidAmount);
+
+      // ✅ CAMBIO: El cálculo del total se hace en el useEffect de arriba
+      // Ya no calculamos aquí para evitar duplicación
     } catch (error) {
       console.error("Error al cargar pagos:", error);
       setSavedPayments([]);
@@ -112,53 +123,38 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
       // Validaciones individuales
       for (let i = 0; i < paymentLines.length; i++) {
         const payment = paymentLines[i];
-        
+
         if (!payment.methodId) {
           window.alert(`Línea ${i + 1}: Debe seleccionar un método de pago`);
           return;
         }
-        
+
         if (!payment.amount || payment.amount <= 0) {
           window.alert(`Línea ${i + 1}: El monto debe ser mayor a cero`);
           return;
         }
-        
+
         if (!payment.receiptNumber.trim()) {
           window.alert(`Línea ${i + 1}: El número de recibo es obligatorio`);
           return;
         }
-        
+
         if (!payment.paymentDate) {
           window.alert(`Línea ${i + 1}: La fecha de pago es obligatoria`);
           return;
         }
       }
 
-      // Validar números de recibo únicos entre líneas nuevas
-      const receiptNumbers = paymentLines.map(p => p.receiptNumber.trim().toLowerCase());
-      const duplicatesInNewLines = receiptNumbers.filter((item, index) => receiptNumbers.indexOf(item) !== index);
-      if (duplicatesInNewLines.length > 0) {
-        window.alert(`Hay números de recibo duplicados en las líneas nuevas`);
-        return;
-      }
-
-      const activePayments = savedPayments.filter(p => p.status === 'Activo');
-      const existingActiveReceipts = activePayments.map(p => p.receiptNumber.toLowerCase());
-      const duplicatesWithActive = receiptNumbers.filter(num => existingActiveReceipts.includes(num));
-      if (duplicatesWithActive.length > 0) {
-        window.alert(`Los siguientes números de recibo ya existen en pagos activos para esta factura: ${duplicatesWithActive.join(', ')}`);
-        return;
-      }
-
-      // Validar suma total contra saldo pendiente de pagos activos
+      const currentRemainingBalance = invoiceTotal - totalPaid; // Usar el totalPaid calculado solo con activos
       const totalNewPayments = paymentLines.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-      if (totalNewPayments > remainingBalance) {
-        window.alert(`El total de pagos ($${totalNewPayments.toLocaleString()}) no puede exceder el saldo pendiente ($${remainingBalance.toLocaleString()})`);
+      
+      if (totalNewPayments > currentRemainingBalance) {
+        window.alert(`El total de pagos ($${totalNewPayments.toLocaleString()}) no puede exceder el saldo pendiente ($${currentRemainingBalance.toLocaleString()})`);
         return;
       }
 
       setLoading(true);
-      
+
       let savedCount = 0;
       for (let i = 0; i < paymentLines.length; i++) {
         const payment = paymentLines[i];
@@ -168,9 +164,9 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
           savedCount++;
         } catch (paymentError: any) {
           console.error(`Error en pago ${i + 1}:`, paymentError);
-          
+
           let errorMessage = `Error en línea ${i + 1}: `;
-          
+
           if (paymentError.response?.data?.message) {
             errorMessage += paymentError.response.data.message;
           } else if (paymentError.message) {
@@ -178,13 +174,13 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
           } else {
             errorMessage += "Error desconocido";
           }
-          
+
           if (savedCount > 0) {
             errorMessage = `Se guardaron ${savedCount} pagos correctamente. ${errorMessage}`;
             await loadSavedPayments();
             setPaymentLines(paymentLines.slice(savedCount));
           }
-          
+
           setError(errorMessage);
           setTimeout(() => setError(""), 8000);
           return;
@@ -194,17 +190,17 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
       setPaymentLines([]);
       await loadSavedPayments();
       setSuccess(`${savedCount} pagos registrados correctamente`);
-      
+
       if (onPaymentsUpdate) {
         onPaymentsUpdate();
       }
-      
+
       setTimeout(() => setSuccess(""), 3000);
     } catch (error: any) {
       console.error("Error general al guardar pagos:", error);
-      
+
       let errorMessage = "Error al registrar pagos: ";
-      
+
       if (error.response?.data?.message) {
         errorMessage += error.response.data.message;
       } else if (error.message) {
@@ -212,7 +208,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
       } else {
         errorMessage += "Error desconocido";
       }
-      
+
       setError(errorMessage);
       setTimeout(() => setError(""), 8000);
     } finally {
@@ -234,13 +230,14 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
     try {
       setLoading(true);
       await apiMutual.CancelSupplierPayment(paymentId, reason.trim());
+      
       await loadSavedPayments();
       setSuccess("Pago cancelado correctamente");
-      
+
       if (onPaymentsUpdate) {
         onPaymentsUpdate();
       }
-      
+
       setTimeout(() => setSuccess(""), 3000);
     } catch (error: any) {
       setError(`Error al cancelar el pago: ${error.message}`);
@@ -255,8 +252,8 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-800">Gestión de Pagos</h3>
         <div className="text-sm text-gray-600">
-          <span className="font-medium">Total: ${invoiceTotal.toLocaleString()}</span> | 
-          <span className="font-medium text-green-600 ml-2">Pagado: ${totalPaid.toLocaleString()}</span> | 
+          <span className="font-medium">Total: ${invoiceTotal.toLocaleString()}</span> |
+          <span className="font-medium text-green-600 ml-2">Pagado: ${totalPaid.toLocaleString()}</span> |
           <span className="font-medium text-orange-600 ml-2">Saldo: ${remainingBalance.toLocaleString()}</span>
         </div>
       </div>
@@ -318,8 +315,8 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    payment.status === 'Activo' 
-                      ? 'bg-green-100 text-green-800' 
+                    payment.status === 'Activo'
+                      ? 'bg-green-100 text-green-800'
                       : 'bg-red-100 text-red-800'
                   }`}>
                     {payment.status}
@@ -335,7 +332,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
                       Cancelar
                     </button>
                   ) : (
-                    <span className="text-gray-400 text-xs">Cancelado</span> 
+                    <span className="text-gray-400 text-xs">Cancelado</span>
                   )}
                 </td>
               </tr>

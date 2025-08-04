@@ -1,329 +1,415 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../../dashboard/components/Sidebar";
 import Header from "../../dashboard/components/Header";
 import { apiMutual } from "../../../api/apiMutual";
-import { IPaymentMethod } from "../../../types/IPaymentMethod";
+import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import useAppToast from "../../../hooks/useAppToast";
 
 interface NewPaymentMethod {
-  code: string;
   name: string;
-  active?: boolean;
-  wasEdited?: boolean;
+  code: string;
+}
+
+interface PaymentMethod {
+  id: number;
+  name: string;
+  code: string;
+  active: boolean;
 }
 
 const PaymentMethods: React.FC = () => {
-  const [methods, setMethods] = useState<IPaymentMethod[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
-  const [newRows, setNewRows] = useState<NewPaymentMethod[]>([]);
-  const [success, setSuccess] = useState<string>("");
+  const navigate = useNavigate();
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [newPaymentMethods, setNewPaymentMethods] = useState<NewPaymentMethod[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [editedRow, setEditedRow] = useState<Partial<IPaymentMethod>>({});
+  const [editedRow, setEditedRow] = useState<Partial<PaymentMethod>>({});
+  const { showSuccessToast, showErrorToast } = useAppToast();
 
-  //Opciones del dropdown
-  const paymentMethodOptions = ["Transferencia", "Efectivo", "Pagare"];
+  // Verificar permisos
+  useEffect(() => {
+    const userRole = sessionStorage.getItem("userRole");
+    if (userRole !== "Administrador") {
+      navigate("/dashboard");
+      return;
+    }
+  }, [navigate]);
 
   useEffect(() => {
-    fetchMethods();
+    loadPaymentMethods();
   }, []);
 
-  const fetchMethods = async () => {
-    setLoading(true);
-    setError("");
+  const loadPaymentMethods = async () => {
     try {
-      const data: any = await apiMutual.GetPaymentMethods();
-      if (Array.isArray(data)) {
-        setMethods(data);
-      } else {
-        setError("Respuesta inesperada del servidor");
+      setDataLoading(true);
+      const data = await apiMutual.GetPaymentMethods();
+      setPaymentMethods(data);
+    } catch (error: any) {
+      showErrorToast({ message: error.message || "Error al cargar los métodos de pago" });
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+  const addPaymentMethodLine = () => {
+    setNewPaymentMethods([...newPaymentMethods, { name: "", code: "" }]);
+  };
+
+  const removePaymentMethodLine = (index: number) => {
+    setNewPaymentMethods(newPaymentMethods.filter((_, i) => i !== index));
+  };
+
+  const updatePaymentMethodLine = (index: number, field: keyof NewPaymentMethod, value: string) => {
+    const updated = newPaymentMethods.map((method, i) => {
+      if (i === index) {
+        return { ...method, [field]: value };
       }
-    } catch (err: any) {
-      setError(err.message || "Error al cargar los métodos de pago");
+      return method;
+    });
+    setNewPaymentMethods(updated);
+  };
+
+  const saveAllPaymentMethods = async () => {
+    try {
+      if (newPaymentMethods.length === 0) {
+        showErrorToast({ message: "No hay métodos de pago para guardar" });
+        return;
+      }
+
+      // Validaciones
+      for (let i = 0; i < newPaymentMethods.length; i++) {
+        const method = newPaymentMethods[i];
+        
+        if (!method.name.trim()) {
+          showErrorToast({ message: `Línea ${i + 1}: El nombre es obligatorio` });
+          return;
+        }
+        
+        if (!method.code.trim()) {
+          showErrorToast({ message: `Línea ${i + 1}: El código es obligatorio` });
+          return;
+        }
+      }
+
+      // Validar códigos únicos
+      const codes = newPaymentMethods.map(m => m.code.trim().toLowerCase());
+      const duplicates = codes.filter((item, index) => codes.indexOf(item) !== index);
+      if (duplicates.length > 0) {
+        showErrorToast({ message: "Hay códigos duplicados en las líneas" });
+        return;
+      }
+
+      setLoading(true);
+      
+      for (const method of newPaymentMethods) {
+        await apiMutual.RegisterPaymentMethod(method.code.trim(), method.name.trim());
+      }
+
+      setNewPaymentMethods([]);
+      await loadPaymentMethods();
+      showSuccessToast({
+        title: "Métodos guardados",
+        message: "Los métodos de pago se registraron correctamente"
+      });
+    } catch (error: any) {
+      showErrorToast({ message: error.message || "Error al guardar los métodos de pago" });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddRow = () => {
-    setNewRows([
-      ...newRows,
-      { code: "", name: "", active: true, wasEdited: false },
-    ]);
-  };
-
-  const handleNewRowChange = (
-    index: number,
-    field: keyof NewPaymentMethod,
-    value: string | boolean
-  ) => {
-    setNewRows((prevRows) => {
-      const updatedRows = [...prevRows];
-      if (field === "active" || field === "wasEdited") {
-        updatedRows[index][field] = Boolean(value);
-      } else {
-        updatedRows[index][field] = value as string;
-      }
-      updatedRows[index].wasEdited = true;
-      return updatedRows;
-    });
-  };
-
-  const handleUpdate = async () => {
-    setError("");
-    setSuccess("");
-    let anyError = false;
-    for (const row of newRows) {
-      if (!row.code || !row.name) {
-        setError("Completa todos los campos de los nuevos métodos de pago.");
-        anyError = true;
-        break;
-      }
-      try {
-        await apiMutual.RegisterPaymentMethod(row.code, row.name);
-      } catch (err: any) {
-        setError(err.message || "Error al agregar un método de pago");
-        anyError = true;
-        break;
-      }
-    }
-    if (!anyError) {
-      setSuccess("Métodos de pago agregados correctamente");
-      setNewRows([]);
-      fetchMethods();
-    }
-  };
-
-  //Activar/Desactivar
-  const handleToggleState = async (id: number) => {
+  const togglePaymentMethodStatus = async (id: number) => {
     try {
-      setError("");
-      setSuccess("");
-      
-      const response = await apiMutual.PaymentMethodState(id);
-
-      await fetchMethods();
-
-      setSuccess("Estado del método de pago actualizado correctamente");
-    } catch (err: any) {
-      setError(err.message || "Error al cambiar el estado del método de pago");
+      setLoading(true);
+      await apiMutual.PaymentMethodState(id);
+      await loadPaymentMethods();
+      showSuccessToast({ message: "Estado actualizado correctamente" });
+    } catch (error: any) {
+      showErrorToast({ message: error.message || "Error al cambiar el estado" });
+    } finally {
+      setLoading(false);
     }
   };
 
-  //Ediatr
   const handleSaveEdit = async (index: number) => {
     try {
-      setError("");
-      setSuccess("");
-      const method = methods[index];
+      const method = paymentMethods[index];
 
       if (!editedRow.name?.trim() || !editedRow.code?.trim()) {
-        setError("El nombre y código no pueden estar vacíos");
+        showErrorToast({ message: "El nombre y código no pueden estar vacíos" });
         return;
       }
 
+      setLoading(true);
       await apiMutual.UpdatePaymentMethod(method.id, {
         name: editedRow.name ?? method.name,
         code: editedRow.code ?? method.code,
       });
 
-      await fetchMethods();
-
+      await loadPaymentMethods();
       setEditIndex(null);
       setEditedRow({});
-      setSuccess("Método de pago actualizado correctamente");
-    } catch (err: any) {
-      setError(err.message || "Error al actualizar el método de pago");
+      showSuccessToast({ message: "Método de pago actualizado correctamente" });
+    } catch (error: any) {
+      showErrorToast({ message: error.message || "Error al actualizar el método de pago" });
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (dataLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex">
+        <Sidebar />
+        <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
+          <Header hasNotifications={true} loans={[]} />
+          <div className="flex flex-col items-center justify-center py-8 flex-1">
+            <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8 text-center">
+              <div className="text-lg text-gray-600">Cargando métodos de pago...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
-      <div className="flex-1" style={{ marginLeft: "18rem" }}>
+      <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
         <Header hasNotifications={true} loans={[]} />
-        <div className="flex flex-col items-center py-8">
-          <div className="w-full max-w-2xl bg-white rounded-lg shadow p-8">
-            <h2 className="text-2xl font-bold mb-6">
-              Agregar/Desactivar medios de pago
-            </h2>
-            {success && <div className="text-green-600 mb-2">{success}</div>}
-            {error && <div className="text-red-600 mb-2">{error}</div>}
-            <table className="min-w-full divide-y divide-gray-200 mb-4">
-              <thead>
-                <tr>
-                  <th className="px-4 py-2 text-left">Nombre</th>
-                  <th className="px-4 py-2 text-left">Método de Pago</th>
-                  <th className="px-4 py-2 text-left">Estado</th>
-                  <th className="px-4 py-2 text-left">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {methods.map((method, index) => (
-                  <tr key={`method-${method.id}`}>
-                    <td className="px-4 py-2">
-                      {editIndex === index ? (
+        
+        {/* Main Content */}
+        <main className="flex-1 p-6 bg-gray-100">
+          <div className="flex justify-start mb-4">
+            <button
+              onClick={() => navigate("/proveedores")}
+              className="text-gray-600 hover:text-gray-800 flex items-center"
+              aria-label="Volver a Proveedores"
+            >
+              <ChevronLeftIcon className="h-5 w-5" />
+              <span className="ml-1">Volver</span>
+            </button>
+          </div>
+          
+          <h1 className="text-2xl font-bold text-blue-900 mb-4">
+            Métodos de Pago
+          </h1>
+
+          <div className="flex-1 w-full">
+            <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
+              {/* Botón agregar */}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
+                <div className="flex gap-2 w-full md:w-auto">
+                  {/* Espacio para futuras funcionalidades de búsqueda */}
+                </div>
+                <button
+                  onClick={addPaymentMethodLine}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full font-semibold shadow transition w-full md:w-auto"
+                  disabled={loading}
+                >
+                  + Agregar Método
+                </button>
+              </div>
+
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Nombre
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Código
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {/* Métodos existentes */}
+                  {paymentMethods.map((method, index) => (
+                    <tr key={method.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {editIndex === index ? (
+                          <input
+                            type="text"
+                            value={editedRow.name ?? method.name}
+                            onChange={(e) =>
+                              setEditedRow({ ...editedRow, name: e.target.value })
+                            }
+                            className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                            disabled={loading}
+                          />
+                        ) : (
+                          method.name
+                        )}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {editIndex === index ? (
+                          <input
+                            type="text"
+                            value={editedRow.code ?? method.code}
+                            onChange={(e) =>
+                              setEditedRow({ ...editedRow, code: e.target.value })
+                            }
+                            className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                            disabled={loading}
+                          />
+                        ) : (
+                          method.code
+                        )}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            method.active
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {method.active ? "Activo" : "Inactivo"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
+                        <div className="space-x-2 flex justify-end">
+                          {editIndex === index ? (
+                            <>
+                              <button
+                                onClick={() => handleSaveEdit(index)}
+                                className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
+                                disabled={loading}
+                              >
+                                Guardar
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditIndex(null);
+                                  setEditedRow({});
+                                }}
+                                className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
+                                disabled={loading}
+                              >
+                                Cancelar
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => {
+                                  setEditIndex(index);
+                                  setEditedRow(method);
+                                }}
+                                className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
+                                disabled={loading}
+                              >
+                                Editar
+                              </button>
+                              <button
+                                onClick={() => togglePaymentMethodStatus(method.id)}
+                                className={`${
+                                  method.active
+                                    ? "bg-red-500 hover:bg-red-600"
+                                    : "bg-green-500 hover:bg-green-600"
+                                } text-white px-6 py-2 rounded-full transition text-xs font-medium`}
+                                disabled={loading}
+                              >
+                                {method.active ? "Desactivar" : "Activar"}
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {/* Líneas nuevas */}
+                  {newPaymentMethods.map((method, index) => (
+                    <tr key={`new-${index}`} className="bg-blue-50 hover:bg-blue-100">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         <input
                           type="text"
-                          value={editedRow.name ?? method.name}
-                          onChange={(e) =>
-                            setEditedRow({ ...editedRow, name: e.target.value })
-                          }
-                          className="border px-2 py-1 rounded w-full"
+                          value={method.name}
+                          onChange={(e) => updatePaymentMethodLine(index, 'name', e.target.value)}
+                          className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Nombre del método"
+                          disabled={loading}
                         />
-                      ) : (
-                        method.name
-                      )}
-                    </td>
-                    <td className="px-4 py-2">
-                      {editIndex === index ? (
-                        <select
-                          value={editedRow.code ?? method.code}
-                          onChange={(e) =>
-                            setEditedRow({ ...editedRow, code: e.target.value })
-                          }
-                          className="border px-2 py-1 rounded w-full"
-                        >
-                          <option value="">Seleccionar...</option>
-                          {paymentMethodOptions.map((option) => (
-                            <option key={option} value={option}>
-                              {option}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        method.code
-                      )}
-                    </td>
-                    <td className="px-4 py-2">
-                      <span
-                        className={
-                          method.active ? "text-green-600" : "text-red-600"
-                        }
-                      >
-                        {method.active ? "Activo" : "Inactivo"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2 flex gap-2">
-                      {editIndex === index ? (
-                        <>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <input
+                          type="text"
+                          value={method.code}
+                          onChange={(e) => updatePaymentMethodLine(index, 'code', e.target.value)}
+                          className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Código"
+                          disabled={loading}
+                        />
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                          Nuevo
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
+                        <div className="space-x-2 flex justify-end">
                           <button
-                            onClick={() => handleSaveEdit(index)}
-                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                            onClick={() => removePaymentMethodLine(index)}
+                            className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
+                            disabled={loading}
                           >
-                            Guardar
+                            Quitar
                           </button>
-                          <button
-                            onClick={() => {
-                              setEditIndex(null);
-                              setEditedRow({});
-                            }}
-                            className="bg-gray-400 hover:bg-gray-500 text-white px-3 py-1 rounded text-sm"
-                          >
-                            Cancelar
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => {
-                              setEditIndex(index);
-                              setEditedRow(method);
-                            }}
-                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
-                          >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() => handleToggleState(method.id)}
-                            className={`${
-                              method.active
-                                ? "bg-red-600 hover:bg-red-700"
-                                : "bg-green-600 hover:bg-green-700"
-                            } text-white px-3 py-1 rounded text-sm`}
-                          >
-                            {method.active ? "Desactivar" : "Activar"}
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {newRows.map((row, idx) => (
-                  <tr key={`new-${idx}`}>
-                    <td className="px-4 py-2">
-                      <input
-                        type="text"
-                        value={row.name}
-                        onChange={(e) =>
-                          handleNewRowChange(idx, "name", e.target.value)
-                        }
-                        placeholder="Nombre"
-                        required
-                        maxLength={255}
-                        className="border px-2 py-1 rounded w-full"
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <select
-                        value={row.code}
-                        onChange={(e) =>
-                          handleNewRowChange(idx, "code", e.target.value)
-                        }
-                        className="border px-2 py-1 rounded w-full"
-                        required
-                      >
-                        <option value="">Seleccionar...</option>
-                        {paymentMethodOptions.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="px-4 py-2">Nuevo</td>
-                    <td className="px-4 py-2 flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setNewRows(newRows.filter((_, i) => i !== idx))
-                        }
-                        className={`bg-gray-400 text-white px-3 py-1 rounded text-sm ${
-                          row.wasEdited ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
-                        disabled={row.wasEdited}
-                        title={
-                          row.wasEdited
-                            ? "No puedes quitar una línea que ya fue editada"
-                            : ""
-                        }
-                      >
-                        Quitar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleAddRow}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
-              >
-                + Agregar línea
-              </button>
-              {newRows.length > 0 && (
-                <button
-                  type="button"
-                  onClick={handleUpdate}
-                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
-                >
-                  Guardar
-                </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {/* Fila vacía */}
+                  {paymentMethods.length === 0 && newPaymentMethods.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="text-center py-8 text-gray-400">
+                        No hay métodos de pago registrados. Haz clic en "Agregar Método" para comenzar.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+
+              {/* Botones de acción para nuevos métodos */}
+              {newPaymentMethods.length > 0 && (
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-2">
+                  <div className="flex justify-center items-center gap-4 flex-1">
+                    <span className="text-gray-700 font-medium">
+                      {newPaymentMethods.length} método(s) por guardar
+                    </span>
+                  </div>
+                  <div className="flex gap-2 md:w-auto w-full">
+                    <button
+                      onClick={() => setNewPaymentMethods([])}
+                      className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-full transition duration-200 ease-in-out flex-1 md:flex-initial"
+                      disabled={loading}
+                    >
+                      Limpiar Todo
+                    </button>
+                    <button
+                      onClick={saveAllPaymentMethods}
+                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold transition duration-200 ease-in-out disabled:opacity-50 flex-1 md:flex-initial"
+                      disabled={loading}
+                    >
+                      {loading ? "Guardando..." : "Guardar Cambios"}
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
