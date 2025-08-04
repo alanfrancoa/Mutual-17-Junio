@@ -1,7 +1,7 @@
 import { JSX } from "react";
 import { Navigate } from "react-router-dom";
 import { Role } from "../helper/config";
-import { isTokenExpired } from "../helper/authservice";
+// import { isTokenExpired } from "../helper/authservice";
 
 export interface ProtectedUser {
   username: string | null;
@@ -21,11 +21,11 @@ const ProtectedRoute = ({
   children,
   authorizedRoles,
 }: ProtectedRouteProps) => {
-  const token = sessionStorage.getItem("token");
+  //const token = sessionStorage.getItem("token");
 
   // limpieza token vencido +2hs
-  if (!user?.username || !user?.role || !token || isTokenExpired(token)) {
-    sessionStorage.clear();
+  if (!user?.username || !user?.role ) {
+    //sessionStorage.clear();
     return <Navigate to={redirectPath} replace />;
   }
 

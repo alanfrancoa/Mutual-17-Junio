@@ -18,14 +18,17 @@ import axios from 'axios';
 //   };
 //   request?: any;
 // }
- export function isTokenExpired(token: string): boolean {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return Date.now() / 1000 > payload.exp;
-  } catch {
-    return true;
-  }
-}
+
+
+// VENCIMIENTO TOKEN
+//  export function isTokenExpired(token: string): boolean {
+//   try {
+//     const payload = JSON.parse(atob(token.split(".")[1]));
+//     return Date.now() / 1000 > payload.exp;
+//   } catch {
+//     return true;
+//   }
+// }
 
 export const AuthService = {
 
