@@ -38,6 +38,7 @@ import RequestLoan from "./pages/modules/loans/requestLoan";
 import CreateLoan from "./pages/modules/loans/loanTypes/createLoanType";
 import ReadLoan from "./pages/modules/loans/readLoan";
 import Collection from "./pages/modules/collections/Collections";
+import CollectionDetail from "./pages/modules/collections/CollectionDetail";
 import RegisterCollection from "./pages/modules/collections/RegisterCollection";
 import OverdueInstallments from "./pages/modules/collections/OverdueInstallments";
 import ReadAccountingPeriod from "./pages/modules/reports-periods/accounting-periods/readAccountingPeriod";
@@ -472,6 +473,18 @@ const AppRouter: React.FC = () => {
               authorizedRoles={[ROLES.GESTOR, ROLES.ADMINISTRADOR]}
             >
               <Collection />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/cobros/detalle/:id"
+          element={
+            <ProtectedRoute
+              user={{ username: userName, role: userRole as Role }}
+              authorizedRoles={[ROLES.GESTOR, ROLES.ADMINISTRADOR]}
+            >
+              <CollectionDetail />
             </ProtectedRoute>
           }
         />
