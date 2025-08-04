@@ -264,19 +264,7 @@ const InvoicesPage: React.FC = () => {
                             >
                               Editar y Ver
                             </button>
-                            <button
-                              className={`${
-                                invoice.Paid 
-                                  ? "bg-red-500 hover:bg-red-600" 
-                                  : "bg-green-500 hover:bg-green-600"
-                              } text-white px-6 py-2 rounded-full transition text-xs font-medium w-36 ${
-                                processing ? "opacity-50 cursor-not-allowed" : ""
-                              }`}
-                              onClick={() => handleAskTogglePaidStatus(invoice)}
-                              disabled={processing}
-                            >
-                              {invoice.Paid ? "Marcar Pendiente" : "Marcar Pagada"}
-                            </button>
+
                           </td>
                         </tr>
                       ))
