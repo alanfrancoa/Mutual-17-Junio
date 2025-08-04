@@ -5,17 +5,19 @@ import { IAssociateList } from "../../../../types/associates/IAssociateList";
 import { apiMutual } from "../../../../api/apiMutual";
 import Header from "../../../dashboard/components/Header";
 import Sidebar from "../../../dashboard/components/Sidebar";
+import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import useAppToast from "../../../../hooks/useAppToast";
 
 // Opciones de parentesco
 const relationshipsOptions = [
   "Seleccione una opcion",
-  "Hijo/a",  
+  "Hijo/a",
   "Padre/Madre",
   "Hermano/a",
-  "Nieto/a", 
+  "Nieto/a",
   "Abuelo/a",
   "Esposo/a",
-  "Conyuge"
+  "Conyuge",
 ];
 
 const CreateAssociateRelative: React.FC = () => {
@@ -27,18 +29,24 @@ const CreateAssociateRelative: React.FC = () => {
     dni: "",
     legalName: "",
     phone: "",
-    relation: relationshipsOptions[0], 
+    relation: relationshipsOptions[0],
   });
 
   const [loadingAssociate, setLoadingAssociate] = useState<boolean>(true);
-  const [parentAssociate, setParentAssociate] = useState<IAssociateList | null>(null);
+  const [parentAssociate, setParentAssociate] = useState<IAssociateList | null>(
+    null
+  );
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const { showErrorToast, showSuccessToast, showInfoToast, showWarningToast } =
+    useAppToast();
 
- 
   useEffect(() => {
     const fetchParentAssociate = async () => {
       if (parsedAssociateId === null) {
-        alert("Error: ID del asociado principal no proporcionado en la URL.");
+        showErrorToast({
+          title: "Error",
+          message: "ID del asociado principal no proporcionado en la URL.",
+        });
         setLoadingAssociate(false);
         return;
       }
@@ -47,7 +55,12 @@ const CreateAssociateRelative: React.FC = () => {
         setParentAssociate(data);
       } catch (error: any) {
         console.error("Error al cargar el asociado principal:", error);
-        alert(error.response?.data?.mensaje || "Error al cargar la información del asociado principal.");
+        showErrorToast({
+          title: "Error",
+          message:
+            error.response?.data?.mensaje ||
+            "Error al cargar la información del asociado principal.",
+        });
       } finally {
         setLoadingAssociate(false);
       }
@@ -61,11 +74,44 @@ const CreateAssociateRelative: React.FC = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const validateForm = () => {
+    if (!form.dni || form.dni.length < 8) {
+      return "El DNI debe tener al menos 8 caracteres.";
+    }
+    if (!form.legalName || !form.legalName.match(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)) {
+      return "El nombre es obligatorio y solo puede contener letras y espacios.";
+    }
+    if (
+      !form.phone ||
+      form.phone.length < 8 ||
+      form.phone.length > 20 ||
+      !form.phone.match(/^[0-9\-\.\s]+$/)
+    ) {
+      return "El teléfono debe tener entre 8 y 20 caracteres y solo puede contener números, guiones y puntos.";
+    }
+    if (!form.relation || form.relation === relationshipsOptions[0]) {
+      return "La relación de parentesco es obligatoria.";
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const validationError = validateForm();
+    if (validationError) {
+      showErrorToast({
+        title: "Validación",
+        message: validationError,
+      });
+      return;
+    }
+
     if (parsedAssociateId === null) {
-      alert("Error: ID del asociado principal no válido.");
+      showErrorToast({
+        title: "Error",
+        message: "ID del asociado principal no válido.",
+      });
       return;
     }
 
@@ -74,15 +120,23 @@ const CreateAssociateRelative: React.FC = () => {
     try {
       const response = await apiMutual.CreateRelativeAssociate(
         parsedAssociateId,
-        form 
+        form
       );
 
-      alert(response.mensaje || "Familiar del asociado creado correctamente.");
+      showSuccessToast({
+        title: "Creacion exitosa",
+        message:
+          response.mensaje || "Familiar del asociado creado correctamente.",
+      });
       navigate(`/asociados/detalle/${parsedAssociateId}`);
-      
     } catch (error: any) {
       console.error("Error al crear familiar del asociado:", error);
-      alert(error.response?.data?.mensaje || "Ocurrió un error al crear el familiar.");
+      showErrorToast({
+        title: "Error",
+        message:
+          error.response?.data?.mensaje ||
+          "Ocurrió un error al crear el familiar.",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -92,24 +146,43 @@ const CreateAssociateRelative: React.FC = () => {
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
         <div className="flex flex-col items-center py-8 flex-1">
           <div className="w-full max-w-xl">
+            <div className="flex justify-start mb-6">
+              <button
+                onClick={() =>
+                  navigate(`/asociados/detalle/${parsedAssociateId}`)
+                }
+                className="text-gray-600 hover:text-gray-800 flex items-center"
+                aria-label="Volver a Asociados"
+              >
+                <ChevronLeftIcon className="h-5 w-5" />
+                <span className="ml-1">Volver</span>
+              </button>
+            </div>
             <h2 className="text-2xl font-bold mb-6 text-blue-900">
               Nuevo Familiar de Asociado
             </h2>
-            {loadingAssociate ? (
-              <p className="text-center text-gray-500">Cargando asociado principal...</p>
-            ) : parentAssociate ? (
-              <p className="text-lg text-gray-700 mb-4">
-                Para: <span className="font-semibold">{parentAssociate.legalName} (DNI: {parentAssociate.dni})</span>
-              </p>
-            ) : (
-              <p className="text-lg text-red-600 mb-4">No se pudo cargar el asociado principal.</p>
-            )}
           </div>
           <div className="w-full max-w-xl bg-white rounded-lg shadow p-8">
             <form onSubmit={handleSubmit} className="space-y-5">
+              {loadingAssociate ? (
+                <p className="text-center text-gray-500">
+                  Cargando asociado principal...
+                </p>
+              ) : parentAssociate ? (
+                <p className="text-lg text-gray-700 mb-4">
+                  Para:{" "}
+                  <span className="font-semibold">
+                    {parentAssociate.legalName} (DNI: {parentAssociate.dni})
+                  </span>
+                </p>
+              ) : (
+                <p className="text-lg text-red-600 mb-4">
+                  No se pudo cargar el asociado principal.
+                </p>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   DNI del Familiar
@@ -130,7 +203,7 @@ const CreateAssociateRelative: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  name="legalName" 
+                  name="legalName"
                   value={form.legalName}
                   onChange={handleChange}
                   required
@@ -145,7 +218,7 @@ const CreateAssociateRelative: React.FC = () => {
                 <input
                   type="text"
                   name="phone"
-                  value={form.phone || ""} 
+                  value={form.phone || ""}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />
@@ -156,7 +229,7 @@ const CreateAssociateRelative: React.FC = () => {
                   Parentesco
                 </label>
                 <select
-                  name="relation" 
+                  name="relation"
                   value={form.relation}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
@@ -173,19 +246,18 @@ const CreateAssociateRelative: React.FC = () => {
               <div className="flex justify-end gap-2 pt-4">
                 <button
                   type="button"
-                  onClick={() => navigate(`/asociados`)} 
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded"
+                  onClick={() => navigate(`/asociados`)}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-full"
                   disabled={submitting}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-semibold disabled:opacity-50"
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold disabled:opacity-50"
                   disabled={submitting}
                 >
                   {submitting ? "Guardando..." : "Guardar Familiar"}
-                  
                 </button>
               </div>
             </form>

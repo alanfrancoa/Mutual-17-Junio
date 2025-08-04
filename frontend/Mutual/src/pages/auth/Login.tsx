@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiMutual } from "../../api/apiMutual";
+import useAppToast from "../../hooks/useAppToast"; // Agrega la importación
 // import TermsModal from "../../components/ui/auth/modalTermsAndConditions";
 // import PrivacyModal from "../../components/ui/auth/modalPrivacyPolitics";
 
@@ -33,6 +34,13 @@ const Login = () => {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showForgotPassModal, setShowForgotPassModal] = useState(false);
+  const toast = useAppToast(); // Inicializa el hook
+
+  useEffect(() => {
+    if (sessionStorage.getItem("token")) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
 
   useEffect(() => {
     if (username) {
@@ -48,33 +56,17 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Condicional de aceptacion de terminos y condiciones y politica de privacidad
-    const termsAccepted = checkUserAcceptance(username, "terms");
-    const privacyAccepted = checkUserAcceptance(username, "privacy");
-
-    // if (!termsAccepted || !privacyAccepted) {
-    //   setError(
-    //     "Debes aceptar los Términos y Condiciones y la Política de Privacidad"
-    //   );
-    //   if (!termsAccepted) setShowTermsModal(true);
-    //   if (!privacyAccepted) setShowPrivacyModal(true);
-    //   return;
-    // }
-
     setLoading(true);
-    setError("");
 
     try {
       const response = await apiMutual.Login(username, password);
       console.log("Token recibido:", response);
 
-      // Guarda el token y el username del input
       sessionStorage.setItem("token", response);
       sessionStorage.setItem("username", username);
 
-      // Decodifica el JWT para obtener los datos del usuario
       const payload = parseJwt(response);
-    
+
       if (payload && payload.role) {
         sessionStorage.setItem("userRole", payload.role);
       }
@@ -82,10 +74,28 @@ const Login = () => {
         sessionStorage.setItem("username", payload.username);
       }
 
+      toast.showSuccessToast({
+        title: "¡Bienvenido!",
+        message: "Inicio de sesión exitoso.",
+      });
+
       navigate("/dashboard");
       window.location.reload();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+    } catch (err: any) {
+      let errorMsg = "Error desconocido";
+      if (
+        err.response &&
+        err.response.data &&
+        (err.response.data.message || err.response.data.mensaje)
+      ) {
+        errorMsg = err.response.data.message || err.response.data.mensaje;
+      } else if (err instanceof Error) {
+        errorMsg = err.message;
+      }
+      toast.showErrorToast({
+        title: "Error de inicio de sesión",
+        message: errorMsg,
+      });
     } finally {
       setLoading(false);
     }
@@ -116,12 +126,7 @@ const Login = () => {
 
         {/* Card blanca */}
         <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 text-black">
-          {error && (
-            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-sm">
-              {error}
-            </div>
-          )}
-
+          {/* Elimina el div de error */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium mb-1">Usuario</label>

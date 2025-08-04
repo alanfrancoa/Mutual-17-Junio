@@ -30,13 +30,24 @@ const Collections: React.FC = () => {
         // eslint-disable-next-line
     }, [filters, page]);
 
+
     const fetchCollections = async () => {
         setLoading(true);
         setError("");
         try {
+
             // Construir query params
             const params = new URLSearchParams();
-            if (filters.associate) params.append("associateId", filters.associate);
+
+
+            if (filters.associate) {
+                if (!isNaN(Number(filters.associate))) {
+                    // Si es número, buscar por ID
+                    params.append("associateId", filters.associate);
+                } else {
+                    params.append("associateName", filters.associate);
+                }
+            }
             if (filters.dateFrom) params.append("startDate", filters.dateFrom);
             if (filters.dateTo) params.append("endDate", filters.dateTo);
             if (filters.status) params.append("status", filters.status);
@@ -76,7 +87,7 @@ const Collections: React.FC = () => {
         <div className="min-h-screen bg-gray-100 flex">
             <Sidebar />
             <div className="flex-1" style={{ marginLeft: "18rem" }}>
-     <Header hasNotifications={true} loans={[]}  />
+                <Header hasNotifications={true} loans={[]} />
                 <div className="flex flex-col items-center py-8">
                     <div className="w-full max-w-6xl bg-white rounded-lg shadow p-8">
                         <h2 className="text-2xl font-bold mb-6">Gestión de Cobros</h2>
@@ -176,8 +187,10 @@ const Collections: React.FC = () => {
                                             </td>
                                             <td className="px-4 py-2 flex gap-2">
                                                 <button
-                                                    className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
+                                                    className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                    disabled={c.status === "Cancelado"}
                                                     onClick={async () => {
+                                                        if (c.status === "Cancelado") return;
                                                         try {
                                                             const response = await fetch(
                                                                 `https://localhost:7256/api/collections/${c.id}/pdf`,
@@ -190,10 +203,32 @@ const Collections: React.FC = () => {
                                                             );
                                                             if (!response.ok) throw new Error("No se pudo generar el PDF");
                                                             const blob = await response.blob();
+                                                            let fileName = `Cobro_${c.id}.pdf`;
+                                                            const disposition = response.headers.get("Content-Disposition");
+                                                            
+                                                            if (disposition) {
+
+                                                                let match = disposition.match(/filename\*\s*=\s*UTF-8''"?([^;"\n]+)"?/i);
+                                                                if (match && match[1]) {
+                                                                    fileName = decodeURIComponent(match[1]);
+                                                                } else {
+                                                                    
+                                                                    match = disposition.match(/filename="([^"]+)"/i);
+                                                                    if (match && match[1]) {
+                                                                        fileName = match[1];
+                                                                    } else {
+                                                                        
+                                                                        match = disposition.match(/filename=([^;]+)/i);
+                                                                        if (match && match[1]) {
+                                                                            fileName = match[1].trim();
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
                                                             const url = window.URL.createObjectURL(blob);
                                                             const link = document.createElement("a");
                                                             link.href = url;
-                                                            link.download = `Cobro_${c.id}.pdf`;
+                                                            link.download = fileName;
                                                             document.body.appendChild(link);
                                                             link.click();
                                                             link.remove();
