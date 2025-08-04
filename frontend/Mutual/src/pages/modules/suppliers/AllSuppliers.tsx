@@ -5,6 +5,8 @@ import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
 import { ISupplierList } from "../../../types/ISupplierList";
 import useAppToast from "../../../hooks/useAppToast";
+// Importar los íconos necesarios
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 
 const AllSuppliers: React.FC = () => {
   const navigate = useNavigate();
@@ -14,6 +16,7 @@ const AllSuppliers: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [estadoFiltro, setEstadoFiltro] = useState<"Todos" | "Activo" | "Inactivo">("Todos");
 
   useEffect(() => {
     const fetchSuppliers = async () => {
@@ -73,11 +76,13 @@ const AllSuppliers: React.FC = () => {
 
   const filteredSuppliers = suppliers.filter(
     (s) =>
-      s.legalName.toLowerCase().includes(search.toLowerCase()) ||
-      s.cuit.includes(search) ||
-      (s.address && s.address.toLowerCase().includes(search.toLowerCase())) ||
-      (s.phone && s.phone.includes(search)) ||
-      (s.email && s.email.toLowerCase().includes(search.toLowerCase()))
+      (estadoFiltro === "Todos" || 
+       (estadoFiltro === "Activo" ? s.active : !s.active)) &&
+      (s.legalName.toLowerCase().includes(search.toLowerCase()) ||
+       s.cuit.includes(search) ||
+       (s.address && s.address.toLowerCase().includes(search.toLowerCase())) ||
+       (s.phone && s.phone.includes(search)) ||
+       (s.email && s.email.toLowerCase().includes(search.toLowerCase())))
   );
 
   // Calcular la paginación
@@ -112,10 +117,20 @@ const AllSuppliers: React.FC = () => {
                   <input
                     type="text"
                     placeholder="Buscar por nombre, CUIT, teléfono o email"
-                    className="w-full md:w-72 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-120"
+                    className="w-full md:w-72 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
+                  <select
+                    name="estadoFiltro"
+                    value={estadoFiltro}
+                    onChange={(e) => setEstadoFiltro(e.target.value as "Todos" | "Activo" | "Inactivo")}
+                    className="px-3 py-2 border border-gray-300 rounded bg-white text-gray-700"
+                  >
+                    <option value="Todos">Todos</option>
+                    <option value="Activo">Activos</option>
+                    <option value="Inactivo">Inactivos</option>
+                  </select>
                 </div>
                 <button
                   onClick={() => navigate("/proveedores/crear")}
@@ -138,13 +153,14 @@ const AllSuppliers: React.FC = () => {
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">CUIT</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Teléfono</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Estado</th>
                       <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {currentItems.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="text-center py-8 text-gray-400">
+                        <td colSpan={7} className="text-center py-8 text-gray-400">
                           No hay proveedores registrados que coincidan con la búsqueda.
                         </td>
                       </tr>
@@ -156,6 +172,17 @@ const AllSuppliers: React.FC = () => {
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{s.cuit}</td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{s.phone}</td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{s.email}</td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm">
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                s.active 
+                                  ? "bg-green-100 text-green-800" 
+                                  : "bg-red-100 text-red-800"
+                              }`}
+                            >
+                              {s.active ? "Activo" : "Inactivo"}
+                            </span>
+                          </td>
                           <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
                             <div className="space-x-2 flex justify-end">
                               <button
@@ -182,51 +209,33 @@ const AllSuppliers: React.FC = () => {
                 </table>
               )}
 
-              {/* Agregar los controles de paginación */}
-              {filteredSuppliers.length > 0 && (
-                <div className="mt-4 flex justify-between items-center">
-                  <div className="text-sm text-gray-700">
-                    Mostrando {indexOfFirstItem + 1} a {Math.min(indexOfLastItem, filteredSuppliers.length)} de {filteredSuppliers.length} resultados
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => paginate(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className={`px-3 py-1 rounded-md ${
-                        currentPage === 1
-                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                      }`}
-                    >
-                      Anterior
-                    </button>
-                    {[...Array(totalPages)].map((_, index) => (
-                      <button
-                        key={index + 1}
-                        onClick={() => paginate(index + 1)}
-                        className={`px-3 py-1 rounded-md ${
-                          currentPage === index + 1
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-white text-blue-600 hover:bg-blue-50'
-                        }`}
-                      >
-                        {index + 1}
-                      </button>
-                    ))}
-                    <button
-                      onClick={() => paginate(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className={`px-3 py-1 rounded-md ${
-                        currentPage === totalPages
-                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                      }`}
-                    >
-                      Siguiente
-                    </button>
-                  </div>
+              {/* Paginacion */}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-2">
+                <div className="flex justify-center items-center gap-4 flex-1">
+                  <button
+                    className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                    onClick={() => paginate(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    aria-label="Anterior"
+                  >
+                    <ChevronLeftIcon className="h-5 w-5 text-gray-700" />
+                  </button>
+                  <span className="text-gray-700">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                  <button
+                    className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                    onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    aria-label="Siguiente"
+                  >
+                    <ChevronRightIcon className="h-5 w-5 text-gray-700" />
+                  </button>
                 </div>
-              )}
+                <span className="text-gray-500 text-sm md:ml-4 md:w-auto w-full text-center md:text-right">
+                  {filteredSuppliers.length} proveedor(es) encontrado(s)
+                </span>
+              </div>
             </div>
           </div>
         </main>
