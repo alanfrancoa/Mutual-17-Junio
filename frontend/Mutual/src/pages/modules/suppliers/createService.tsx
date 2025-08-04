@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../dashboard/components/Sidebar';
 import { apiMutual } from "../../../api/apiMutual";
+import useAppToast from "../../../hooks/useAppToast";
 
 interface Supplier {
   id: number;
@@ -34,6 +35,7 @@ interface CreateServiceProps {
 
 const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
   const navigate = useNavigate();
+  const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast();
 
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
@@ -43,26 +45,28 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
     description: "",
     monthlyCost: "",
   });
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
-
-    useEffect(() => {
-      const fetchSuppliers = async () => {
-    try {
-      const data = await apiMutual.GetAllSuppliers();
-      
-      if (Array.isArray(data)) {
-        const activeSuppliers = data.filter((s: Supplier) => s.active);
-        setSuppliers(activeSuppliers);
-      } else {
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        const data = await apiMutual.GetAllSuppliers();
+        
+        if (Array.isArray(data)) {
+          const activeSuppliers = data.filter((s: Supplier) => s.active);
+          setSuppliers(activeSuppliers);
+        } else {
+          setSuppliers([]);
+        }
+      } catch (error: any) {
         setSuppliers([]);
+        showErrorToast({
+          title: "Error de carga",
+          message: error.message || "No se pudieron cargar los proveedores"
+        });
       }
-    } catch (error) {
-      setSuppliers([]);
-    }
-  };
-  fetchSuppliers();
-}, []);
+    };
+    fetchSuppliers();
+  }, []);
 
   useEffect(() => {
     const fetchServiceTypes = async () => {
@@ -75,8 +79,12 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
         } else {
           setServiceTypes([]);
         }
-      } catch (error) {
+      } catch (error: any) {
         setServiceTypes([]);
+        showErrorToast({
+          title: "Error de carga",
+          message: error.message || "No se pudieron cargar los tipos de servicio"
+        });
       }
     };
     fetchServiceTypes();
@@ -91,25 +99,49 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
   };
 
   const handleSave = async () => {
-  setSuccess("");
-  setError("");
-  if (!form.serviceTypeId || !form.supplierId || !form.description || !form.monthlyCost) {
-    setError("Completa todos los campos obligatorios.");
-    return;
-  }
-  try {
-    await apiMutual.RegisterService({
-      ServiceTypeId: Number(form.serviceTypeId),
-      SupplierId: Number(form.supplierId),
-      Description: form.description,
-      MonthlyCost: Number(form.monthlyCost),
-    });
-    setSuccess("Servicio registrado correctamente.");
-    setTimeout(() => navigate("/proveedores/servicios"), 1200);
-  } catch (err: any) {
-    setError(err.message || "Error de red o servidor.");
-  }
-};
+
+    if (!form.serviceTypeId || !form.supplierId || !form.description || !form.monthlyCost) {
+      showWarningToast({
+        title: "Campos incompletos",
+        message: "Completa todos los campos obligatorios"
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await apiMutual.RegisterService({
+        ServiceTypeId: Number(form.serviceTypeId),
+        SupplierId: Number(form.supplierId),
+        Description: form.description,
+        MonthlyCost: Number(form.monthlyCost),
+      });
+      
+      showSuccessToast({
+        title: "¡Servicio creado!",
+        message: "El servicio fue registrado correctamente"
+      });
+      
+      setTimeout(() => navigate("/proveedores/servicios"), 1500);
+    } catch (err: any) {
+      console.error("Error al crear servicio:", err);
+      
+      const errorMessage = 
+        err.response?.data?.message || 
+        err.response?.data?.mensaje || 
+        (typeof err.response?.data === 'string' ? err.response.data : null) ||
+        err.message || 
+        "Error desconocido";
+
+      showErrorToast({
+        title: "Error al crear servicio",
+        message: errorMessage
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
@@ -121,13 +153,15 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
             <div className="flex space-x-2">
               <button
                 onClick={handleSave}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                disabled={loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50"
               >
-                Guardar
+                {loading ? "Guardando..." : "Guardar"}
               </button>
               <button
                 onClick={() => navigate(-1)}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+                disabled={loading}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition disabled:opacity-50"
               >
                 Volver
               </button>
@@ -135,8 +169,6 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
           </div>
 
           <div className="bg-white rounded-lg shadow p-6 mb-6">
-            {success && <div className="text-green-600 mb-2">{success}</div>}
-            {error && <div className="text-red-600 mb-2">{error}</div>}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Servicio</label>
@@ -144,7 +176,8 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
                   name="serviceTypeId"
                   value={form.serviceTypeId}
                   onChange={handleChange}
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                  disabled={loading}
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50" // ✅ AÑADIR disabled:opacity-50
                   required
                 >
                   <option value="">Seleccione un tipo de servicio...</option>
@@ -156,13 +189,14 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
                 </select>
               </div>
 
-               <div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
                 <select
                   name="supplierId"
                   value={form.supplierId}
                   onChange={handleChange}
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                  disabled={loading}
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   required
                 >
                   <option value="">Seleccione un proveedor...</option>
@@ -180,7 +214,8 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
                   name="description"
                   value={form.description}
                   onChange={handleChange}
-                  className="w-full p-2 border border-gray-300 rounded"
+                  disabled={loading}
+                  className="w-full p-2 border border-gray-300 rounded disabled:opacity-50"
                   maxLength={255}
                   required
                 />
@@ -192,13 +227,14 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
                   name="monthlyCost"
                   value={form.monthlyCost}
                   onChange={handleChange}
-                  className="w-full p-2 border border-gray-300 rounded"
+                  disabled={loading}
+                  className="w-full p-2 border border-gray-300 rounded disabled:opacity-50"
                   min={0}
                   step="0.01"
                   required
                 />
               </div>
-               </div>
+            </div>
           </div>
         </div>
       </div>
