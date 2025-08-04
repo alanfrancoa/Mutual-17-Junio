@@ -18,8 +18,17 @@ import axios from 'axios';
 //   };
 //   request?: any;
 // }
+ export function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return Date.now() / 1000 > payload.exp;
+  } catch {
+    return true;
+  }
+}
 
 export const AuthService = {
+
   // async login(username: string, password: string): Promise<string> {
   //   try {
   //     const response = await axios.post<LoginResponse>(
@@ -50,6 +59,9 @@ export const AuthService = {
   //     throw new Error('Error desconocido durante el login');
   //   }
   // },
+
+
+
 
   logout(): void {
     sessionStorage.removeItem('token');
