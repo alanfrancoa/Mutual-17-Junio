@@ -18,7 +18,7 @@ const CollectionDetail: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await apiMutual.GetCollectionById(Number(id));
+        const data = await apiMutual.GetCollectionActiveById(Number(id));
         setCollection(data);
       } catch (err: any) {
         setError(err.message || "Error al obtener el detalle del cobro");
