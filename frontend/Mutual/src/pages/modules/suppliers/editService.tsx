@@ -6,12 +6,12 @@ import { apiMutual } from "../../../api/apiMutual";
 import { IServiceType } from "../../../types/IServiceType";
 import { ISupplier } from "../../../types/ISupplier"; 
 import { IServiceUpdate } from "../../../types/IServiceRegister";
-import useAppToast from "../../../hooks/useAppToast"; // ✅ AÑADIR
+import useAppToast from "../../../hooks/useAppToast";
 
 const EditService: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast(); // ✅ AÑADIR
+  const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast();
 
   const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
   const [serviceTypes, setServiceTypes] = useState<IServiceType[]>([]);
@@ -25,10 +25,7 @@ const EditService: React.FC = () => {
     active: true,
   });
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false); // ✅ AÑADIR
-  // ✅ ELIMINAR estos estados:
-  // const [success, setSuccess] = useState("");
-  // const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false); 
 
   useEffect(() => {
     const userRole = sessionStorage.getItem("userRole");
@@ -46,7 +43,6 @@ const EditService: React.FC = () => {
       } catch (err: any) {
         console.error("Error al cargar proveedores:", err);
         setSuppliers([]);
-        // ✅ CAMBIAR: Usar toast
         showErrorToast({
           title: "Error de carga",
           message: err.message || "Error al cargar proveedores"
@@ -64,7 +60,6 @@ const EditService: React.FC = () => {
       } catch (err: any) {
         console.error("Error al cargar tipos de servicio:", err);
         setServiceTypes([]);
-        // ✅ CAMBIAR: Usar toast
         showErrorToast({
           title: "Error de carga",
           message: err.message || "Error al cargar tipos de servicio"
@@ -77,7 +72,6 @@ const EditService: React.FC = () => {
   useEffect(() => {
     const fetchService = async () => {
       if (!id) {
-        // ✅ CAMBIAR: Usar toast
         showErrorToast({
           title: "ID inválido",
           message: "ID de servicio no válido"
@@ -100,7 +94,6 @@ const EditService: React.FC = () => {
           active: data.active ?? true,
         });
       } catch (err: any) {
-        // ✅ CAMBIAR: Usar toast
         showErrorToast({
           title: "Error de carga",
           message: err.message || "Error al cargar el servicio"
@@ -122,12 +115,8 @@ const EditService: React.FC = () => {
   };
 
   const handleSave = async () => {
-    // ✅ ELIMINAR estas líneas:
-    // setSuccess("");
-    // setError("");
 
     if (!form.ServiceTypeId || !form.SupplierId || !form.Description || !form.amount) {
-      // ✅ CAMBIAR: Usar toast warning
       showWarningToast({
         title: "Campos incompletos",
         message: "Completa todos los campos obligatorios"
@@ -136,7 +125,6 @@ const EditService: React.FC = () => {
     }
 
     if (!id) {
-      // ✅ CAMBIAR: Usar toast error
       showErrorToast({
         title: "ID inválido",
         message: "ID de servicio no válido"
@@ -144,7 +132,7 @@ const EditService: React.FC = () => {
       return;
     }
 
-    setSaving(true); // ✅ AÑADIR
+    setSaving(true);
 
     try {
       await apiMutual.UpdateService(Number(id), {
@@ -154,7 +142,6 @@ const EditService: React.FC = () => {
         monthlyCost: Number(form.amount),
       });
 
-      // ✅ CAMBIAR: Usar toast success
       showSuccessToast({
         title: "¡Servicio actualizado!",
         message: "El servicio fue actualizado correctamente"
@@ -164,7 +151,6 @@ const EditService: React.FC = () => {
     } catch (err: any) {
       console.error("Error al actualizar servicio:", err);
       
-      // ✅ CAMBIAR: Usar toast error con manejo mejorado
       const errorMessage = 
         err.response?.data?.message || 
         err.response?.data?.mensaje || 
@@ -177,7 +163,7 @@ const EditService: React.FC = () => {
         message: errorMessage
       });
     } finally {
-      setSaving(false); // ✅ AÑADIR
+      setSaving(false);
     }
   };
 
@@ -209,15 +195,15 @@ const EditService: React.FC = () => {
             <div className="flex space-x-2">
               <button
                 onClick={handleSave}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50" // ✅ CAMBIAR disabled styles
-                disabled={saving || loading} // ✅ CAMBIAR
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50" 
+                disabled={saving || loading} 
               >
-                {saving ? "Guardando..." : "Guardar Cambios"} {/* ✅ CAMBIAR */}
+                {saving ? "Guardando..." : "Guardar Cambios"} 
               </button>
               <button
                 onClick={() => navigate("/proveedores/servicios")}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition disabled:opacity-50" // ✅ AÑADIR disabled styles
-                disabled={saving} // ✅ AÑADIR
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition disabled:opacity-50" 
+                disabled={saving} 
               >
                 Volver
               </button>
@@ -225,18 +211,6 @@ const EditService: React.FC = () => {
           </div>
 
           <div className="bg-white rounded-lg shadow p-6 mb-6">
-            {/* ✅ ELIMINAR todo este bloque:
-            {success && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {success}
-              </div>
-            )}
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-            )}
-            */}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
@@ -247,8 +221,8 @@ const EditService: React.FC = () => {
                   name="ServiceTypeId"
                   value={form.ServiceTypeId}
                   onChange={handleChange}
-                  disabled={saving} // ✅ AÑADIR
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50" // ✅ AÑADIR disabled:opacity-50
+                  disabled={saving}
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   required
                 >
                   <option value="">Seleccione un tipo de servicio...</option>
@@ -268,8 +242,8 @@ const EditService: React.FC = () => {
                   name="SupplierId"
                   value={form.SupplierId}
                   onChange={handleChange}
-                  disabled={saving} // ✅ AÑADIR
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50" // ✅ AÑADIR disabled:opacity-50
+                  disabled={saving} 
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   required
                 >
                   <option value="">Seleccione un proveedor...</option>
@@ -289,8 +263,8 @@ const EditService: React.FC = () => {
                   name="Description"
                   value={form.Description}
                   onChange={handleChange}
-                  disabled={saving} // ✅ AÑADIR
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50" // ✅ AÑADIR disabled:opacity-50
+                  disabled={saving} 
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   maxLength={255}
                   rows={3}
                   required
@@ -308,8 +282,8 @@ const EditService: React.FC = () => {
                   name="amount" 
                   value={form.amount}
                   onChange={handleChange}
-                  disabled={saving} // ✅ AÑADIR
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50" // ✅ AÑADIR disabled:opacity-50
+                  disabled={saving} 
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   min="0"
                   step="0.01"
                   required
