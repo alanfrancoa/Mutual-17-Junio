@@ -11,7 +11,7 @@ import useAppToast from "../../../../hooks/useAppToast";
 const ReadAccountingPeriod: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { showErrorToast } = useAppToast();
+  const { showErrorToast, showInfoToast, showSuccessToast } = useAppToast();
 
   const [period, setPeriod] = useState<IAccountingPeriodList | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -20,29 +20,86 @@ const ReadAccountingPeriod: React.FC = () => {
   const fetchPeriodDetails = async () => {
     if (!id) {
       setError("ID del período no proporcionado.");
-      setLoading(false);
+      showErrorToast({
+        title: "Error de validación",
+        message: "ID del período no proporcionado.",
+      });
       return;
     }
+
     setLoading(true);
     setError(null);
     try {
       const periodId = parseInt(id);
       if (isNaN(periodId)) {
         setError("ID del período inválido.");
+        showErrorToast({
+          title: "Error de validación",
+          message: "El ID del período proporcionado no es válido.",
+        });
         setLoading(false);
         return;
       }
 
       const data = await apiMutual.GetAccountingPeriodById(periodId);
       setPeriod(data);
+      showSuccessToast({
+        title: "Período contable",
+        message: `Detalles del período ${data.code} cargados correctamente.`,
+      });
+
+      
     } catch (err: any) {
       console.error("Error fetching accounting period details:", err);
+
+      if (err.response) {
+        switch (err.response.status) {
+          case 404:
+            showErrorToast({
+              title: "No encontrado",
+              message: `Período contable con ID '${id}' no encontrado.`,
+            });
+            break;
+
+          case 401:
+            showErrorToast({
+              title: "No autorizado",
+              message: "No tiene permisos para ver este período contable.",
+            });
+            break;
+
+          case 500:
+            showErrorToast({
+              title: "Error del servidor",
+              message:
+                "Ocurrió un error interno al obtener el período contable.",
+            });
+            // Log detallado para errores del servidor
+            console.error("Detalles del error:", {
+              message: err.response.data?.message,
+              errorDetails: err.response.data?.errorDetails,
+              innerException: err.response.data?.innerExceptionDetails,
+            });
+            break;
+
+          default:
+            showErrorToast({
+              title: "Error",
+              message: "Error al cargar los detalles del período contable.",
+            });
+        }
+      } else {
+        showErrorToast({
+          title: "Error de conexión",
+          message: "No se pudo conectar con el servidor.",
+        });
+      }
+
       const errorMessage =
-        err.message ||
         err.response?.data?.message ||
+        err.message ||
         "Error al cargar los detalles del período contable.";
       setError(errorMessage);
-      showErrorToast({ message: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -63,7 +120,7 @@ const ReadAccountingPeriod: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <Sidebar />
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="w-full max-w-xl bg-white rounded-lg shadow p-8 text-center text-gray-500">
             Cargando detalles del período contable...
@@ -77,7 +134,7 @@ const ReadAccountingPeriod: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <Sidebar />
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="w-full max-w-xl bg-white rounded-lg shadow p-8 text-center">
             <p className="text-red-600 mb-4">{error}</p>
@@ -98,7 +155,7 @@ const ReadAccountingPeriod: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <Sidebar />
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="w-full max-w-xl bg-white rounded-lg shadow p-8 text-center text-red-500">
             Período contable no encontrado
@@ -117,12 +174,11 @@ const ReadAccountingPeriod: React.FC = () => {
     );
   }
 
-  
   return (
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
 
         <main className="flex-1 p-6 bg-gray-100">
           <div className="flex justify-start mb-6">
@@ -161,7 +217,9 @@ const ReadAccountingPeriod: React.FC = () => {
                 <div>
                   <span className="text-sm text-gray-500 block">Estado:</span>
                   <span
-                    className={`font-semibold px-3 py-1 rounded-full text-sm ${getStatusColorClass(period.status)}`}
+                    className={`font-semibold px-3 py-1 rounded-full text-sm ${getStatusColorClass(
+                      period.status
+                    )}`}
                   >
                     {period.status}
                   </span>

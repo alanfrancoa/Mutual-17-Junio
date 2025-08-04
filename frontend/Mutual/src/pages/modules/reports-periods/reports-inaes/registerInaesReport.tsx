@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { IAccountingPeriodList } from "../../../../types/accountablePeriods/IAccountingPeriodList";
 import ListInaesReport from "./listInaesReport";
 import { apiMutual } from "../../../../api/apiMutual";
+import useAppToast from "../../../../hooks/useAppToast";
 
 interface RegisterReportProps {
   closedPeriods: IAccountingPeriodList[];
@@ -14,6 +15,7 @@ const RegisterReport: React.FC<RegisterReportProps> = ({ closedPeriods }) => {
     text: string;
   } | null>(null);
   const [inaesReports, setInaesReports] = useState<any[]>([]);
+  const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast();
 
   // Solo cerrados
   const closedFiltered = closedPeriods.filter((p) => p.status === "Cerrado");
@@ -23,72 +25,123 @@ const RegisterReport: React.FC<RegisterReportProps> = ({ closedPeriods }) => {
     setMessage(null);
   };
 
-  // Obtener la lista de reportes al montar el componente
-  useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        const reports = await apiMutual.GetInaesReports();
-        setInaesReports(Array.isArray(reports) ? reports : []);
-      } catch {
-        setInaesReports([]);
+// Busca si existen reportes inaes en la lista y manda toast
+useEffect(() => {
+  const fetchReports = async () => {
+    try {
+      const reports = await apiMutual.GetInaesReports();
+      const reportsList = Array.isArray(reports) ? reports : [];
+      setInaesReports(reportsList);
+      
+      if (reportsList.length > 0) {
+        showSuccessToast({
+          title: "Reportes INAES",
+          message: `Se encontraron ${reportsList.length} reporte(s) INAES.`,
+        });
       }
-    };
-    fetchReports();
-  }, []);
+    } catch (error: any) {
+      showErrorToast({
+        title: "Error al cargar reportes",
+        message: "No se pudieron cargar los reportes INAES. Por favor, intente nuevamente.",
+      });
+    }
+  };
+  fetchReports();
+}, []); 
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage(null);
 
     if (!selectedPeriodId) {
-      setMessage({
-        type: "error",
-        text: "Por favor, seleccione un período contable.",
+      showWarningToast({
+        title: "Selección requerida",
+        message: "Por favor, seleccione un período contable.",
       });
       return;
     }
 
     try {
       await apiMutual.RegisterInaesReport(selectedPeriodId);
-      setMessage({
-        type: "info",
-        text: "Reporte INAES registrado correctamente",
+      showSuccessToast({
+        title: "Reporte registrado",
+        message: "Reporte de INAES registrado exitosamente",
       });
+
       // actualizar lista de reportes
       const reports = await apiMutual.GetInaesReports();
       setInaesReports(Array.isArray(reports) ? reports : []);
     } catch (error: any) {
-      // Para axios o wrappers similares
-      if (error.response && error.response.status === 409) {
-        setMessage({
-          type: "error",
-          text:
-            error.response.data?.message ||
-            error.response.data?.mensaje ||
-            "El reporte ya existe para ese período.",
-        });
+      // Manejar diferentes tipos de errores seguin status code
+      if (error.response) {
+        switch (error.response.status) {
+          case 400:
+            showErrorToast({
+              title: "Error de validación",
+              message:
+                error.response.data?.message ||
+                "El período contable no es válido o no se encuentra cerrado.",
+            });
+            break;
+          case 401:
+            showErrorToast({
+              title: "Error de autorización",
+              message: "No tiene permisos para realizar esta acción.",
+            });
+            break;
+          case 404:
+            showErrorToast({
+              title: "No encontrado",
+              message: "Periodo contable no encontrado.",
+            });
+            break;
+          case 409:
+            showWarningToast({
+              title: "Reporte duplicado",
+              message:
+                error.response.data?.message ||
+                "El reporte ya existe para este período.",
+            });
+            break;
+          case 500:
+            showErrorToast({
+              title: "Error del servidor",
+              message:
+                error.response.data?.message ||
+                "Ocurrió un error al intentar registrar el reporte de INAES.",
+            });
+            break;
+          default:
+            showErrorToast({
+              title: "Error",
+              message:
+                error.response.data?.message ||
+                "Error al registrar el reporte.",
+            });
+        }
       } else {
-        setMessage({
-          type: "error",
-          text: error.message || "Error al registrar el reporte.",
+        showErrorToast({
+          title: "Error de conexión",
+          message:
+            "No se pudo conectar con el servidor. Por favor, verifique su conexión.",
         });
       }
     }
   };
 
-
   return (
     <>
-      <h2 className="text-2xl font-bold text-gray-800 mt-12 mb-6">
+      <h2 className="text-2xl font-bold text-blue-900 mt-12 mb-6">
         Reportes INAES
       </h2>
       <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
         {message && (
           <div
-            className={`p-3 mb-4 rounded-md ${message.type === "error"
+            className={`p-3 mb-4 rounded-md ${
+              message.type === "error"
                 ? "bg-red-100 text-red-800"
                 : "bg-blue-100 text-blue-800"
-              }`}
+            }`}
             role="alert"
           >
             {message.text}
@@ -143,7 +196,8 @@ const RegisterReport: React.FC<RegisterReportProps> = ({ closedPeriods }) => {
 
         {/* Lista de reportes INAES */}
         <div className="mt-8">
-          <ListInaesReport reports={inaesReports} />
+          <ListInaesReport
+           reports={inaesReports} />
         </div>
       </div>
     </>

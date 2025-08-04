@@ -3,11 +3,11 @@ import React, { useEffect, useState } from "react";
 import {
   IAccountingPeriodResponse,
   IErrorResponse,
-} from "../../../../types/accountablePeriods/IAccountingPeriodResponse"; // Asegúrate de crear este archivo
+} from "../../../../types/accountablePeriods/IAccountingPeriodResponse";
 import { apiMutual } from "../../../../api/apiMutual";
 import { PeriodType } from "../../../../types/accountablePeriods/IAccountingPeriod";
 import { IAccountingPeriodList } from "../../../../types/accountablePeriods/IAccountingPeriodList";
-import { start } from "repl";
+import useAppToast from "../../../../hooks/useAppToast";
 
 type PeriodFormType = PeriodType;
 
@@ -32,12 +32,13 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
     endDate: "",
   });
 
-  const [message, setMessage] = useState<{
+  const [, setMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
 
   const [loading, setLoading] = useState(false);
+  const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast();
 
   // Función para calcular fechas  inicio y fin
   const calculateDates = (periodType: PeriodType | "") => {
@@ -59,7 +60,10 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
     }
 
     const format = (date: Date) =>
-      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}-${String(date.getDate()).padStart(2, "0")}`;
 
     return {
       startDate: format(startDate),
@@ -108,17 +112,26 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
     // Validaciones de FE antes de la llamada a la API
 
     if (!form.code.trim()) {
-      setMessage({
-        type: "error",
-        text: "El Código del Período es obligatorio.",
+      showWarningToast({
+        title: "Campo requerido",
+        message: "El Código del Período es obligatorio.",
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (!form.code || form.code.length > 10) {
+      showWarningToast({
+        title: "Campo codigo invalido",
+        message: "El Código no puede exceder los 10 caracteres.",
       });
       setLoading(false);
       return;
     }
     if (!form.periodType) {
-      setMessage({
-        type: "error",
-        text: "El Tipo de Período es obligatorio.",
+      showWarningToast({
+        title: "Campo requerido",
+        message: "El Tipo de Período es obligatorio.",
       });
       setLoading(false);
       return;
@@ -128,9 +141,13 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
       const response: IAccountingPeriodResponse =
         await apiMutual.CreateAccountingPeriod(form.code, form.periodType);
 
-      setMessage({
-        type: "success",
-        text: response.message,
+       if (response && response.message) {
+        showSuccessToast({
+          title: "Periodo contable creado",
+          message: response.message,
+          options: {
+            duration: 4000, 
+          }
       });
 
       onSuccess({
@@ -151,11 +168,8 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
         startDate: newStartDate,
         endDate: newEndDate,
       });
+    }
     } catch (error: any) {
-      let errorMessage =
-        "Error al crear el período contable. Intente nuevamente.";
-      console.error("Error de API:", error);
-
       if (error.response) {
         const status = error.response.status;
         const data: IErrorResponse = error.response.data;
@@ -163,47 +177,70 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
         switch (status) {
           case 400:
             if (data && typeof data === "string") {
-              errorMessage = data;
+              showWarningToast({
+                title: "Error de validación",
+                message: data,
+              });
             } else if (data && data.errors) {
               const validationErrors = Object.values(data.errors)
                 .flat()
                 .join(". ");
-              errorMessage = `Errores de validación: ${validationErrors}`;
+              showWarningToast({
+                title: "Error de validación",
+                message: `Errores de validación: ${validationErrors}`,
+              });
             } else if (data && data.message) {
-              errorMessage = data.message;
+              showWarningToast({
+                title: "Error de validación",
+                message: data.message,
+              });
             }
             break;
           case 401:
-            errorMessage =
-              data?.message ||
-              "No autorizado. Por favor, inicie sesión nuevamente.";
+            showErrorToast({
+              title: "No autorizado",
+              message:
+                data?.message ||
+                "No autorizado. Por favor, inicie sesión nuevamente.",
+            });
             break;
           case 409:
-            errorMessage =
-              data?.message || "El código de período contable ya existe."; // Mensaje genérico para 409 si no hay 'message'
+            showWarningToast({
+              title: "Período Duplicado",
+              message:
+                data?.message ||
+                `El código de período contable '${form.code}' ya existe.`,
+            });
             break;
           case 500:
-            errorMessage =
-              data?.message ||
-              "Error interno del servidor. Por favor, contacte a soporte.";
+            showErrorToast({
+              title: "Error del servidor",
+              message: "Ocurrió un error interno al crear el período contable.",
+            });
             console.error(
-              "Detalles del error 500 del backend:",
+              "Detalles del error:",
               data?.errorDetails,
               data?.innerExceptionDetails
             );
             break;
           default:
-            errorMessage = data?.message || `Error del servidor: ${status}`;
-            break;
+            showErrorToast({
+              title: "Error",
+              message: data?.message || `Error del servidor: ${status}`,
+            });
         }
       } else if (error.request) {
-        errorMessage =
-          "No se pudo conectar con el servidor. Verifique su conexión a internet.";
+        showErrorToast({
+          title: "Error de conexión",
+          message:
+            "No se pudo conectar con el servidor. Verifique su conexión a internet.",
+        });
       } else {
-        errorMessage = error.message || "Ocurrió un error inesperado.";
+        showErrorToast({
+          title: "Error",
+          message: error.message || "Ocurrió un error inesperado.",
+        });
       }
-
-      setMessage({ type: "error", text: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -265,10 +302,10 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
             value={
               form.startDate
                 ? parseLocalDate(form.startDate).toLocaleDateString("es-AR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                })
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })
                 : ""
             }
             className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-gray-700 cursor-not-allowed"
@@ -289,10 +326,10 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
             value={
               form.endDate
                 ? parseLocalDate(form.endDate).toLocaleDateString("es-AR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                })
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })
                 : ""
             }
             className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-gray-700 cursor-not-allowed"

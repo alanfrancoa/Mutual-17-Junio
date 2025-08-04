@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { DocumentTextIcon } from "@heroicons/react/24/solid";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { InaesReport } from "../../../../types/reports/IReportInaes";
 import { apiMutual } from "../../../../api/apiMutual";
+import useAppToast from "../../../../hooks/useAppToast";
 
 interface ListInaesReportProps {
   reports: InaesReport[];
@@ -13,12 +14,13 @@ const REPORTS_PER_PAGE = 2;
 const ListInaesReport: React.FC<ListInaesReportProps> = ({ reports }) => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const totalPages = Math.ceil(reports.length / REPORTS_PER_PAGE);
+  const { showSuccessToast, showErrorToast, showInfoToast } = useAppToast();
+  
 
-  const paginatedReports = reports.slice(
-    (currentPage - 1) * REPORTS_PER_PAGE,
-    currentPage * REPORTS_PER_PAGE
-  );
-
+  const startIndex = (currentPage - 1) * REPORTS_PER_PAGE;
+  const paginatedReports = reports.slice(startIndex, startIndex + REPORTS_PER_PAGE);
+   
+  
   const handlePrev = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
@@ -28,6 +30,10 @@ const ListInaesReport: React.FC<ListInaesReportProps> = ({ reports }) => {
 
   const handleExportPdf = async (id: number, code: string) => {
     try {
+      showInfoToast({
+        title: "Generando reporte INAES",
+        message: "El reporte INAES se está generando, por favor espere...",
+      });
       const pdfBlob = await apiMutual.GenerateInaesReportPdf(id);
       const url = window.URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
@@ -37,8 +43,16 @@ const ListInaesReport: React.FC<ListInaesReportProps> = ({ reports }) => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+      showSuccessToast({
+        title: "Reporte INAES generado",
+
+        message: "Reporte INAES descargado exitosamente",
+      });
     } catch (error) {
-      alert("Error al descargar el PDF");
+      showErrorToast({
+        title: "Error",
+        message: "Error al descargar el reporte INAES",
+      });
     }
   };
 
@@ -58,12 +72,12 @@ const ListInaesReport: React.FC<ListInaesReportProps> = ({ reports }) => {
                 Fecha Emisión
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                Descarga
+                Exportacion reporte
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {paginatedReports.length === 0 ? (
+            {reports.length === 0 ? (
               <tr>
                 <td colSpan={9} className="text-center py-8 text-gray-400">
                   No hay reportes INAES registrados para mostrar.
@@ -132,7 +146,7 @@ const ListInaesReport: React.FC<ListInaesReportProps> = ({ reports }) => {
             style={{ minWidth: "220px" }}
           >
             <span className="text-gray-500 text-sm min-w-max">
-              {reports.length} reporte(s) encontrado(s)
+              {paginatedReports.length} reporte(s) encontrado(s)
             </span>
           </div>
         </div>
