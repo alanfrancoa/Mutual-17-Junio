@@ -4,6 +4,7 @@ import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
 import useAppToast from "../../../hooks/useAppToast";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 
 interface Invoice {
   Id: number;
@@ -17,6 +18,8 @@ interface Invoice {
   Paid: boolean;
 }
 
+const PAGE_SIZE = 5;
+
 const InvoicesPage: React.FC = () => {
   const navigate = useNavigate();
   const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast();
@@ -27,6 +30,7 @@ const InvoicesPage: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [processing, setProcessing] = useState(false); 
+  const [page, setPage] = useState(1);
 
   const userRole = useMemo(
     () =>
@@ -80,6 +84,12 @@ const InvoicesPage: React.FC = () => {
           invoice.Description.toLowerCase().includes(search.toLowerCase())
       ),
     [search, invoices]
+  );
+
+  const totalPages = Math.ceil(filteredInvoices.length / PAGE_SIZE);
+  const paginatedInvoices = filteredInvoices.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
   );
 
   const handleTogglePaidStatus = async (
@@ -154,9 +164,9 @@ const InvoicesPage: React.FC = () => {
             </h2>
             <button
               onClick={() => navigate("/proveedores/facturas/crear")}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full font-semibold shadow transition w-full md:w-auto"
             >
-              Nueva Factura
+             + Nueva Factura
             </button>
           </div>
           <div className="mb-4">
@@ -164,7 +174,10 @@ const InvoicesPage: React.FC = () => {
               type="text"
               placeholder="Buscar por N° de factura, proveedor, tipo o descripción..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               className="w-full border border-gray-300 rounded px-3 py-2"
             />
           </div>
@@ -213,7 +226,7 @@ const InvoicesPage: React.FC = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredInvoices.map((invoice) => (
+                  paginatedInvoices.map((invoice) => (
                     <tr key={invoice.Id} className="hover:bg-gray-50">
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {invoice.InvoiceNumber}
@@ -244,25 +257,60 @@ const InvoicesPage: React.FC = () => {
                           {invoice.Paid ? "Pagada" : "Pendiente"}
                         </span>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium flex gap-4">
+                      <td className="px-4 py-4 border-b text-right space-x-2 whitespace-nowrap">
                         <button
-                          onClick={() =>
-                            navigate(
-                              `/proveedores/facturas/editar/${invoice.Id}`
-                            )
-                          }
-                          className="text-indigo-600 hover:text-indigo-900"
-                          title="Ver/Editar Factura"
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
+                          onClick={() => navigate(`/proveedores/facturas/editar/${invoice.Id}`)}
                         >
-                          Ver/Editar
+                          Editar y Ver
                         </button>
-                        
+                        <button
+                          className={`${
+                            invoice.Paid 
+                              ? "bg-red-500 hover:bg-red-600" 
+                              : "bg-green-500 hover:bg-green-600"
+                          } text-white px-6 py-2 rounded-full transition text-xs font-medium w-36 ${
+                            processing ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                          onClick={() => handleAskTogglePaidStatus(invoice)}
+                          disabled={processing}
+                        >
+                          {invoice.Paid ? "Marcar Pendiente" : "Marcar Pagada"}
+                        </button>
                       </td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
+
+            {/* Add pagination controls */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-2">
+              <div className="flex justify-center items-center gap-4 flex-1">
+                <button
+                  className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  aria-label="Anterior"
+                >
+                  <ChevronLeftIcon className="h-5 w-5 text-gray-700" />
+                </button>
+                <span className="text-gray-700">
+                  Página {page} de {totalPages}
+                </span>
+                <button
+                  className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  aria-label="Siguiente"
+                >
+                  <ChevronRightIcon className="h-5 w-5 text-gray-700" />
+                </button>
+              </div>
+              <span className="text-gray-500 text-sm md:ml-4 md:w-auto w-full text-center md:text-right">
+                {filteredInvoices.length} factura(s) encontrada(s)
+              </span>
+            </div>
           </div>
         </div>
       </main>
