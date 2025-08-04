@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import Sidebar from "../../dashboard/components/Sidebar";
@@ -8,6 +8,7 @@ import { apiMutual } from "../../../api/apiMutual";
 import { ILoanList } from "../../../types/loans/ILoanList";
 import RejectLoanButton from "./rejectLoan";
 import ApproveLoanButton from "../loans/approveLoan";
+import useAppToast from "../../../hooks/useAppToast";
 
 // limite de prestamos mostrados
 const DEFAULT_PAGE_SIZE = 5;
@@ -24,6 +25,7 @@ const Loans: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const userRole = sessionStorage.getItem("userRole") || "";
+  const { showErrorToast } = useAppToast();
 
   const fetchLoans = async () => {
     setLoading(true);
@@ -33,9 +35,16 @@ const Loans: React.FC = () => {
       setLoans(data);
     } catch (err: any) {
       console.error("Error cargando prestamos:", err);
-      setError(
-        err.response?.data?.message || "Error al cargar los tipos de prestamo."
-      );
+      const backendMsg =
+        err.response?.data?.message ||
+        err.response?.data?.mensaje ||
+        "Error al cargar los préstamos.";
+      setError(backendMsg);
+
+      showErrorToast({
+        title: "Error al cargar préstamos",
+        message: backendMsg,
+      });
     } finally {
       setLoading(false);
     }
@@ -99,7 +108,8 @@ const Loans: React.FC = () => {
         <Header hasNotifications loans={loans} />
 
         <main className="flex-1 p-6 bg-gray-100">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Préstamos</h1>
+          <h1 className="text-2xl font-bold text-blue-900 mb-4">Préstamos</h1>
+
           <div className="flex-1 w-full">
             <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
@@ -130,9 +140,9 @@ const Loans: React.FC = () => {
                   {userRole === "Gestor" && (
                     <button
                       onClick={() => navigate("/prestamos/solicitar")}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-semibold shadow transition flex items-center gap-2"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold shadow transition flex items-center gap-2"
                     >
-                      Solicitar Préstamo
+                      + Solicitar Préstamo
                     </button>
                   )}
                 </div>
@@ -239,7 +249,7 @@ const Loans: React.FC = () => {
                                 </>
                               )}
                               <button
-                                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded-full transition text-xs font-medium"
+                                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
                                 onClick={() =>
                                   navigate(`/prestamos/detalle/${loan.id}`)
                                 }

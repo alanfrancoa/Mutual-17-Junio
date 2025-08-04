@@ -5,6 +5,7 @@ import Sidebar from "../../dashboard/components/Sidebar";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
 import { ILoanTypesList } from "../../../types/loans/ILoanTypesList";
 import { apiMutual } from "../../../api/apiMutual";
+import useAppToast from "../../../hooks/useAppToast";
 
 const RequestLoan: React.FC = () => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ const RequestLoan: React.FC = () => {
     associateDni: "",
     associateName: "",
     applicationDate: "",
-    loanTypeId: "", // <-- Cambiado a string vacío
+    loanTypeId: "",
     amount: 0,
     termMonths: 0,
   });
@@ -40,6 +41,7 @@ const RequestLoan: React.FC = () => {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const { showSuccessToast, showErrorToast } = useAppToast();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -53,38 +55,51 @@ const RequestLoan: React.FC = () => {
 
     // Validaciones por campos
     if (!form.associateDni.trim()) {
-      setMessage({
-        type: "error",
-        text: "El DNI del asociado es obligatorio.",
+      showErrorToast({
+        title: "Error de validación",
+        message: "El DNI del asociado es obligatorio.",
       });
+      setLoading(false);
       return;
     }
     if (!form.associateName.trim()) {
-      setMessage({
-        type: "error",
-        text: "El nombre del asociado es obligatorio.",
+      showErrorToast({
+        title: "Error de validación",
+        message: "El nombre del asociado es obligatorio.",
       });
+      setLoading(false);
       return;
     }
     if (!form.loanTypeId) {
-      setMessage({
-        type: "error",
-        text: "Debe seleccionar un tipo de préstamo válido.",
+      showErrorToast({
+        title: "Error de validación",
+        message: "Debe seleccionar un tipo de préstamo válido.",
       });
+      setLoading(false);
       return;
     }
     if (isNaN(form.amount) || form.amount <= 0) {
-      setMessage({
-        type: "error",
-        text: "El monto debe ser un número positivo.",
+      showErrorToast({
+        title: "Error de validación",
+        message: "El monto debe ser un número positivo.",
       });
+      setLoading(false);
       return;
     }
     if (isNaN(form.termMonths) || form.termMonths <= 0) {
-      setMessage({
-        type: "error",
-        text: "La cantidad de cuotas debe ser un número entero positivo.",
+      showErrorToast({
+        title: "Error de validación",
+        message: "La cantidad de cuotas debe ser un número entero positivo.",
       });
+      setLoading(false);
+      return;
+    }
+    if (!form.applicationDate) {
+      showErrorToast({
+        title: "Error de validación",
+        message: "La fecha de aplicación es obligatoria.",
+      });
+      setLoading(false);
       return;
     }
 
@@ -95,9 +110,14 @@ const RequestLoan: React.FC = () => {
     };
 
     try {
-      console.log("Datos del nuevo préstamo a enviar:", payload);
+      const response = await apiMutual.CreateLoan(payload);
 
-      setMessage({ type: "success", text: "¡Préstamo solicitado con éxito!" });
+      showSuccessToast({
+        title: "¡Éxito!",
+        message:
+          response.message ||
+          "¡Préstamo solicitado con éxito! Estado: Pendiente",
+      });
 
       setForm({
         associateDni: "",
@@ -107,27 +127,49 @@ const RequestLoan: React.FC = () => {
         termMonths: 0,
         applicationDate: "",
       });
-    } catch (error) {
-      console.error("Error al solicitar préstamo:", error);
-      setMessage({
-        type: "error",
-        text: "Error al solicitar el préstamo. Intente nuevamente.",
-      });
-    }
-
-    try {
-      const response = await apiMutual.CreateLoan(payload);
-      setMessage({ type: "success", text: response.message });
 
       setTimeout(() => {
         navigate("/prestamos");
       }, 2000);
     } catch (error: any) {
-      console.error("Error al registrar prestamo:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        "Ocurrió un error al registrar prestamo.";
-      setMessage({ type: "error", text: errorMessage });
+      const statusCode = error.response?.status;
+      let title = "Error";
+      let message = "Ocurrió un error al solicitar el préstamo.";
+
+      switch (statusCode) {
+        case 400:
+          title = "Error de validación";
+          message =
+            error.response?.data?.message ||
+            "Los datos proporcionados no son válidos.";
+          break;
+        case 401:
+          title = "No autorizado";
+          message = "No tiene permisos para realizar esta acción.";
+          break;
+        case 404:
+          title = "No encontrado";
+          message = error.response?.data?.message || "Recurso no encontrado.";
+          break;
+        case 409:
+          title = "Conflicto";
+          message =
+            error.response?.data?.message ||
+            "Existe un conflicto con la solicitud.";
+          break;
+        case 500:
+          title = "Error del servidor";
+          message =
+            "Ocurrió un error en el servidor. Por favor, inténtelo más tarde.";
+       
+          break;
+        default:
+          title = "Error";
+          message =
+            error.response?.data?.message || "Ocurrió un error inesperado.";
+      }
+
+      showErrorToast({ title, message });
     } finally {
       setLoading(false);
     }
@@ -139,14 +181,14 @@ const RequestLoan: React.FC = () => {
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
         <div className="flex flex-col items-center py-8 flex-1">
           <div className="w-full max-w-xl">
             <div className="flex justify-start mb-6">
               <button
                 onClick={() => navigate("/prestamos")}
                 className="text-gray-600 hover:text-gray-800 flex items-center"
-                aria-label="Volver a Préstamos"
+                aria-label="Volver a prestamos"
               >
                 <ChevronLeftIcon className="h-5 w-5" />
                 <span className="ml-1">Volver</span>
@@ -225,7 +267,7 @@ const RequestLoan: React.FC = () => {
                   required
                   className="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">Seleccione un tipo de préstamo...</option>
+                  <option value="">Seleccione una opcion</option>
                   {loanTypes.map((type) => (
                     <option key={type.id} value={type.id}>
                       {type.name}
@@ -295,13 +337,13 @@ const RequestLoan: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/prestamos")}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded"
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-full"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-semibold"
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2  font-semibold rounded-full"
                 >
                   Enviar Solicitud
                 </button>

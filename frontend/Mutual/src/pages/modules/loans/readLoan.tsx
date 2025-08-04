@@ -10,7 +10,7 @@ import useAppToast from "../../../hooks/useAppToast";
 const ReadLoan: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { showErrorToast } = useAppToast();
+  const { showErrorToast, showWarningToast } = useAppToast();
   const [loan, setLoan] = useState<ILoanDetails | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,16 +23,27 @@ const ReadLoan: React.FC = () => {
 
   const fetchLoanDetails = async () => {
     if (!id) {
-      setError("ID de préstamo no proporcionado.");
+      const errorMsg = "ID de préstamo no proporcionado.";
+      setError(errorMsg);
+      showErrorToast({
+        title: "Error de validación",
+        message: errorMsg,
+      });
       setLoading(false);
       return;
     }
     setLoading(true);
     setError(null);
+
     try {
       const loanId = parseInt(id);
       if (isNaN(loanId)) {
-        setError("ID de préstamo inválido.");
+        const errorMsg = "ID de préstamo inválido.";
+        setError(errorMsg);
+        showErrorToast({
+          title: "Error de validación",
+          message: errorMsg,
+        });
         setLoading(false);
         return;
       }
@@ -40,13 +51,50 @@ const ReadLoan: React.FC = () => {
       // Obtener detalles principales del préstamo
       const loanData = await apiMutual.GetLoanById(loanId);
       setLoan(loanData);
-    } catch (err: any) {
-      console.error("Error fetching loan details:", err);
-      const errorMessage =
-        err.response?.data?.message ||
-        "Error al cargar los detalles del préstamo.";
-      setError(errorMessage);
-      showErrorToast({ message: errorMessage });
+
+      // // Verificar cuotas atrasadas
+      // if (loanData.status === "Aprobado" || loanData.status === "Finalizado") {
+      //   const cuotasAtrasadas =
+      //     loanData.installments?.filter((i) => i.collected === "Atrasada")
+      //       .length || 0;
+      //   if (cuotasAtrasadas > 0) {
+      //     showWarningToast({
+      //       title: "Cuotas atrasadas",
+      //       message: `Este préstamo tiene ${cuotasAtrasadas} cuota${
+      //         cuotasAtrasadas > 1 ? "s" : ""
+      //       } atrasada${cuotasAtrasadas > 1 ? "s" : ""}.`,
+      //     });
+      //   }
+      // }
+
+    } catch (error: any) {
+      console.error("Error fetching loan details:", error);
+      const statusCode = error.response?.status;
+      let title = "Error";
+      let message = "Error al cargar los detalles del préstamo.";
+
+      switch (statusCode) {
+        case 401:
+          title = "No autorizado";
+          message = "No tiene permisos para ver los detalles de este préstamo.";
+          navigate("/unauthorized");
+          break;
+        case 404:
+          title = "No encontrado";
+          message = error.response?.data?.message || "Préstamo no encontrado.";
+          break;
+        case 500:
+          title = "Error del servidor";
+          message = "Ocurrió un error al cargar los detalles del préstamo.";
+          
+          break;
+        default:
+          message =
+            error.response?.data?.message || "Ocurrió un error inesperado.";
+      }
+
+      setError(message);
+      showErrorToast({ title, message });
     } finally {
       setLoading(false);
     }
@@ -79,10 +127,9 @@ const ReadLoan: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <Sidebar />
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
         <div className="flex-1 flex flex-col items-center justify-center">
           {" "}
-
           <div className="w-full max-w-xl bg-white rounded-lg shadow p-8 text-center text-gray-500">
             Cargando detalles del préstamo...
           </div>
@@ -95,7 +142,7 @@ const ReadLoan: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <Sidebar />
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="w-full max-w-xl bg-white rounded-lg shadow p-8 text-center">
             <p className="text-red-600 mb-4">{error}</p>
@@ -116,7 +163,7 @@ const ReadLoan: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <Sidebar />
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="w-full max-w-xl bg-white rounded-lg shadow p-8 text-center text-red-500">
             Préstamo no encontrado
@@ -136,14 +183,13 @@ const ReadLoan: React.FC = () => {
     );
   }
 
-
   const installmentsToDisplay = loan.installments;
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
 
         <main className="flex-1 p-6 bg-gray-100">
           <div className="flex justify-start mb-6">
@@ -220,9 +266,9 @@ const ReadLoan: React.FC = () => {
 
             {/* Datos del asociado */}
             <div className="mb-6 border-b pb-4">
-              <h3 className="font-bold text-gray-700 mb-2 text-base">
+              <h2 className="font-bold text-blue-900 mb-4 text-base">
                 Información del Asociado
-              </h3>
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <span className="text-sm font-semibold text-gray-500 block">
@@ -245,9 +291,9 @@ const ReadLoan: React.FC = () => {
 
             {/* Detalles del préstamo */}
             <div className="mb-6">
-              <h3 className="font-bold text-gray-700 mb-2 text-base">
+              <h2 className="font-bold text-blue-900 mb-4 text-base">
                 Tipo de Préstamo
-              </h3>
+              </h2>
               <div>
                 <span className="text-sm font-semibold text-gray-500 block">
                   Tipo de Préstamo:
@@ -260,9 +306,9 @@ const ReadLoan: React.FC = () => {
             {(loan.status === "Aprobado" || loan.status === "Finalizado") &&
               installmentsToDisplay.length > 0 && (
                 <div className="mt-6 border-t pt-6">
-                  <h3 className="font-bold text-gray-700 mb-4 text-base">
+                  <h2 className="font-bold text-blue-900 mb-4 text-base">
                     Cuotas del Préstamo
-                  </h3>
+                  </h2>
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
@@ -299,12 +345,13 @@ const ReadLoan: React.FC = () => {
                               <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                                 {formatCurrency(installment.amount)}
                               </td>
-                              <td className="px-4 py-4 whitespace-nowrap text-sm">
+                              <td className="whitespace-nowrap text-sm">
                                 <span
-                                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${installment.collected === "Pagado"
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-yellow-100 text-yellow-800"
-                                    }`}
+                                  className={`px-3 py-1 rounded-full inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                    installment.collected === "Pagado"
+                                      ? "bg-green-100 text-green-800"
+                                      : "bg-yellow-100 text-yellow-800"
+                                  }`}
                                 >
                                   {installment.collected}
                                 </span>
@@ -312,14 +359,23 @@ const ReadLoan: React.FC = () => {
                               <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
                                 {installment.collected === "Pagado" ? (
                                   <button
-                                    onClick={() => navigate(`/collections/edit/${installment.id}`)}
+                                    onClick={() =>
+                                      navigate(
+                                        `/collections/edit/${installment.id}`
+                                      )
+                                    }
                                     className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
                                   >
                                     Ver cobro
                                   </button>
                                 ) : (
                                   <button
-                                    onClick={() => navigate(`/cobros/registrar/${installment.id}`)} className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs"
+                                    onClick={() =>
+                                      navigate(
+                                        `/cobros/registrar/${installment.id}`
+                                      )
+                                    }
+                                    className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full text-xs"
                                   >
                                     Cobrar
                                   </button>
