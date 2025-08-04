@@ -1324,9 +1324,9 @@ export const apiMutual = {
     return response.data as Blob;
   },
 
-  //---------------------------5. GENERAR EXCEL -Reporte PRESTAMOS---------------------//
-  ExportLoansToExcel: async (accountingPeriodId: number): Promise<Blob> => {
-    const url = `https://localhost:7256/api/export/loans/${accountingPeriodId}`;
+  //---------------------------5. GENERAR PDF - Reporte PRESTAMOS---------------------//
+  ExportLoansReportPdf: async (accountingPeriodId: number): Promise<Blob> => {
+    const url = `https://localhost:7256/api/reports/loans/${accountingPeriodId}`;
     const response = await Fetcher.get(url, {
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
