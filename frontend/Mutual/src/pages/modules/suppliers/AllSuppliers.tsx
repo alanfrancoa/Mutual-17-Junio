@@ -17,7 +17,6 @@ const AllSuppliers: React.FC = () => {
     const fetchSuppliers = async () => {
       try {
         const data = await apiMutual.GetAllSuppliers();
-
         const mapped = data.map((s: any) => ({
           id: s.id,
           cuit: s.cuit ?? "",
@@ -44,7 +43,6 @@ const AllSuppliers: React.FC = () => {
   const handleToggleStatus = async (supplierId: number, currentStatus: boolean) => {
     try {
       await apiMutual.ChangeSupplierStatus(supplierId, !currentStatus);
-
       setSuppliers(prev =>
         prev.map(s =>
           s.id === supplierId
@@ -52,7 +50,6 @@ const AllSuppliers: React.FC = () => {
             : s
         )
       );
-
       toast.showSuccessToast({
         title: "Estado actualizado",
         message: `Proveedor ${!currentStatus ? 'activado' : 'desactivado'} correctamente`
@@ -72,7 +69,6 @@ const AllSuppliers: React.FC = () => {
     }
   };
 
-  // Filtro por nombre, cuit, teléfono o email
   const filteredSuppliers = suppliers.filter(
     (s) =>
       s.legalName.toLowerCase().includes(search.toLowerCase()) ||
@@ -83,82 +79,99 @@ const AllSuppliers: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex">
+      {/* Sidebar fija a la izquierda */}
       <Sidebar />
-      <Header hasNotifications={true} loans={[]} />
-      <div className="flex flex-col items-center py-8 flex-1">
-        <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-blue-900">Proveedores</h2>
-            <button
-              onClick={() => navigate("/proveedores/crear")}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full font-semibold shadow transition w-full md:w-auto"
-            >
-              + Nuevo Proveedor
-            </button>
-          </div>
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Buscar por nombre, CUIT, teléfono o email"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full border border-gray-300 rounded px-3 py-2"
-            />
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nombre/Razón Social</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">CUIT</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Teléfono</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredSuppliers.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="text-center py-4 text-gray-500">
-                      {loading ? "Cargando proveedores..." : "No se encontraron proveedores."}
-                    </td>
-                  </tr>
-                ) : (
-                  filteredSuppliers.map((s) => (
-                    <tr key={s.id}>
-                      <td className="px-4 py-2">{s.id}</td>
-                      <td className="px-4 py-2">{s.legalName}</td>
-                      <td className="px-4 py-2">{s.cuit}</td>
-                      <td className="px-4 py-2">{s.phone}</td>
-                      <td className="px-4 py-2">{s.email}</td>
-                      <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
-                        <div className="space-x-2 flex justify-end">
-                          <button
-                            onClick={() => navigate(`/proveedores/editar/${s.id}`)}
-                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
-                          >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() => handleToggleStatus(s.id, s.active)}
-                            className={`${s.active
-                              ? "bg-red-500 hover:bg-red-600"
-                              : "bg-green-500 hover:bg-green-600"
-                              } text-white px-6 py-2 rounded-full transition text-xs font-medium w-24`}
-                          >
-                            {s.active ? "Desactivar" : "Activar"}
-                          </button>
-                        </div>
-                      </td>
+
+      {/* Contenido principal desplazado a la derecha */}
+      <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
+        {/* Header */}
+        <Header hasNotifications={true} loans={[]} />
+
+        {/* Main Content */}
+        <main className="flex-1 p-6 bg-gray-100">
+          <h1 className="text-2xl font-bold text-blue-900 mb-4">Proveedores</h1>
+
+          <div className="flex-1 w-full">
+            <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
+              {/* Buscador y botón agregar proveedor */}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
+                <div className="flex gap-2 w-full md:w-auto">
+                  <input
+                    type="text"
+                    placeholder="Buscar por nombre, CUIT, teléfono o email"
+                    className="w-full md:w-72 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-120"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+                <button
+                  onClick={() => navigate("/proveedores/crear")}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full font-semibold shadow transition w-full md:w-auto"
+                >
+                  + Nuevo Proveedor
+                </button>
+              </div>
+
+              {loading ? (
+                <div className="text-center py-8 text-gray-500">
+                  Cargando proveedores...
+                </div>
+              ) : (
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nombre/Razón Social</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">CUIT</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Teléfono</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Acciones</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredSuppliers.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="text-center py-8 text-gray-400">
+                          No hay proveedores registrados que coincidan con la búsqueda.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredSuppliers.map((s, idx) => (
+                        <tr key={s.id} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{s.id}</td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{s.legalName}</td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{s.cuit}</td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{s.phone}</td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{s.email}</td>
+                          <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
+                            <div className="space-x-2 flex justify-end">
+                              <button
+                                className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
+                                onClick={() => navigate(`/proveedores/editar/${s.id}`)}
+                              >
+                                Editar
+                              </button>
+                              <button
+                                className={`${s.active 
+                                  ? "bg-red-500 hover:bg-red-600" 
+                                  : "bg-green-500 hover:bg-green-600"
+                                } text-white px-6 py-2 rounded-full transition text-xs font-medium w-24`}
+                                onClick={() => handleToggleStatus(s.id, s.active)}
+                              >
+                                {s.active ? "Desactivar" : "Activar"}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
