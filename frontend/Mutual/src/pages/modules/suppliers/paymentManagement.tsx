@@ -262,6 +262,8 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
           <span className="font-medium text-green-600 ml-2">Pagado: ${totalPaid.toLocaleString()}</span> |
           <span className="font-medium text-orange-600 ml-2">Saldo: ${remainingBalance.toLocaleString()}</span>
         </div>
+
+        
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -435,13 +437,13 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
       </div>
 
       {/* Botones de acción */}
-      <div className="flex justify-between items-center mt-4">
+      <div className="flex justify-end items-center mt-4"> {/* Cambiado justify-between por justify-end */}
         <div className="flex gap-2">
           {!invoicePaid && remainingBalance > 0 && (
             <button
               type="button"
               onClick={addPaymentLine}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm inline-flex items-center"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full font-semibold shadow transition w-full md:w-auto"
               disabled={loading}
             >
               <span className="mr-1">+</span>
