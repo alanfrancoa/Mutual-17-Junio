@@ -5,6 +5,8 @@ import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
 import { ISupplierList } from "../../../types/ISupplierList";
 import useAppToast from "../../../hooks/useAppToast";
+// Importar los íconos necesarios
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 
 const AllSuppliers: React.FC = () => {
   const navigate = useNavigate();
@@ -182,51 +184,33 @@ const AllSuppliers: React.FC = () => {
                 </table>
               )}
 
-              {/* Agregar los controles de paginación */}
-              {filteredSuppliers.length > 0 && (
-                <div className="mt-4 flex justify-between items-center">
-                  <div className="text-sm text-gray-700">
-                    Mostrando {indexOfFirstItem + 1} a {Math.min(indexOfLastItem, filteredSuppliers.length)} de {filteredSuppliers.length} resultados
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => paginate(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className={`px-3 py-1 rounded-md ${
-                        currentPage === 1
-                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                      }`}
-                    >
-                      Anterior
-                    </button>
-                    {[...Array(totalPages)].map((_, index) => (
-                      <button
-                        key={index + 1}
-                        onClick={() => paginate(index + 1)}
-                        className={`px-3 py-1 rounded-md ${
-                          currentPage === index + 1
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-white text-blue-600 hover:bg-blue-50'
-                        }`}
-                      >
-                        {index + 1}
-                      </button>
-                    ))}
-                    <button
-                      onClick={() => paginate(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className={`px-3 py-1 rounded-md ${
-                        currentPage === totalPages
-                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                      }`}
-                    >
-                      Siguiente
-                    </button>
-                  </div>
+              {/* Paginacion */}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-2">
+                <div className="flex justify-center items-center gap-4 flex-1">
+                  <button
+                    className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                    onClick={() => paginate(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    aria-label="Anterior"
+                  >
+                    <ChevronLeftIcon className="h-5 w-5 text-gray-700" />
+                  </button>
+                  <span className="text-gray-700">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                  <button
+                    className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                    onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    aria-label="Siguiente"
+                  >
+                    <ChevronRightIcon className="h-5 w-5 text-gray-700" />
+                  </button>
                 </div>
-              )}
+                <span className="text-gray-500 text-sm md:ml-4 md:w-auto w-full text-center md:text-right">
+                  {filteredSuppliers.length} proveedor(es) encontrado(s)
+                </span>
+              </div>
             </div>
           </div>
         </main>
