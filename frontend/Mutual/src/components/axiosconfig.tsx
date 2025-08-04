@@ -13,7 +13,7 @@ const AxiosConfig: FC<React.PropsWithChildren> = (props) => {
         config.headers.Authorization = `Bearer ${token}`;
       }
       config.withCredentials = true;
-      config.timeout = 10000;
+      config.timeout = 30000;
       return config;
     });
 
