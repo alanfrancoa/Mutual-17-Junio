@@ -391,7 +391,7 @@ const AccountingPeriods: React.FC = () => {
                                     }`}
                                     disabled={period.status === "Abierto"}
                                   >
-                                    <TableCellsIcon className="h-4 w-4 mr-2" />
+                                    <DocumentTextIcon className="h-4 w-4 mr-2" />
                                     Reporte Prestamos
                                   </button>
                                   <button
