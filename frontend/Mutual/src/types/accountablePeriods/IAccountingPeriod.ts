@@ -1,4 +1,4 @@
-export type PeriodType = "Mensual" | "Trimestral";
+export type PeriodType = "Mensual" | "Trimestral" | "";
 export type PeriodStatus = "Abierto" | "Cerrado";
 
 export interface IAccountingPeriod {

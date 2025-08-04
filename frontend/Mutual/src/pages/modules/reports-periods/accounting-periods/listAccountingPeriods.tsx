@@ -6,7 +6,6 @@ import {
   DocumentTextIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/solid";
-import toast from "react-hot-toast";
 import Header from "../../../dashboard/components/Header";
 import Sidebar from "../../../dashboard/components/Sidebar";
 import CloseAccountingPeriod from "./closeAccountingPeriod";
@@ -15,6 +14,7 @@ import GenerateReportForm from "../reports-inaes/registerInaesReport";
 import { apiMutual } from "../../../../api/apiMutual";
 import { IAccountingPeriodList } from "../../../../types/accountablePeriods/IAccountingPeriodList";
 import { ILoanList } from "../../../../types/loans/ILoanList";
+import useAppToast from "../../../../hooks/useAppToast";
 
 // Paginacion
 const PAGE_SIZE = 5;
@@ -40,6 +40,7 @@ const AccountingPeriods: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState<boolean>(false);
   const userRole = sessionStorage.getItem("userRole");
+  const { showSuccessToast, showErrorToast, showInfoToast } = useAppToast();
 
   const fetchAccountingPeriods = useCallback(async () => {
     setLoading(true);
@@ -53,14 +54,58 @@ const AccountingPeriods: React.FC = () => {
       }
 
       const data = await apiMutual.GetAccountingPeriods(closedFilter);
+
+      if (Array.isArray(data) && data.length === 0) {
+        showInfoToast({
+          title: "Sin resultados",
+          message:
+            "No se encontraron períodos contables que coincidan con los criterios.",
+        });
+        setAccountingPeriods([]);
+        return;
+      }
+
+      // Si la respuesta es exitosa con datos
+      if (Array.isArray(data)) {
+        setAccountingPeriods(data);
+        showSuccessToast({
+          title: "Periodos Contables",
+          message: `Se ${
+            data.length === 1
+              ? "ha encontrado 1 período contable"
+              : `han encontrado ${data.length} períodos contables`
+          }`,
+        });
+      }
+
       setAccountingPeriods(data);
     } catch (err: any) {
       console.error("Error al cargar períodos contables:", err);
-      const errorMessage =
-        err.data?.message ||
-        err.message ||
-        "Error al cargar los períodos contables.";
-      setError(errorMessage);
+
+      if (err.response) {
+        switch (err.response.status) {
+          case 500:
+            showErrorToast({
+              title: "Error del servidor",
+              message: "Error interno al consultar los períodos contables.",
+            });
+            break;
+          case 404:
+            showInfoToast({
+              title: "Sin datos",
+              message: "No se encontraron períodos contables para mostrar.",
+            });
+            break;
+          default:
+            showErrorToast({
+              message: "Error al cargar los períodos contables.",
+            });
+        }
+      }
+
+      setError(
+        err.response?.data?.message || "Error al cargar los períodos contables."
+      );
       setAccountingPeriods([]);
     } finally {
       setLoading(false);
@@ -122,12 +167,14 @@ const AccountingPeriods: React.FC = () => {
     setShowCreateForm(true);
   };
 
-  const handleNewPeriodSuccess = (newPeriod: IAccountingPeriodList) => {
+const handleNewPeriodSuccess = (newPeriod: IAccountingPeriodList) => {
     setAccountingPeriods((prev) => [...prev, newPeriod]);
     setShowCreateForm(false);
-    toast.success(
-      `Nuevo período ${newPeriod.code} creado y añadido a la lista.`
-    );
+    // Reemplazar toast.success por showSuccessToast
+    showSuccessToast({
+      title: "Período creado",
+      message: `El período ${newPeriod.code} ha sido creado exitosamente.`
+    });
   };
 
   const handleCreateFormCancel = () => {
@@ -139,6 +186,10 @@ const AccountingPeriods: React.FC = () => {
     accountingPeriodId: number,
     periodCode: string
   ) => {
+    showInfoToast({
+      title: "Generando reporte",
+      message: "El reporte financiero se está generando, por favor espere...",
+    });
     try {
       const pdfBlob = await apiMutual.ExportFinancialStatusPdf(
         accountingPeriodId
@@ -151,8 +202,16 @@ const AccountingPeriods: React.FC = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+
+      showSuccessToast({
+        title: "Reporte generado",
+        message: "Reporte financiero descargado exitosamente",
+      });
     } catch (error) {
-      alert("Error al descargar el PDF financiero");
+      showErrorToast({
+        title: "Error",
+        message: "Error al descargar el reporte financiero",
+      });
     }
   };
 
@@ -160,6 +219,10 @@ const AccountingPeriods: React.FC = () => {
     accountingPeriodId: number,
     periodCode: string
   ) => {
+    showInfoToast({
+      title: "Generando reporte",
+      message: "El reporte de morosidad se está generando, por favor espere...",
+    });
     try {
       const pdfBlob = await apiMutual.ExportDelinquencyReportPdf(
         accountingPeriodId
@@ -172,8 +235,16 @@ const AccountingPeriods: React.FC = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+      showSuccessToast({
+        title: "Reporte generado",
+        message: "El reporte de morosidad se ha descargado exitosamente",
+      });
     } catch (error) {
-      alert("Error al descargar el PDF de morosidad");
+      showErrorToast({
+        title: "Error",
+        message:
+          "No se pudo generar el reporte de morosidad. Por favor, intente nuevamente.",
+      });
     }
   };
 
@@ -181,6 +252,10 @@ const AccountingPeriods: React.FC = () => {
     accountingPeriodId: number,
     periodCode: string
   ) => {
+    showInfoToast({
+      title: "Generando reporte",
+      message: "El reporte de préstamos se está generando, por favor espere...",
+    });
     try {
       const pdfBlob = await apiMutual.ExportLoansReportPdf(accountingPeriodId);
       const url = window.URL.createObjectURL(pdfBlob);
@@ -191,8 +266,16 @@ const AccountingPeriods: React.FC = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+      showSuccessToast({
+        title: "Reporte generado",
+        message: "El reporte de préstamos se ha descargado exitosamente",
+      });
     } catch (error) {
-      alert("Error al descargar el reporte de préstamos");
+      showErrorToast({
+        title: "Error",
+        message:
+          "No se pudo generar el reporte de préstamos. Por favor, intente nuevamente.",
+      });
     }
   };
 
@@ -208,14 +291,14 @@ const AccountingPeriods: React.FC = () => {
             {showCreateForm ? (
               <div className="flex flex-col items-center py-8">
                 <div className="w-full max-w-xl">
-                  <div className="flex justify-start mb-6">
+                  <div className="flex justify-start mb-4">
                     <button
                       onClick={handleCreateFormCancel}
                       className="text-gray-600 hover:text-gray-800 flex items-center"
                       aria-label="Volver a la lista de períodos"
                     >
                       <ChevronLeftIcon className="h-5 w-5" />
-                      <span className="ml-1">Volver a la lista</span>
+                      <span className="ml-1">Volver</span>
                     </button>
                   </div>
                   <h2 className="text-2xl font-bold text-blue-900 mb-6">
@@ -229,7 +312,7 @@ const AccountingPeriods: React.FC = () => {
               </div>
             ) : (
               <>
-                <h1 className="text-2xl font-bold text-gray-800 mb-4">
+                <h1 className="text-2xl font-bold text-blue-900 mb-4">
                   Períodos Contables
                 </h1>
                 <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
@@ -258,7 +341,7 @@ const AccountingPeriods: React.FC = () => {
                       {userRole === "Administrador" && (
                         <button
                           onClick={handleCreateNewPeriodClick}
-                          className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-3 rounded-full font-semibold shadow transition flex items-center gap-2"
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-full font-semibold shadow transition flex items-center gap-2"
                         >
                           + Agregar Período
                         </button>
@@ -295,7 +378,7 @@ const AccountingPeriods: React.FC = () => {
                             Acciones
                           </th>
                           <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Descarga
+                            Exportacion de Reportes
                           </th>
                         </tr>
                       </thead>
@@ -348,7 +431,7 @@ const AccountingPeriods: React.FC = () => {
                                 <div className="space-x-2 flex justify-center">
                                   <button
                                     onClick={() => handleViewReport(period)}
-                                    className="bg-yellow-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition text-xs font-medium"
+                                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-full transition text-xs font-medium"
                                   >
                                     Ver Periodo
                                   </button>
