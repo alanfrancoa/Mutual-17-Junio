@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { apiMutual } from "../../../api/apiMutual";
 import { IPaymentCreate, IPaymentList, IPaymentMethod } from "../../../types/IPayment";
+import useAppToast from "../../../hooks/useAppToast";
 
 interface PaymentManagementProps {
   invoiceId: number;
@@ -21,8 +22,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
   const [totalPaid, setTotalPaid] = useState(0);
   const [remainingBalance, setRemainingBalance] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const { showSuccessToast, showErrorToast } = useAppToast();
 
   useEffect(() => {
     loadInitialData();
@@ -111,8 +111,6 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
   };
 
   const saveAllPayments = async () => {
-    setError("");
-    setSuccess("");
 
     try {
       if (paymentLines.length === 0) {
@@ -181,21 +179,24 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
             setPaymentLines(paymentLines.slice(savedCount));
           }
 
-          setError(errorMessage);
-          setTimeout(() => setError(""), 8000);
+          showErrorToast({
+            title: "Error",
+            message: errorMessage
+          });
           return;
         }
       }
 
       setPaymentLines([]);
       await loadSavedPayments();
-      setSuccess(`${savedCount} pagos registrados correctamente`);
+      showSuccessToast({
+        title: "Éxito",
+        message: `${savedCount} pagos registrados correctamente`
+      });
 
       if (onPaymentsUpdate) {
         onPaymentsUpdate();
       }
-
-      setTimeout(() => setSuccess(""), 3000);
     } catch (error: any) {
       console.error("Error general al guardar pagos:", error);
 
@@ -209,8 +210,10 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
         errorMessage += "Error desconocido";
       }
 
-      setError(errorMessage);
-      setTimeout(() => setError(""), 8000);
+      showErrorToast({
+        title: "Error",
+        message: errorMessage
+      });
     } finally {
       setLoading(false);
     }
@@ -232,16 +235,19 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
       await apiMutual.CancelSupplierPayment(paymentId, reason.trim());
       
       await loadSavedPayments();
-      setSuccess("Pago cancelado correctamente");
+      showSuccessToast({
+        title: "Éxito",
+        message: "Pago cancelado correctamente"
+      });
 
       if (onPaymentsUpdate) {
         onPaymentsUpdate();
       }
-
-      setTimeout(() => setSuccess(""), 3000);
     } catch (error: any) {
-      setError(`Error al cancelar el pago: ${error.message}`);
-      setTimeout(() => setError(""), 5000);
+      showErrorToast({
+        title: "Error",
+        message: `Error al cancelar el pago: ${error.message}`
+      });
     } finally {
       setLoading(false);
     }
@@ -257,18 +263,6 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
           <span className="font-medium text-orange-600 ml-2">Saldo: ${remainingBalance.toLocaleString()}</span>
         </div>
       </div>
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-          {success}
-        </div>
-      )}
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="w-full">
