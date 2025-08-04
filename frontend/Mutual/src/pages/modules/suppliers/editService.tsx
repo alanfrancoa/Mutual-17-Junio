@@ -6,10 +6,12 @@ import { apiMutual } from "../../../api/apiMutual";
 import { IServiceType } from "../../../types/IServiceType";
 import { ISupplier } from "../../../types/ISupplier"; 
 import { IServiceUpdate } from "../../../types/IServiceRegister";
+import useAppToast from "../../../hooks/useAppToast"; // ✅ AÑADIR
 
 const EditService: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast(); // ✅ AÑADIR
 
   const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
   const [serviceTypes, setServiceTypes] = useState<IServiceType[]>([]);
@@ -23,8 +25,10 @@ const EditService: React.FC = () => {
     active: true,
   });
   const [loading, setLoading] = useState(true);
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false); // ✅ AÑADIR
+  // ✅ ELIMINAR estos estados:
+  // const [success, setSuccess] = useState("");
+  // const [error, setError] = useState("");
 
   useEffect(() => {
     const userRole = sessionStorage.getItem("userRole");
@@ -39,10 +43,14 @@ const EditService: React.FC = () => {
       try {
         const data = await apiMutual.GetAllSuppliers();
         setSuppliers(data.filter((s: ISupplier) => s.active));
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error al cargar proveedores:", err);
         setSuppliers([]);
-        setError("Error al cargar proveedores");
+        // ✅ CAMBIAR: Usar toast
+        showErrorToast({
+          title: "Error de carga",
+          message: err.message || "Error al cargar proveedores"
+        });
       }
     };
     fetchSuppliers();
@@ -56,7 +64,11 @@ const EditService: React.FC = () => {
       } catch (err: any) {
         console.error("Error al cargar tipos de servicio:", err);
         setServiceTypes([]);
-        setError("Error al cargar tipos de servicio");
+        // ✅ CAMBIAR: Usar toast
+        showErrorToast({
+          title: "Error de carga",
+          message: err.message || "Error al cargar tipos de servicio"
+        });
       }
     };
     fetchServiceTypes();
@@ -65,7 +77,11 @@ const EditService: React.FC = () => {
   useEffect(() => {
     const fetchService = async () => {
       if (!id) {
-        setError("ID de servicio no válido");
+        // ✅ CAMBIAR: Usar toast
+        showErrorToast({
+          title: "ID inválido",
+          message: "ID de servicio no válido"
+        });
         setLoading(false);
         return;
       }
@@ -84,7 +100,11 @@ const EditService: React.FC = () => {
           active: data.active ?? true,
         });
       } catch (err: any) {
-        setError(err.message || "Error al cargar el servicio");
+        // ✅ CAMBIAR: Usar toast
+        showErrorToast({
+          title: "Error de carga",
+          message: err.message || "Error al cargar el servicio"
+        });
       } finally {
         setLoading(false);
       }
@@ -102,18 +122,29 @@ const EditService: React.FC = () => {
   };
 
   const handleSave = async () => {
-    setSuccess("");
-    setError("");
+    // ✅ ELIMINAR estas líneas:
+    // setSuccess("");
+    // setError("");
 
     if (!form.ServiceTypeId || !form.SupplierId || !form.Description || !form.amount) {
-      setError("Completa todos los campos obligatorios.");
+      // ✅ CAMBIAR: Usar toast warning
+      showWarningToast({
+        title: "Campos incompletos",
+        message: "Completa todos los campos obligatorios"
+      });
       return;
     }
 
     if (!id) {
-      setError("ID de servicio no válido");
+      // ✅ CAMBIAR: Usar toast error
+      showErrorToast({
+        title: "ID inválido",
+        message: "ID de servicio no válido"
+      });
       return;
     }
+
+    setSaving(true); // ✅ AÑADIR
 
     try {
       await apiMutual.UpdateService(Number(id), {
@@ -123,10 +154,30 @@ const EditService: React.FC = () => {
         monthlyCost: Number(form.amount),
       });
 
-      setSuccess("Servicio actualizado correctamente.");
+      // ✅ CAMBIAR: Usar toast success
+      showSuccessToast({
+        title: "¡Servicio actualizado!",
+        message: "El servicio fue actualizado correctamente"
+      });
+      
       setTimeout(() => navigate("/proveedores/servicios"), 1500);
     } catch (err: any) {
-      setError(err.message || "Error al actualizar el servicio");
+      console.error("Error al actualizar servicio:", err);
+      
+      // ✅ CAMBIAR: Usar toast error con manejo mejorado
+      const errorMessage = 
+        err.response?.data?.message || 
+        err.response?.data?.mensaje || 
+        (typeof err.response?.data === 'string' ? err.response.data : null) ||
+        err.message || 
+        "Error desconocido";
+
+      showErrorToast({
+        title: "Error al actualizar servicio",
+        message: errorMessage
+      });
+    } finally {
+      setSaving(false); // ✅ AÑADIR
     }
   };
 
@@ -135,9 +186,9 @@ const EditService: React.FC = () => {
       <div className="min-h-screen bg-gray-100 flex">
         <Sidebar />
         <div className="flex-1" style={{ marginLeft: "18rem" }}>
-              <Header hasNotifications={true} loans={[]}  />
-
+          <Header hasNotifications={true} loans={[]} />
           <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4 mx-auto"></div>
             <div className="text-lg text-gray-600">Cargando servicio...</div>
           </div>
         </div>
@@ -149,7 +200,7 @@ const EditService: React.FC = () => {
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
       <div className="flex-1" style={{ marginLeft: "18rem" }}>
-     <Header hasNotifications={true} loans={[]}  />
+        <Header hasNotifications={true} loans={[]} />
         <div className="container mx-auto px-4 py-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800">
@@ -158,14 +209,15 @@ const EditService: React.FC = () => {
             <div className="flex space-x-2">
               <button
                 onClick={handleSave}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:bg-blue-400"
-                disabled={loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50" // ✅ CAMBIAR disabled styles
+                disabled={saving || loading} // ✅ CAMBIAR
               >
-                Guardar Cambios
+                {saving ? "Guardando..." : "Guardar Cambios"} {/* ✅ CAMBIAR */}
               </button>
               <button
                 onClick={() => navigate("/proveedores/servicios")}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition disabled:opacity-50" // ✅ AÑADIR disabled styles
+                disabled={saving} // ✅ AÑADIR
               >
                 Volver
               </button>
@@ -173,6 +225,7 @@ const EditService: React.FC = () => {
           </div>
 
           <div className="bg-white rounded-lg shadow p-6 mb-6">
+            {/* ✅ ELIMINAR todo este bloque:
             {success && (
               <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                 {success}
@@ -183,6 +236,7 @@ const EditService: React.FC = () => {
                 {error}
               </div>
             )}
+            */}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
@@ -193,11 +247,11 @@ const EditService: React.FC = () => {
                   name="ServiceTypeId"
                   value={form.ServiceTypeId}
                   onChange={handleChange}
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                  disabled={saving} // ✅ AÑADIR
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50" // ✅ AÑADIR disabled:opacity-50
                   required
                 >
                   <option value="">Seleccione un tipo de servicio...</option>
-
                   {serviceTypes.map((type) => (
                     <option key={type.id} value={type.id}>
                       {type.name} ({type.code})
@@ -214,7 +268,8 @@ const EditService: React.FC = () => {
                   name="SupplierId"
                   value={form.SupplierId}
                   onChange={handleChange}
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                  disabled={saving} // ✅ AÑADIR
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50" // ✅ AÑADIR disabled:opacity-50
                   required
                 >
                   <option value="">Seleccione un proveedor...</option>
@@ -234,7 +289,8 @@ const EditService: React.FC = () => {
                   name="Description"
                   value={form.Description}
                   onChange={handleChange}
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                  disabled={saving} // ✅ AÑADIR
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50" // ✅ AÑADIR disabled:opacity-50
                   maxLength={255}
                   rows={3}
                   required
@@ -252,7 +308,8 @@ const EditService: React.FC = () => {
                   name="amount" 
                   value={form.amount}
                   onChange={handleChange}
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                  disabled={saving} // ✅ AÑADIR
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50" // ✅ AÑADIR disabled:opacity-50
                   min="0"
                   step="0.01"
                   required
