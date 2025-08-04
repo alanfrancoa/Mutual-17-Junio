@@ -3,13 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { IRelativeList } from "../../../../types/associates/IRelative";
 import DeleteAndReactivateRelative from "./deleteAndReactivateRelative";
 
-
 interface AssociateRelativesTableProps {
   associateId: number | null;
   relatives: IRelativeList[];
   loadingRelatives: boolean;
   relativeError: string | null;
-  onRelativesUpdated: () => Promise<void>; // Callback para recargar los familiares
+  onRelativesUpdated: () => Promise<void>;
 }
 
 const AssociateRelativesTable: React.FC<AssociateRelativesTableProps> = ({
@@ -39,7 +38,7 @@ const AssociateRelativesTable: React.FC<AssociateRelativesTableProps> = ({
   return (
     <div className="mt-8 pt-8 border-t border-gray-200">
       <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold mb-6 text-blue-900">
+        <h2 className="text-2xl font-bold mb-6 text-blue-900">
           Familiares Registrados
         </h2>
         {associateId && (
@@ -116,14 +115,16 @@ const AssociateRelativesTable: React.FC<AssociateRelativesTableProps> = ({
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => handleEditRelative(relative.id)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-4"
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-full transition text-xs font-medium gap-2 mr-2"
                     >
                       Editar
                     </button>
                     <DeleteAndReactivateRelative
                       relativeId={relative.id}
                       currentStatus={relative.active}
-                      onStatusChanged={onRelativesUpdated} 
+                      onStatusChanged={onRelativesUpdated}
+                      legalName={relative.legalName}
+                      dni={relative.dni}
                     />
                   </td>
                 </tr>

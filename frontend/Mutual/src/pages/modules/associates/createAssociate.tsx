@@ -77,6 +77,7 @@ const CreateAssociate: React.FC = () => {
     text: string;
   } | null>(null);
   const { showSuccessToast, showErrorToast } = useAppToast();
+  
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -210,7 +211,8 @@ const CreateAssociate: React.FC = () => {
           <div className="w-full max-w-xl">
             <div className="flex justify-start mb-6">
               <button
-                onClick={() => navigate("/asociados")}
+                onClick={() => navigate("/asociados/detalle/:id")}
+                ///asociados/crear/familiar/:associateId
                 className="text-gray-600 hover:text-gray-800 flex items-center"
                 aria-label="Volver a Usuarios"
               >

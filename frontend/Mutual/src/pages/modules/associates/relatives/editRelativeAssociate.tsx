@@ -4,9 +4,12 @@ import {
   IRelativeList,
   IRelativeUpdate,
 } from "../../../../types/associates/IRelative";
+import { IAssociateList } from "../../../../types/associates/IAssociateList";
 import { apiMutual } from "../../../../api/apiMutual";
 import Sidebar from "../../../dashboard/components/Sidebar";
 import Header from "../../../dashboard/components/Header";
+import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import useAppToast from "../../../../hooks/useAppToast";
 
 const EditRelativeAssociate: React.FC = () => {
   const navigate = useNavigate();
@@ -29,6 +32,13 @@ const EditRelativeAssociate: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Estado para el asociado principal
+  const [parentAssociate, setParentAssociate] = useState<IAssociateList | null>(
+    null
+  );
+  const [loadingAssociate, setLoadingAssociate] = useState<boolean>(true);
+  const { showSuccessToast, showErrorToast } = useAppToast();
+
   // Opciones para el campo parentesco
   const relationOptions = [
     "Seleccione una opcion",
@@ -45,14 +55,21 @@ const EditRelativeAssociate: React.FC = () => {
     const fetchRelativeData = async () => {
       if (parsedAssociateId === null || parsedRelativeId === null) {
         setError("IDs de asociado o familiar no proporcionados en la URL.");
+        showErrorToast({
+          title: "Error",
+          message: "IDs de asociado o familiar no proporcionados en la URL.",
+        });
         setLoading(false);
+        setLoadingAssociate(false);
         return;
       }
 
       try {
         setLoading(true);
+        setLoadingAssociate(true);
         setError(null);
 
+        // Cargar familiares
         const relatives = await apiMutual.GetRelativesByAssociateId(
           parsedAssociateId
         );
@@ -64,22 +81,36 @@ const EditRelativeAssociate: React.FC = () => {
           setFormData({
             dni: relativeToEdit.dni,
             legalName: relativeToEdit.legalName,
-            // revision 'phone' para BE
             phone: relativeToEdit.phone || "",
             relation: relativeToEdit.relation,
             active: relativeToEdit.active,
           });
         } else {
           setError("Familiar no encontrado para el ID proporcionado.");
+          showErrorToast({
+            title: "Error",
+            message: "Familiar no encontrado para el ID proporcionado.",
+          });
         }
-      } catch (err: any) {
-        console.error("Error al cargar los datos del familiar:", err);
-        setError(
-          err.response?.data?.mensaje ||
-            "Error al cargar la información del familiar."
+
+        // Cargar asociado principal
+        const associateData = await apiMutual.GetAssociateById(
+          parsedAssociateId
         );
+        setParentAssociate(associateData);
+      } catch (err: any) {
+        console.error("Error al cargar los datos:", err);
+        const msg =
+          err.response?.data?.mensaje ||
+          "Error al cargar la información del familiar o asociado principal.";
+        setError(msg);
+        showErrorToast({
+          title: "Error",
+          message: msg,
+        });
       } finally {
         setLoading(false);
+        setLoadingAssociate(false);
       }
     };
 
@@ -96,11 +127,48 @@ const EditRelativeAssociate: React.FC = () => {
     }));
   };
 
+  // Validación antes de enviar
+  const validateForm = () => {
+    if (!formData.dni || formData.dni.length < 8) {
+      return "El DNI debe tener al menos 8 caracteres.";
+    }
+    if (
+      !formData.legalName ||
+      !formData.legalName.match(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)
+    ) {
+      return "El nombre es obligatorio y solo puede contener letras y espacios.";
+    }
+    if (
+      !formData.phone ||
+      formData.phone.length < 8 ||
+      formData.phone.length > 20 ||
+      !formData.phone.match(/^[0-9\-.\s]+$/)
+    ) {
+      return "El teléfono debe tener entre 8 y 20 caracteres y solo puede contener números, guiones y puntos.";
+    }
+    if (!formData.relation || formData.relation === relationOptions[0]) {
+      return "La relación de parentesco es obligatoria.";
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
+    const validationError = validateForm();
+    if (validationError) {
+      showErrorToast({
+        title: "Validación",
+        message: validationError,
+      });
+      return;
+    }
+
     if (parsedRelativeId === null) {
-      alert("Error: ID del familiar no disponible para la actualización.");
+      showErrorToast({
+        title: "Error",
+        message: "ID del familiar no disponible para la actualización.",
+      });
       return;
     }
 
@@ -117,11 +185,18 @@ const EditRelativeAssociate: React.FC = () => {
         parsedRelativeId,
         dataToSend
       );
-      alert(response.mensaje || "Familiar actualizado correctamente.");
+      showSuccessToast({
+        title: "Familiar actualizado",
+        message: response.mensaje || "Familiar actualizado correctamente.",
+      });
       navigate(`/asociados/detalle/${parsedAssociateId}`);
     } catch (err: any) {
       console.error("Error al actualizar familiar:", err);
-      alert(err.response?.data?.mensaje || "Error al actualizar el familiar.");
+      showErrorToast({
+        title: "Error",
+        message:
+          err.response?.data?.mensaje || "Error al actualizar el familiar.",
+      });
     }
   };
 
@@ -130,135 +205,140 @@ const EditRelativeAssociate: React.FC = () => {
       <Sidebar />
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
         <Header hasNotifications={true} loans={[]} />
-        <div className="flex flex-col items-center py-8 flex-1 px-4 sm:px-6 lg:px-8">
-          <div className="w-full max-w-2xl bg-white rounded-lg shadow p-8">
+        <div className="flex flex-col items-center py-8 flex-1">
+          <div className="w-full max-w-xl">
+            <div className="flex justify-start mb-6">
+              <button
+                onClick={() =>
+                  navigate(`/asociados/detalle/${parsedAssociateId}`)
+                }
+                className="text-gray-600 hover:text-gray-800 flex items-center"
+                aria-label="Volver a Asociados"
+              >
+                <ChevronLeftIcon className="h-5 w-5" />
+                <span className="ml-1">Volver</span>
+              </button>
+            </div>
             <h2 className="text-2xl font-bold mb-6 text-blue-900">
               Editar Familiar
             </h2>
-
-            {loading ? (
-              <div className="text-center py-8 text-gray-500">
-                Cargando datos del familiar...
-              </div>
-            ) : error ? (
-              <div className="text-center py-8 text-red-600">{error}</div>
+          </div>
+          <div className="w-full max-w-xl bg-white rounded-lg shadow p-8">
+            {/* Mostrar asociado principal */}
+            {loadingAssociate ? (
+              <p className="text-center text-gray-500">
+                Cargando asociado principal...
+              </p>
+            ) : parentAssociate ? (
+              <p className="text-lg text-gray-700 mb-4">
+                Para:{" "}
+                <span className="font-semibold">
+                  {parentAssociate.legalName} (DNI: {parentAssociate.dni})
+                </span>
+              </p>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label
-                    htmlFor="dni"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    DNI
-                  </label>
-                  <input
-                    type="text"
-                    id="dni"
-                    name="dni"
-                    value={formData.dni}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                    maxLength={10}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="legalName"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Nombre Legal
-                  </label>
-                  <input
-                    type="text"
-                    id="legalName"
-                    name="legalName"
-                    value={formData.legalName}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                    maxLength={255}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="phone"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Teléfono (opcional)
-                  </label>
-                  <input
-                    type="text"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone || ""}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                    maxLength={20}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="relation"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Parentesco
-                  </label>
-                  <select
-                    id="relation"
-                    name="relation"
-                    value={formData.relation}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                    required
-                  >
-                    {relationOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="active"
-                    name="active"
-                    checked={formData.active}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label
-                    htmlFor="active"
-                    className="ml-2 block text-sm text-gray-900"
-                  >
-                    Activo
-                  </label>
-                </div>
-
-                <div className="flex justify-end gap-4">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      navigate(`/asociados/detalle/${parsedAssociateId}`)
-                    }
-                    className="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Guardar Cambios
-                  </button>
-                </div>
-              </form>
+              <p className="text-lg text-red-600 mb-4">
+                No se pudo cargar el asociado principal.
+              </p>
             )}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label
+                  htmlFor="dni"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  DNI
+                </label>
+                <input
+                  type="text"
+                  id="dni"
+                  name="dni"
+                  value={formData.dni}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                  maxLength={10}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="legalName"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Nombre Completo del Familiar
+                </label>
+                <input
+                  type="text"
+                  id="legalName"
+                  name="legalName"
+                  value={formData.legalName}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                  maxLength={255}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Teléfono del Familiar
+                </label>
+                <input
+                  type="text"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                  maxLength={20}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="relation"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Parentesco
+                </label>
+                <select
+                  id="relation"
+                  name="relation"
+                  value={formData.relation}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  required
+                >
+                  {relationOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate(`/asociados/detalle/${parsedAssociateId}`)
+                  }
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-full"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold disabled:opacity-50"
+                >
+                  Guardar Cambios
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
