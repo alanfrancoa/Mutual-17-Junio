@@ -16,6 +16,7 @@ const AllSuppliers: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [estadoFiltro, setEstadoFiltro] = useState<"Todos" | "Activo" | "Inactivo">("Todos");
 
   useEffect(() => {
     const fetchSuppliers = async () => {
@@ -75,11 +76,13 @@ const AllSuppliers: React.FC = () => {
 
   const filteredSuppliers = suppliers.filter(
     (s) =>
-      s.legalName.toLowerCase().includes(search.toLowerCase()) ||
-      s.cuit.includes(search) ||
-      (s.address && s.address.toLowerCase().includes(search.toLowerCase())) ||
-      (s.phone && s.phone.includes(search)) ||
-      (s.email && s.email.toLowerCase().includes(search.toLowerCase()))
+      (estadoFiltro === "Todos" || 
+       (estadoFiltro === "Activo" ? s.active : !s.active)) &&
+      (s.legalName.toLowerCase().includes(search.toLowerCase()) ||
+       s.cuit.includes(search) ||
+       (s.address && s.address.toLowerCase().includes(search.toLowerCase())) ||
+       (s.phone && s.phone.includes(search)) ||
+       (s.email && s.email.toLowerCase().includes(search.toLowerCase())))
   );
 
   // Calcular la paginación
@@ -114,10 +117,20 @@ const AllSuppliers: React.FC = () => {
                   <input
                     type="text"
                     placeholder="Buscar por nombre, CUIT, teléfono o email"
-                    className="w-full md:w-72 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-120"
+                    className="w-full md:w-72 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
+                  <select
+                    name="estadoFiltro"
+                    value={estadoFiltro}
+                    onChange={(e) => setEstadoFiltro(e.target.value as "Todos" | "Activo" | "Inactivo")}
+                    className="px-3 py-2 border border-gray-300 rounded bg-white text-gray-700"
+                  >
+                    <option value="Todos">Todos</option>
+                    <option value="Activo">Activos</option>
+                    <option value="Inactivo">Inactivos</option>
+                  </select>
                 </div>
                 <button
                   onClick={() => navigate("/proveedores/crear")}
@@ -140,13 +153,14 @@ const AllSuppliers: React.FC = () => {
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">CUIT</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Teléfono</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Estado</th>
                       <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {currentItems.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="text-center py-8 text-gray-400">
+                        <td colSpan={7} className="text-center py-8 text-gray-400">
                           No hay proveedores registrados que coincidan con la búsqueda.
                         </td>
                       </tr>
@@ -158,6 +172,17 @@ const AllSuppliers: React.FC = () => {
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{s.cuit}</td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{s.phone}</td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{s.email}</td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm">
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                s.active 
+                                  ? "bg-green-100 text-green-800" 
+                                  : "bg-red-100 text-red-800"
+                              }`}
+                            >
+                              {s.active ? "Activo" : "Inactivo"}
+                            </span>
+                          </td>
                           <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
                             <div className="space-x-2 flex justify-end">
                               <button
