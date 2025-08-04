@@ -55,7 +55,7 @@ const AllSuppliers: React.FC = () => {
 
       toast.showSuccessToast({
         title: "Estado actualizado",
-        message: `Proveedor ${!currentStatus ? 'activado' : 'inactivado'} correctamente`
+        message: `Proveedor ${!currentStatus ? 'activado' : 'desactivado'} correctamente`
       });
     } catch (error: any) {
       const errorMessage = 
@@ -151,7 +151,7 @@ const AllSuppliers: React.FC = () => {
                             : "bg-green-600 hover:bg-green-700") +
                           " text-white px-3 py-1 rounded text-sm"
                           }>
-                          {s.active ? "Inactivar" : "Activar"}
+                          {s.active ? "Desactivar" : "Activar"}
                         </button>
                       </td>
                     </tr>
