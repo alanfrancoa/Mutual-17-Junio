@@ -74,10 +74,6 @@ const Login = () => {
         sessionStorage.setItem("username", payload.username);
       }
 
-      toast.showSuccessToast({
-        title: "¡Bienvenido!",
-        message: "Inicio de sesión exitoso.",
-      });
 
       navigate("/dashboard");
       window.location.reload();
