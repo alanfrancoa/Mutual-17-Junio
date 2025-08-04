@@ -4,12 +4,14 @@ import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
 import { ServiceList } from "../../../types/IServiceList";
+import useAppToast from "../../../hooks/useAppToast";
 
 type UserRole = "Administrador" | "Gestor" | "Consultor";
 const userRole = (sessionStorage.getItem("userRole") || "Consultor") as UserRole;
 
 const AllServicesPage: React.FC = () => {
   const navigate = useNavigate();
+  const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast();
   const [search, setSearch] = useState("");
   const [services, setServices] = useState<ServiceList[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,9 +35,13 @@ const AllServicesPage: React.FC = () => {
         } else {
           setServices([]);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error al cargar servicios:", error);
-        setServices([]);
+        setServices([])
+        showErrorToast({
+          title: "Error de carga",
+          message: error.message || "No se pudieron cargar los servicios"
+        });
       } finally {
         setLoading(false);
       }
@@ -51,7 +57,10 @@ const AllServicesPage: React.FC = () => {
 
   const handleEditClick = (service: ServiceList) => {
     if (userRole !== "Administrador" && userRole !== "Gestor") {
-      alert('Solo usuarios con rol "Administrador" o "Gestor" pueden editar un servicio.');
+      showWarningToast({
+        title: "Acceso denegado",
+        message: 'Solo usuarios con rol "Administrador" o "Gestor" pueden editar un servicio.'
+      });
       return;
     }
     navigate(`/proveedores/servicios/editar/${service.Id}`);
@@ -59,7 +68,10 @@ const AllServicesPage: React.FC = () => {
 
   const handleToggleStatus = async (service: ServiceList) => {
     if (userRole !== "Administrador" && userRole !== "Gestor") {
-      alert('Solo usuarios con rol "Administrador" o "Gestor" pueden cambiar el estado.');
+      showWarningToast({
+        title: "Acceso denegado",
+        message: 'Solo usuarios con rol "Administrador" o "Gestor" pueden cambiar el estado.'
+      });
       return;
     }
 
@@ -72,7 +84,12 @@ const AllServicesPage: React.FC = () => {
 
     try {
       await apiMutual.UpdateServiceStatus(service.Id);
-      alert(`Servicio ${action === 'desactivar' ? 'desactivado' : 'activado'} correctamente`);
+      
+      showSuccessToast({
+        title: "Estado actualizado",
+        message: `Servicio ${action === 'desactivar' ? 'desactivado' : 'activado'} correctamente`
+      });
+
       setServices(prevServices =>
         prevServices.map(s =>
           s.Id === service.Id
@@ -82,7 +99,18 @@ const AllServicesPage: React.FC = () => {
       );
     } catch (error: any) {
       console.error("Error al cambiar estado:", error);
-      alert(`Error al ${action} el servicio: ${error.message}`);
+      
+      const errorMessage = 
+        error.response?.data?.message || 
+        error.response?.data?.mensaje || 
+        (typeof error.response?.data === 'string' ? error.response.data : null) ||
+        error.message || 
+        "Error desconocido";
+
+      showErrorToast({
+        title: `Error al ${action} servicio`,
+        message: errorMessage
+      });
     }
   };
 
