@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ChevronLeftIcon } from "@heroicons/react/24/solid";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
@@ -25,7 +26,8 @@ const EditService: React.FC = () => {
     active: true,
   });
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false); 
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const userRole = sessionStorage.getItem("userRole");
@@ -39,13 +41,33 @@ const EditService: React.FC = () => {
     const fetchSuppliers = async () => {
       try {
         const data = await apiMutual.GetAllSuppliers();
-        setSuppliers(data.filter((s: ISupplier) => s.active));
-      } catch (err: any) {
-        console.error("Error al cargar proveedores:", err);
+        const activeSuppliers = data.filter((s: ISupplier) => s.active);
+        setSuppliers(activeSuppliers);
+        
+        if (activeSuppliers.length === 0) {
+          showWarningToast({
+            title: "Sin proveedores",
+            message: "No hay proveedores activos disponibles. Contacte al administrador"
+          });
+        }
+      } catch (error: any) {
         setSuppliers([]);
+        
+        let errorMessage = "Error desconocido al cargar proveedores";
+        
+        if (error.response?.status === 400) {
+          errorMessage = error.response.data?.mensaje || 
+                       (typeof error.response.data === 'string' ? error.response.data : null) ||
+                       "Error de validación al cargar proveedores";
+        } else if (error.response?.status === 500) {
+          errorMessage = error.response.data?.message || "Error interno del servidor";
+        } else {
+          errorMessage = error.message || "Error de conexión";
+        }
+        
         showErrorToast({
-          title: "Error de carga",
-          message: err.message || "Error al cargar proveedores"
+          title: "Error al cargar proveedores",
+          message: errorMessage
         });
       }
     };
@@ -56,13 +78,33 @@ const EditService: React.FC = () => {
     const fetchServiceTypes = async () => {
       try {
         const data = await apiMutual.GetServiceTypes();
-        setServiceTypes(data.filter((t: IServiceType) => t.active));
-      } catch (err: any) {
-        console.error("Error al cargar tipos de servicio:", err);
+        const activeTypes = data.filter((t: IServiceType) => t.active);
+        setServiceTypes(activeTypes);
+        
+        if (activeTypes.length === 0) {
+          showWarningToast({
+            title: "Sin tipos de servicio",
+            message: "No hay tipos de servicio activos disponibles. Contacte al administrador"
+          });
+        }
+      } catch (error: any) {
         setServiceTypes([]);
+        
+        let errorMessage = "Error desconocido al cargar tipos de servicio";
+        
+        if (error.response?.status === 400) {
+          errorMessage = error.response.data?.mensaje || 
+                       (typeof error.response.data === 'string' ? error.response.data : null) ||
+                       "Error de validación al cargar tipos de servicio";
+        } else if (error.response?.status === 500) {
+          errorMessage = error.response.data?.message || "Error interno del servidor";
+        } else {
+          errorMessage = error.message || "Error de conexión";
+        }
+        
         showErrorToast({
-          title: "Error de carga",
-          message: err.message || "Error al cargar tipos de servicio"
+          title: "Error al cargar tipos de servicio",
+          message: errorMessage
         });
       }
     };
@@ -94,9 +136,24 @@ const EditService: React.FC = () => {
           active: data.active ?? true,
         });
       } catch (err: any) {
+        let errorMessage = "Error desconocido al cargar el servicio";
+        
+        if (err.response?.status === 400) {
+          errorMessage = err.response.data?.mensaje || 
+                        (typeof err.response.data === 'string' ? err.response.data : null) ||
+                        "Error de validación al cargar el servicio";
+        } else if (err.response?.status === 404) {
+          errorMessage = err.response.data?.mensaje || "El servicio no fue encontrado";
+        } else if (err.response?.status === 500) {
+          errorMessage = err.response.data?.message || "Error interno del servidor";
+        } else {
+          errorMessage = err.message || "Error de conexión";
+        }
+        
+        setError(errorMessage);
         showErrorToast({
-          title: "Error de carga",
-          message: err.message || "Error al cargar el servicio"
+          title: "Error al cargar servicio",
+          message: errorMessage
         });
       } finally {
         setLoading(false);
@@ -114,12 +171,22 @@ const EditService: React.FC = () => {
     }));
   };
 
-  const handleSave = async () => {
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
 
     if (!form.ServiceTypeId || !form.SupplierId || !form.Description || !form.amount) {
       showWarningToast({
         title: "Campos incompletos",
         message: "Completa todos los campos obligatorios"
+      });
+      return;
+    }
+
+    // Validar que el costo mensual sea positivo
+    if (Number(form.amount) <= 0) {
+      showWarningToast({
+        title: "Valor inválido",
+        message: "El costo mensual debe ser mayor a cero"
       });
       return;
     }
@@ -143,20 +210,47 @@ const EditService: React.FC = () => {
       });
 
       showSuccessToast({
-        title: "¡Servicio actualizado!",
-        message: "El servicio fue actualizado correctamente"
+        title: "Cambio exitoso",
+        message: "Servicio actualizado correctamente"
       });
       
       setTimeout(() => navigate("/proveedores/servicios"), 1500);
     } catch (err: any) {
       console.error("Error al actualizar servicio:", err);
       
-      const errorMessage = 
-        err.response?.data?.message || 
-        err.response?.data?.mensaje || 
-        (typeof err.response?.data === 'string' ? err.response.data : null) ||
-        err.message || 
-        "Error desconocido";
+      // Manejar diferentes tipos de error del backend según tu controller
+      let errorMessage = "Error desconocido al actualizar el servicio";
+      
+      if (err.response?.status === 400) {
+        // Error 400: Objeto con mensaje
+        if (err.response.data?.mensaje) {
+          if (err.response.data.mensaje.includes("tipo de servicio no existe")) {
+            errorMessage = "El tipo de servicio seleccionado no existe o no está disponible";
+          } else if (err.response.data.mensaje.includes("proveedor no existe")) {
+            errorMessage = "El proveedor seleccionado no existe o no está disponible";
+          } else {
+            errorMessage = err.response.data.mensaje;
+          }
+        } else {
+          // ModelState validation errors
+          errorMessage = "Error de validación: Verifique que todos los campos estén completos y sean válidos";
+        }
+      } else if (err.response?.status === 404) {
+        // Error 404: Servicio no encontrado
+        errorMessage = err.response.data?.mensaje || "El servicio no fue encontrado o ya no existe";
+      } else if (err.response?.status === 500) {
+        // Error 500: Objeto con message
+        errorMessage = err.response.data?.message || "Error interno del servidor. Intente nuevamente más tarde";
+      } else if (err.response?.data) {
+        // Otros errores
+        errorMessage = err.response.data.mensaje || 
+                     err.response.data.message || 
+                     (typeof err.response.data === 'string' ? err.response.data : null) ||
+                     "Error del servidor";
+      } else {
+        // Error de red o conexión
+        errorMessage = err.message || "Error de conexión. Verifique su conexión a internet";
+      }
 
       showErrorToast({
         title: "Error al actualizar servicio",
@@ -167,129 +261,127 @@ const EditService: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex">
-        <Sidebar />
-        <div className="flex-1" style={{ marginLeft: "18rem" }}>
-          <Header hasNotifications={true} loans={[]} />
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4 mx-auto"></div>
-            <div className="text-lg text-gray-600">Cargando servicio...</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
-      <div className="flex-1" style={{ marginLeft: "18rem" }}>
+      <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
         <Header hasNotifications={true} loans={[]} />
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">
-              Editar Servicio
-            </h1>
-            <div className="flex space-x-2">
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50" 
-                disabled={saving || loading} 
-              >
-                {saving ? "Guardando..." : "Guardar Cambios"} 
-              </button>
+        <div className="flex flex-col items-center py-8 flex-1">
+          <div className="w-full max-w-xl">
+            <div className="flex justify-start mb-6">
               <button
                 onClick={() => navigate("/proveedores/servicios")}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition disabled:opacity-50" 
-                disabled={saving} 
+                className="text-gray-600 hover:text-gray-800 flex items-center"
+                aria-label="Volver a Servicios"
               >
-                Volver
+                <ChevronLeftIcon className="h-5 w-5" />
+                <span className="ml-1">Volver</span>
               </button>
             </div>
-          </div>
+            <h2 className="text-2xl font-bold mb-6 text-blue-900">
+              Editar Servicio
+            </h2>
+            <div className="w-full max-w-xl bg-white rounded-lg shadow p-8">
+              {loading ? (
+                <div className="text-center py-8 text-gray-500">
+                  Cargando datos del servicio...
+                </div>
+              ) : error ? (
+                <div className="text-center py-8 text-red-600">{error}</div>
+              ) : (
+                <form onSubmit={handleSave} className="space-y-5" noValidate>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tipo de Servicio *
+                    </label>
+                    <select
+                      name="ServiceTypeId"
+                      value={form.ServiceTypeId}
+                      onChange={handleChange}
+                      disabled={saving}
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    >
+                      <option value="">Seleccione un tipo de servicio...</option>
+                      {serviceTypes.map((type) => (
+                        <option key={type.id} value={type.id}>
+                          {type.name} ({type.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Proveedor *
+                    </label>
+                    <select
+                      name="SupplierId"
+                      value={form.SupplierId}
+                      onChange={handleChange}
+                      disabled={saving}
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    >
+                      <option value="">Seleccione un proveedor...</option>
+                      {suppliers.map((supplier) => (
+                        <option key={supplier.id} value={supplier.id}>
+                          {supplier.legalName} ({supplier.cuit})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tipo de Servicio *
-                </label>
-                <select
-                  name="ServiceTypeId"
-                  value={form.ServiceTypeId}
-                  onChange={handleChange}
-                  disabled={saving}
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
-                  required
-                >
-                  <option value="">Seleccione un tipo de servicio...</option>
-                  {serviceTypes.map((type) => (
-                    <option key={type.id} value={type.id}>
-                      {type.name} ({type.code})
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Descripción *
+                    </label>
+                    <textarea
+                      name="Description"
+                      value={form.Description}
+                      onChange={handleChange}
+                      disabled={saving}
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                      maxLength={255}
+                      rows={3}
+                      placeholder="Descripción del servicio"
+                    />
+                    <small className="text-gray-500">{form.Description.length}/255 caracteres</small>
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Proveedor *
-                </label>
-                <select
-                  name="SupplierId"
-                  value={form.SupplierId}
-                  onChange={handleChange}
-                  disabled={saving} 
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
-                  required
-                >
-                  <option value="">Seleccione un proveedor...</option>
-                  {suppliers.map((supplier) => (
-                    <option key={supplier.id} value={supplier.id}>
-                      {supplier.legalName} ({supplier.cuit})
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Costo Mensual *
+                    </label>
+                    <input
+                      type="number"
+                      name="amount"
+                      value={form.amount}
+                      onChange={handleChange}
+                      disabled={saving}
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                      step="0.01"
+                      placeholder="0.00"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descripción *
-                </label>
-                <textarea
-                  name="Description"
-                  value={form.Description}
-                  onChange={handleChange}
-                  disabled={saving} 
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
-                  maxLength={255}
-                  rows={3}
-                  required
-                  placeholder="Descripción del servicio"
-                />
-                <small className="text-gray-500">{form.Description.length}/255 caracteres</small>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Costo Mensual *
-                </label>
-                <input
-                  type="number"
-                  name="amount" 
-                  value={form.amount}
-                  onChange={handleChange}
-                  disabled={saving} 
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
-                  min="0"
-                  step="0.01"
-                  required
-                  placeholder="0.00"
-                />
-              </div>
+                  <div className="flex justify-end gap-2 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => navigate("/proveedores/servicios")}
+                      className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-full transition duration-200 ease-in-out"
+                      disabled={saving}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold transition duration-200 ease-in-out disabled:opacity-50"
+                      disabled={saving}
+                    >
+                      {saving ? "Guardando..." : "Guardar Cambios"}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         </div>
