@@ -361,7 +361,7 @@ const ReadLoan: React.FC = () => {
                                   <button
                                     onClick={() =>
                                       navigate(
-                                        `/collections/edit/${installment.id}`
+                                        `/cobros/detalle/${installment.id}`
                                       )
                                     }
                                     className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
