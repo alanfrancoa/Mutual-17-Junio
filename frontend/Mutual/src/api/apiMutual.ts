@@ -978,6 +978,22 @@ export const apiMutual = {
     return response.data as ICollectionDetail;
   },
 
+  /* ----------------------- Obtener el cobro activo por id ----------------------- */
+  GetCollectionActiveById: async (id: number): Promise<ICollectionDetail> => {
+    const url = `https://localhost:7256/api/collection/active/${id}`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const data = response.data as { message?: string };
+      throw new Error(data?.message || "No se pudo obtener el cobro");
+    }
+    return response.data as ICollectionDetail;
+  },
+
   /* ----------------------- Actualizar cobro ----------------------- */
 
   UpdateCollection: async (id: number, data: { methodId: number; observations: string }) => {
