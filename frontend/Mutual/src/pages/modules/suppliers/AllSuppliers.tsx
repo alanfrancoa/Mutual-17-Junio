@@ -4,37 +4,74 @@ import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
 import { ISupplierList } from "../../../types/ISupplierList";
+import useAppToast from "../../../hooks/useAppToast";
 
 const AllSuppliers: React.FC = () => {
   const navigate = useNavigate();
+  const toast = useAppToast();
   const [search, setSearch] = useState("");
   const [suppliers, setSuppliers] = useState<ISupplierList[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const fetchSuppliers = async () => {
+    const fetchSuppliers = async () => {
+      try {
+        const data = await apiMutual.GetAllSuppliers();
+
+        const mapped = data.map((s: any) => ({
+          id: s.id,
+          cuit: s.cuit ?? "",
+          legalName: s.legalName ?? "",
+          address: s.address ?? "",
+          phone: s.phone ?? "",
+          email: s.email ?? "",
+          active: s.active,
+        }));
+        setSuppliers(mapped);
+      } catch (err: any) {
+        setSuppliers([]);
+        toast.showErrorToast({
+          title: "Error de carga",
+          message: err.message || "No se pudieron cargar los proveedores"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSuppliers();
+  }, []);
+
+  const handleToggleStatus = async (supplierId: number, currentStatus: boolean) => {
     try {
-      const data = await apiMutual.GetAllSuppliers();
+      await apiMutual.ChangeSupplierStatus(supplierId, !currentStatus);
+      
+      setSuppliers(prev => 
+        prev.map(s => 
+          s.id === supplierId 
+            ? { ...s, active: !currentStatus }
+            : s
+        )
+      );
 
-      const mapped = data.map((s: any) => ({
-        id: s.id,
-        cuit: s.cuit ?? "",
-        legalName: s.legalName ?? "",
-        address: s.address ?? "",
-        phone: s.phone ?? "",
-        email: s.email ?? "",
-        active: s.active,
-      }));
-      setSuppliers(mapped);
-    } catch (err: any) {
-      setSuppliers([]);
+      toast.showSuccessToast({
+        title: "Estado actualizado",
+        message: `Proveedor ${!currentStatus ? 'activado' : 'inactivado'} correctamente`
+      });
+    } catch (error: any) {
+      const errorMessage = 
+        error.response?.data?.message || 
+        error.response?.data?.mensaje || 
+        (typeof error.response?.data === 'string' ? error.response.data : null) ||
+        error.message || 
+        "Error desconocido";
 
-    } finally {
-      setLoading(false);
+      toast.showErrorToast({
+        title: "Error al cambiar estado",
+        message: errorMessage
+      });
     }
   };
-  fetchSuppliers();
-}, []);
+
   // Filtro por nombre, cuit, teléfono o email
   const filteredSuppliers = suppliers.filter(
     (s) =>
@@ -85,7 +122,7 @@ const AllSuppliers: React.FC = () => {
                 {filteredSuppliers.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="text-center py-4 text-gray-500">
-                      No se encontraron proveedores.
+                      {loading ? "Cargando proveedores..." : "No se encontraron proveedores."}
                     </td>
                   </tr>
                 ) : (
@@ -107,9 +144,7 @@ const AllSuppliers: React.FC = () => {
                           Editar
                         </button>
                         <button
-                          onClick={() => {
-                            navigate(`/proveedores/desactivar/${s.id}`);
-                          }}
+                          onClick={() => handleToggleStatus(s.id, s.active)}
                           className={(
                             s.active
                             ? "bg-red-600 hover:bg-red-700"
