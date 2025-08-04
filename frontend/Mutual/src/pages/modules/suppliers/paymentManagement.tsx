@@ -22,6 +22,9 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
   const [totalPaid, setTotalPaid] = useState(0);
   const [remainingBalance, setRemainingBalance] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [showCancelPrompt, setShowCancelPrompt] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [selectedPaymentId, setSelectedPaymentId] = useState<number | null>(null);
   const { showSuccessToast, showErrorToast } = useAppToast();
 
   useEffect(() => {
@@ -220,19 +223,22 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
   };
 
   const handleCancelPayment = async (paymentId: number) => {
-    const reason = window.prompt("Ingrese el motivo de cancelación:");
-    if (!reason || !reason.trim()) {
-      window.alert("Debe ingresar un motivo de cancelación");
-      return;
-    }
+    setSelectedPaymentId(paymentId);
+    setShowCancelPrompt(true);
+  };
 
-    if (!window.confirm("¿Está seguro que desea cancelar este pago?")) {
+  const confirmCancelPayment = async () => {
+    if (!cancelReason || !cancelReason.trim()) {
+      showErrorToast({
+        title: "Error",
+        message: "Debe ingresar un motivo de cancelación"
+      });
       return;
     }
 
     try {
       setLoading(true);
-      await apiMutual.CancelSupplierPayment(paymentId, reason.trim());
+      await apiMutual.CancelSupplierPayment(selectedPaymentId!, cancelReason.trim());
       
       await loadSavedPayments();
       showSuccessToast({
@@ -243,6 +249,11 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
       if (onPaymentsUpdate) {
         onPaymentsUpdate();
       }
+
+      // Limpiar el estado
+      setShowCancelPrompt(false);
+      setCancelReason("");
+      setSelectedPaymentId(null);
     } catch (error: any) {
       showErrorToast({
         title: "Error",
@@ -256,14 +267,12 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
   return (
     <div className="mt-8 border-t pt-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">Gestión de Pagos</h3>
+        <h3 className="text-lg font-bold text-blue-900 mb-4">Gestión de Pagos</h3>
         <div className="text-sm text-gray-600">
           <span className="font-medium">Total: ${invoiceTotal.toLocaleString()}</span> |
           <span className="font-medium text-green-600 ml-2">Pagado: ${totalPaid.toLocaleString()}</span> |
           <span className="font-medium text-orange-600 ml-2">Saldo: ${remainingBalance.toLocaleString()}</span>
         </div>
-
-        
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -322,14 +331,15 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
                   {payment.status === 'Activo' ? (
                     <button
                       onClick={() => handleCancelPayment(payment.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs"
+                      className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-full text-sm inline-flex items-center w-22"
                       disabled={loading}
                     >
+    
                       Cancelar
                     </button>
                   ) : (
                     <span className="text-gray-400 text-xs">Cancelado</span>
-                  )}
+                  )}  
                 </td>
               </tr>
             ))}
@@ -394,9 +404,10 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
                     onClick={() => removePaymentLine(index)}
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs"
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full text-sm inline-flex items-center w-22"
                     disabled={loading}
                   >
+                    <span className="mr-1">×</span>
                     Quitar
                   </button>
                 </td>
@@ -437,22 +448,35 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
       </div>
 
       {/* Botones de acción */}
-      <div className="flex justify-end items-center mt-4"> {/* Cambiado justify-between por justify-end */}
+      <div className="flex justify-between items-center mt-4">
         <div className="flex gap-2">
           {!invoicePaid && remainingBalance > 0 && (
+            // Botón Agregar línea
             <button
               type="button"
               onClick={addPaymentLine}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full font-semibold shadow transition w-full md:w-auto"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm inline-flex items-center"
               disabled={loading}
             >
               <span className="mr-1">+</span>
               Agregar línea
             </button>
           )}
+          {paymentLines.length > 0 && (
+            // Botón Limpiar Todo
+            <button
+              type="button"
+              onClick={() => setPaymentLines([])}
+              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-full text-sm inline-flex items-center"
+              disabled={loading}
+            >
+              <span className="mr-1">×</span>
+              Limpiar Todo
+            </button>
+          )}
         </div>
 
-        {/* Resumen y botones de guardado */}
+        {/* Resumen y botón de guardado */}
         {paymentLines.length > 0 && (
           <div className="flex items-center gap-4">
             <div className="text-sm text-gray-600">
@@ -460,24 +484,25 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
                 Total a registrar: ${paymentLines.reduce((sum, p) => sum + (Number(p.amount) || 0), 0).toLocaleString()}
               </span>
             </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setPaymentLines([])}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm"
-                disabled={loading}
-              >
-                Limpiar Todo
-              </button>
-              <button
-                type="button"
-                onClick={saveAllPayments}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm"
-                disabled={loading || paymentLines.length === 0}
-              >
-                {loading ? "Guardando..." : "Guardar Cambios"}
-              </button>
-            </div>
+            {/* Botón Guardar Cambios */}
+            <button
+              type="button"
+              onClick={saveAllPayments}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full text-sm inline-flex items-center"
+              disabled={loading || paymentLines.length === 0}
+            >
+              {loading ? (
+                <>
+                  <span className="mr-1">⌛</span>
+                  Guardando...
+                </>
+              ) : (
+                <>
+                  <span className="mr-1">✓</span>
+                  Guardar Cambios
+                </>
+              )}
+            </button>
           </div>
         )}
       </div>
@@ -501,6 +526,49 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
             <div className="text-yellow-800">
               <div className="font-medium">Factura con saldo cero</div>
               <div className="text-sm">El sistema actualizará automáticamente el estado a "Pagada"</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de cancelación */}
+      {showCancelPrompt && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Cancelar Pago</h3>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Motivo de cancelación
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={3}
+                placeholder="Ingrese el motivo de la cancelación..."
+                maxLength={250}
+              />
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCancelPrompt(false);
+                  setCancelReason("");
+                  setSelectedPaymentId(null);
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={confirmCancelPayment}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-full hover:bg-red-700"
+                disabled={loading}
+              >
+                {loading ? "Procesando..." : "Confirmar Cancelación"}
+              </button>
             </div>
           </div>
         </div>
