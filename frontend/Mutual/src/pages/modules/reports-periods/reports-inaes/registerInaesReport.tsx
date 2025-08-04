@@ -23,7 +23,7 @@ const RegisterReport: React.FC<RegisterReportProps> = ({ closedPeriods }) => {
     setMessage(null);
   };
 
-    // Obtener la lista de reportes al montar el componente
+  // Obtener la lista de reportes al montar el componente
   useEffect(() => {
     const fetchReports = async () => {
       try {
@@ -48,20 +48,31 @@ const RegisterReport: React.FC<RegisterReportProps> = ({ closedPeriods }) => {
       return;
     }
 
-    try{
+    try {
       await apiMutual.RegisterInaesReport(selectedPeriodId);
       setMessage({
         type: "info",
         text: "Reporte INAES registrado correctamente",
       });
-      // actualizar lsita de reportes
+      // actualizar lista de reportes
       const reports = await apiMutual.GetInaesReports();
-       setInaesReports(Array.isArray(reports) ? reports : []);
+      setInaesReports(Array.isArray(reports) ? reports : []);
     } catch (error: any) {
-      setMessage({
-        type: "error",
-        text: error.message || "Error al registrar el reporte.",
-      });
+      // Para axios o wrappers similares
+      if (error.response && error.response.status === 409) {
+        setMessage({
+          type: "error",
+          text:
+            error.response.data?.message ||
+            error.response.data?.mensaje ||
+            "El reporte ya existe para ese período.",
+        });
+      } else {
+        setMessage({
+          type: "error",
+          text: error.message || "Error al registrar el reporte.",
+        });
+      }
     }
   };
 
@@ -74,11 +85,10 @@ const RegisterReport: React.FC<RegisterReportProps> = ({ closedPeriods }) => {
       <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
         {message && (
           <div
-            className={`p-3 mb-4 rounded-md ${
-              message.type === "error"
+            className={`p-3 mb-4 rounded-md ${message.type === "error"
                 ? "bg-red-100 text-red-800"
                 : "bg-blue-100 text-blue-800"
-            }`}
+              }`}
             role="alert"
           >
             {message.text}
