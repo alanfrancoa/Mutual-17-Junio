@@ -177,22 +177,22 @@ const AccountingPeriods: React.FC = () => {
     }
   };
 
-  const handleExportLoansExcel = async (
+  const handleExportLoansPdf = async (
     accountingPeriodId: number,
     periodCode: string
   ) => {
     try {
-      const excelBlob = await apiMutual.ExportLoansToExcel(accountingPeriodId);
-      const url = window.URL.createObjectURL(excelBlob);
+      const pdfBlob = await apiMutual.ExportLoansReportPdf(accountingPeriodId);
+      const url = window.URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `ReportePrestamos_${periodCode}.xlsx`;
+      link.download = `ReportePrestamos_${periodCode}.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      alert("Error al descargar el Excel de préstamos");
+      alert("Error al descargar el reporte de préstamos");
     }
   };
 
@@ -379,7 +379,7 @@ const AccountingPeriods: React.FC = () => {
                                 <div className="flex justify-center items-center gap-2">
                                   <button
                                     onClick={() =>
-                                      handleExportLoansExcel(
+                                      handleExportLoansPdf(
                                         period.id,
                                         period.code
                                       )
