@@ -177,13 +177,19 @@ const Collections: React.FC = () => {
                                             <td className="px-4 py-2">{c.collectionDate}</td>
                                             <td className="px-4 py-2">{c.amount}</td>
                                             <td className="px-4 py-2">
-                                                <span className={
-                                                    c.status === "Activo" ? "text-green-600" :
-                                                        c.status === "Cancelado" ? "text-red-600" :
-                                                            "text-yellow-600"
-                                                }>
-                                                    {c.status}
-                                                </span>
+                                                {c.status === "Activo" ? (
+                                                    <span className="bg-green-100 text-green-800 rounded-full px-3 py-0.5 text-sm font-semibold">
+                                                        Activo
+                                                    </span>
+                                                ) : c.status === "Cancelado" ? (
+                                                    <span className="bg-red-100 text-red-700 rounded-full px-3 py-0.5 text-sm font-semibold">
+                                                        Cancelado
+                                                    </span>
+                                                ) : (
+                                                    <span className="bg-gray-200 text-gray-800 rounded-full px-3 py-0.5 text-sm font-semibold">
+                                                        {c.status}
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="px-4 py-2 flex gap-2">
                                                 <button
