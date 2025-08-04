@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
+import useAppToast from "../../../hooks/useAppToast";
 
 interface Invoice {
   Id: number;
@@ -18,25 +19,26 @@ interface Invoice {
 
 const InvoicesPage: React.FC = () => {
   const navigate = useNavigate();
+  const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast();
+  
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [processing, setProcessing] = useState(false); 
 
   const userRole = useMemo(
     () =>
       (sessionStorage.getItem("userRole") || "Consultor") as
-        | "administrador"
-        | "gestor"
-        | "consultor",
+        | "Administrador"
+        | "Gestor"
+        | "Consultor",
     []
   );
 
   const fetchInvoices = async () => {
     setLoading(true);
-    setError(null);
     try {
       const data = await apiMutual.GetInvoices();
       const mappedData = data.map((i: any) => ({
@@ -52,12 +54,13 @@ const InvoicesPage: React.FC = () => {
       }));
       setInvoices(mappedData);
     } catch (err: any) {
-      // Mejor manejo del error:
-      let msg = "No se encontraron facturas.";
-      if (err?.response?.data?.mesagge) msg = err.response.data.mesagge;
-      else if (err?.message) msg = err.message;
-      setError(msg);
+      console.error("Error al cargar facturas:", err);
       setInvoices([]);
+      
+      showErrorToast({
+        title: "Error de carga",
+        message: err.response?.data?.message || err.message || "No se pudieron cargar las facturas"
+      });
     } finally {
       setLoading(false);
     }
@@ -83,17 +86,41 @@ const InvoicesPage: React.FC = () => {
     invoiceId: number,
     currentStatus: boolean
   ) => {
-    if (userRole !== "administrador" && userRole !== "gestor") {
-      alert("No tiene permisos para realizar esta acción.");
+    if (userRole !== "Administrador" && userRole !== "Gestor") {
+      showWarningToast({
+        title: "Acceso denegado",
+        message: "No tiene permisos para realizar esta acción"
+      });
       return;
     }
+
+    setProcessing(true);
+
     try {
       await apiMutual.UpdateInvoiceStatus(invoiceId, !currentStatus);
-      fetchInvoices();
+      
+      showSuccessToast({
+        title: "Estado actualizado",
+        message: `Factura marcada como ${!currentStatus ? 'pagada' : 'pendiente'} correctamente`
+      });
+      
+      await fetchInvoices();
     } catch (error: any) {
-      setError(
-        error.mensaje || "No se pudo actualizar el estado de la factura."
-      );
+      console.error("Error al actualizar estado:", error);
+      
+      const errorMessage = 
+        error.response?.data?.message || 
+        error.response?.data?.mensaje || 
+        (typeof error.response?.data === 'string' ? error.response.data : null) ||
+        error.message || 
+        "No se pudo actualizar el estado de la factura";
+
+      showErrorToast({
+        title: "Error al actualizar estado",
+        message: errorMessage
+      });
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -142,10 +169,6 @@ const InvoicesPage: React.FC = () => {
             />
           </div>
 
-          {error && !loading && (
-            <div className="text-center text-red-500 py-4">{error}</div>
-          )}
-
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -183,7 +206,7 @@ const InvoicesPage: React.FC = () => {
                       Cargando facturas...
                     </td>
                   </tr>
-                ) : filteredInvoices.length === 0 && !error ? (
+                ) : filteredInvoices.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="text-center py-4 text-gray-500">
                       No se encontraron facturas.
@@ -233,24 +256,7 @@ const InvoicesPage: React.FC = () => {
                         >
                           Ver/Editar
                         </button>
-                        {(userRole === "administrador" ||
-                          userRole === "gestor") && (
-                          <button
-                            onClick={() => handleAskTogglePaidStatus(invoice)}
-                            className={
-                              invoice.Paid
-                                ? "text-yellow-600 hover:text-yellow-900"
-                                : "text-green-600 hover:text-green-900"
-                            }
-                            title={
-                              invoice.Paid
-                                ? "Marcar como Pendiente"
-                                : "Marcar como Pagada"
-                            }
-                          >
-                            {invoice.Paid ? "Anular Pago" : "Pagar"}
-                          </button>
-                        )}
+                        
                       </td>
                     </tr>
                   ))
@@ -260,41 +266,7 @@ const InvoicesPage: React.FC = () => {
           </div>
         </div>
       </main>
-      {/* Modal para doble verificación de cambio de estado */}
-      {modalOpen && selectedInvoice && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">
-              {selectedInvoice.Paid
-                ? "¿Anular pago de la factura?"
-                : "¿Marcar factura como pagada?"}
-            </h3>
-            <p className="mb-6 text-gray-600">
-              ¿Está seguro que desea{" "}
-              {selectedInvoice.Paid ? "anular el pago" : "marcar como pagada"}{" "}
-              la factura <b>{selectedInvoice.InvoiceNumber}</b>?
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={handleCancelModal}
-                className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleConfirmTogglePaidStatus}
-                className={
-                  selectedInvoice.Paid
-                    ? "px-4 py-2 rounded bg-yellow-600 text-white hover:bg-yellow-700"
-                    : "px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
-                }
-              >
-                Confirmar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 };
