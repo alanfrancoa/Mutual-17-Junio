@@ -114,113 +114,130 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
   };
 
   const saveAllPayments = async () => {
-
-    try {
-      if (paymentLines.length === 0) {
-        window.alert("No hay pagos para guardar");
-        return;
-      }
-
-      // Validaciones individuales
-      for (let i = 0; i < paymentLines.length; i++) {
-        const payment = paymentLines[i];
-
-        if (!payment.methodId) {
-          window.alert(`Línea ${i + 1}: Debe seleccionar un método de pago`);
-          return;
-        }
-
-        if (!payment.amount || payment.amount <= 0) {
-          window.alert(`Línea ${i + 1}: El monto debe ser mayor a cero`);
-          return;
-        }
-
-        if (!payment.receiptNumber.trim()) {
-          window.alert(`Línea ${i + 1}: El número de recibo es obligatorio`);
-          return;
-        }
-
-        if (!payment.paymentDate) {
-          window.alert(`Línea ${i + 1}: La fecha de pago es obligatoria`);
-          return;
-        }
-      }
-
-      const currentRemainingBalance = invoiceTotal - totalPaid; // Usar el totalPaid calculado solo con activos
-      const totalNewPayments = paymentLines.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-      
-      if (totalNewPayments > currentRemainingBalance) {
-        window.alert(`El total de pagos ($${totalNewPayments.toLocaleString()}) no puede exceder el saldo pendiente ($${currentRemainingBalance.toLocaleString()})`);
-        return;
-      }
-
-      setLoading(true);
-
-      let savedCount = 0;
-      for (let i = 0; i < paymentLines.length; i++) {
-        const payment = paymentLines[i];
-        try {
-          console.log(`Guardando pago ${i + 1}:`, payment);
-          await apiMutual.RegisterSupplierPayment(payment);
-          savedCount++;
-        } catch (paymentError: any) {
-          console.error(`Error en pago ${i + 1}:`, paymentError);
-
-          let errorMessage = `Error en línea ${i + 1}: `;
-
-          if (paymentError.response?.data?.message) {
-            errorMessage += paymentError.response.data.message;
-          } else if (paymentError.message) {
-            errorMessage += paymentError.message;
-          } else {
-            errorMessage += "Error desconocido";
-          }
-
-          if (savedCount > 0) {
-            errorMessage = `Se guardaron ${savedCount} pagos correctamente. ${errorMessage}`;
-            await loadSavedPayments();
-            setPaymentLines(paymentLines.slice(savedCount));
-          }
-
-          showErrorToast({
-            title: "Error",
-            message: errorMessage
-          });
-          return;
-        }
-      }
-
-      setPaymentLines([]);
-      await loadSavedPayments();
-      showSuccessToast({
-        title: "Éxito",
-        message: `${savedCount} pagos registrados correctamente`
-      });
-
-      if (onPaymentsUpdate) {
-        onPaymentsUpdate();
-      }
-    } catch (error: any) {
-      console.error("Error general al guardar pagos:", error);
-
-      let errorMessage = "Error al registrar pagos: ";
-
-      if (error.response?.data?.message) {
-        errorMessage += error.response.data.message;
-      } else if (error.message) {
-        errorMessage += error.message;
-      } else {
-        errorMessage += "Error desconocido";
-      }
-
+  try {
+    if (paymentLines.length === 0) {
       showErrorToast({
         title: "Error",
-        message: errorMessage
+        message: "No hay pagos para guardar"
       });
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
+
+    // Validaciones individuales
+    for (let i = 0; i < paymentLines.length; i++) {
+      const payment = paymentLines[i];
+
+      if (!payment.methodId) {
+        showErrorToast({
+          title: "Error de validación",
+          message: `Línea ${i + 1}: Debe seleccionar un método de pago`
+        });
+        return;
+      }
+
+      if (!payment.amount || payment.amount <= 0) {
+        showErrorToast({
+          title: "Error de validación",
+          message: `Línea ${i + 1}: El monto debe ser mayor a cero`
+        });
+        return;
+      }
+
+      if (!payment.receiptNumber.trim()) {
+        showErrorToast({
+          title: "Error de validación",
+          message: `Línea ${i + 1}: El número de recibo es obligatorio`
+        });
+        return;
+      }
+
+      if (!payment.paymentDate) {
+        showErrorToast({
+          title: "Error de validación",
+          message: `Línea ${i + 1}: La fecha de pago es obligatoria`
+        });
+        return;
+      }
+    }
+
+    const currentRemainingBalance = invoiceTotal - totalPaid;
+    const totalNewPayments = paymentLines.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    
+    if (totalNewPayments > currentRemainingBalance) {
+      showErrorToast({
+        title: "Error de validación",
+        message: `El total de pagos ($${totalNewPayments.toLocaleString()}) no puede exceder el saldo pendiente ($${currentRemainingBalance.toLocaleString()})`
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    let savedCount = 0;
+    for (let i = 0; i < paymentLines.length; i++) {
+      const payment = paymentLines[i];
+      try {
+        console.log(`Guardando pago ${i + 1}:`, payment);
+        await apiMutual.RegisterSupplierPayment(payment);
+        savedCount++;
+      } catch (paymentError: any) {
+        console.error(`Error en pago ${i + 1}:`, paymentError);
+
+        let errorMessage = `Error en línea ${i + 1}: `;
+
+        if (paymentError.response?.data?.message) {
+          errorMessage += paymentError.response.data.message;
+        } else if (paymentError.message) {
+          errorMessage += paymentError.message;
+        } else {
+          errorMessage += "Error desconocido";
+        }
+
+        if (savedCount > 0) {
+          errorMessage = `Se guardaron ${savedCount} pagos correctamente. ${errorMessage}`;
+          await loadSavedPayments();
+          setPaymentLines(paymentLines.slice(savedCount));
+        }
+
+        showErrorToast({
+          title: "Error",
+          message: errorMessage
+        });
+        return;
+      }
+    }
+
+    setPaymentLines([]);
+    await loadSavedPayments();
+    showSuccessToast({
+      title: "Éxito",
+      message: `${savedCount} pagos registrados correctamente`
+    });
+
+    if (onPaymentsUpdate) {
+      onPaymentsUpdate();
+    }
+  } catch (error: any) {
+    console.error("Error general al guardar pagos:", error);
+
+    let errorMessage = "Error al registrar pagos: ";
+
+    if (error.response?.data?.message) {
+      errorMessage += error.response.data.message;
+    } else if (error.message) {
+      errorMessage += error.message;
+    } else {
+      errorMessage += "Error desconocido";
+    }
+
+    showErrorToast({
+      title: "Error",
+      message: errorMessage
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleCancelPayment = async (paymentId: number) => {
     setSelectedPaymentId(paymentId);
