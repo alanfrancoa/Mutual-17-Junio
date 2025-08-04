@@ -4,10 +4,12 @@ import Sidebar from "../../dashboard/components/Sidebar";
 import Header from "../../dashboard/components/Header";
 import { apiMutual } from "../../../api/apiMutual";
 import { ISupplierUpdate } from "../../../types/ISupplierRegister";
+import useAppToast from "../../../hooks/useAppToast";
 
 const EditSupplier: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const toast = useAppToast();
 
   const [form, setForm] = useState<ISupplierUpdate>({
     id: 0,
@@ -19,13 +21,15 @@ const EditSupplier: React.FC = () => {
     Active: true,
   });
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
     const fetchSupplier = async () => {
       if (!id) {
         setLoading(false);
-        setMessage({ type: "error", text: "ID de proveedor no válido" });
+        toast.showErrorToast({
+          title: "Error de ID",
+          message: "ID de proveedor no válido",
+        });
         return;
       }
       try {
@@ -40,7 +44,10 @@ const EditSupplier: React.FC = () => {
           Active: supplier.active ?? true,
         });
       } catch (error: any) {
-        setMessage({ type: "error", text: error.message });
+        toast.showErrorToast({
+          title: "Error de carga",
+          message: error.message || "No se pudo cargar el proveedor",
+        });
       } finally {
         setLoading(false);
       }
@@ -55,14 +62,19 @@ const EditSupplier: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage(null);
 
     if (!/^\d{2}-\d{8}-\d{1}$/.test(form.CUIT)) {
-      setMessage({ type: "error", text: "El CUIT debe tener el formato 20-12345678-3" });
+      toast.showErrorToast({
+        title: "CUIT inválido",
+        message: "El CUIT debe tener el formato 20-12345678-3",
+      });
       return;
     }
     if (!form.LegalName || !form.Address || !form.Phone || !form.Email) {
-      setMessage({ type: "error", text: "Todos los campos son obligatorios" });
+      toast.showErrorToast({
+        title: "Campos incompletos",
+        message: "Todos los campos son obligatorios",
+      });
       return;
     }
     setLoading(true);
@@ -74,10 +86,23 @@ const EditSupplier: React.FC = () => {
         Phone: form.Phone,
         Email: form.Email,
       });
-      setMessage({ type: "success", text: "Proveedor actualizado correctamente" });
+      toast.showSuccessToast({
+        title: "Proveedor actualizado",
+        message: "Proveedor actualizado correctamente",
+      });
       setTimeout(() => navigate("/proveedores"), 1200);
     } catch (error: any) {
-      setMessage({ type: "error", text: error.message });
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.mensaje ||
+        (typeof error.response?.data === "string" ? error.response.data : null) ||
+        error.message ||
+        "Error desconocido";
+
+      toast.showErrorToast({
+        title: "Error al actualizar proveedor",
+        message: errorMessage,
+      });
     } finally {
       setLoading(false);
     }
@@ -86,22 +111,10 @@ const EditSupplier: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Sidebar />
-     <Header hasNotifications={true} loans={[]}  />
+      <Header hasNotifications={true} loans={[]} />
       <div className="flex flex-col items-center py-8 flex-1">
         <div className="w-full max-w-2xl bg-white rounded-lg shadow p-8">
           <h2 className="text-2xl font-bold mb-6">Editar Proveedor</h2>
-          {message && (
-            <div
-              className={`p-3 rounded mb-4 text-sm font-medium ${
-                message.type === "success"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-              role="alert"
-            >
-              {message.text}
-            </div>
-          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               name="CUIT"
@@ -145,7 +158,9 @@ const EditSupplier: React.FC = () => {
               className="w-full border px-3 py-2 rounded"
             />
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Estado
+              </label>
               <input
                 type="text"
                 value={form.Active ? "Activo" : "Inactivo"}
