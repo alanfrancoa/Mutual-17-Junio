@@ -38,7 +38,6 @@ const CreateSupplier: React.FC = () => {
     return;
   }
 
-  // Validación de campos obligatorios
   if (!form.LegalName || !form.Address || !form.Phone || !form.Email) {
     toast.showErrorToast({
       title: "Campos incompletos",
@@ -56,7 +55,6 @@ const CreateSupplier: React.FC = () => {
     });
     setTimeout(() => navigate("/proveedores"), 1500);
   } catch (error: any) {
-    // ✅ CORRECCIÓN: Extraer el mensaje correctamente del objeto
     const errorMessage = 
       error.response?.data?.message || 
       error.response?.data?.mensaje || 
