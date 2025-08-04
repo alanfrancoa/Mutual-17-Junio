@@ -7,6 +7,7 @@ import {
 import { apiMutual } from "../../../../api/apiMutual";
 import { PeriodType } from "../../../../types/accountablePeriods/IAccountingPeriod";
 import { IAccountingPeriodList } from "../../../../types/accountablePeriods/IAccountingPeriodList";
+import { start } from "repl";
 
 type PeriodFormType = PeriodType;
 
@@ -43,6 +44,7 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
     const today = new Date();
 
     const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
     let endDate: Date;
 
     if (periodType === "Trimestral") {
@@ -56,18 +58,20 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
       endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     }
 
-    const formatToISOString = (date: Date): string => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
-    };
+    const format = (date: Date) =>
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
     return {
-      startDate: formatToISOString(startDate),
-      endDate: formatToISOString(endDate),
+      startDate: format(startDate),
+      endDate: format(endDate),
     };
   };
+
+  // Utiliza esta función para parsear la fecha correctamente
+  function parseLocalDate(dateStr: string) {
+    const [year, month, day] = dateStr.split("-");
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
 
   useEffect(() => {
     const { startDate, endDate } = calculateDates(form.periodType);
@@ -248,7 +252,7 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
             <option value="Trimestral">Trimestral</option>
           </select>
         </div>
-        {/* <div>
+        <div>
           <label
             htmlFor="startDateDisplay"
             className="block text-sm font-medium text-gray-700 mb-1"
@@ -258,17 +262,21 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
           <input
             type="text"
             id="startDateDisplay"
-            value={new Date(form.startDate).toLocaleDateString("es-AR", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            })}
+            value={
+              form.startDate
+                ? parseLocalDate(form.startDate).toLocaleDateString("es-AR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })
+                : ""
+            }
             className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-gray-700 cursor-not-allowed"
             readOnly
           />
-        </div> */}
+        </div>
 
-        {/* <div>
+        <div>
           <label
             htmlFor="endDateDisplay"
             className="block text-sm font-medium text-gray-700 mb-1"
@@ -278,15 +286,19 @@ const CreateAccountingPeriodForm: React.FC<CreateAccountingPeriodFormProps> = ({
           <input
             type="text"
             id="endDateDisplay"
-            value={new Date(form.endDate).toLocaleDateString("es-AR", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            })}
+            value={
+              form.endDate
+                ? parseLocalDate(form.endDate).toLocaleDateString("es-AR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })
+                : ""
+            }
             className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-gray-700 cursor-not-allowed"
             readOnly
           />
-        </div> */}
+        </div>
 
         <div className="flex justify-end gap-2 pt-4">
           <button
