@@ -4,9 +4,12 @@ import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
 import { ISupplierRegister } from "../../../types/ISupplierRegister";
+import useAppToast from "../../../hooks/useAppToast";
+
 
 const CreateSupplier: React.FC = () => {
   const navigate = useNavigate();
+  const toast = useAppToast();
   const [form, setForm] = useState<ISupplierRegister>({
     CUIT: "",
     LegalName: "",
@@ -16,8 +19,6 @@ const CreateSupplier: React.FC = () => {
   });
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -26,22 +27,47 @@ const CreateSupplier: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   setLoading(true);
-  setMessage(null);
 
+  // Validación de CUIT
   if (!/^\d{2}-\d{8}-\d{1}$/.test(form.CUIT)) {
-    setMessage({ type: "error", text: "El CUIT debe tener el formato 20-12345678-3" });
+    toast.showErrorToast({
+      title: "CUIT inválido",
+      message: "El CUIT debe tener el formato 20-12345678-3",
+    });
+    setLoading(false);
     return;
   }
+
+  // Validación de campos obligatorios
   if (!form.LegalName || !form.Address || !form.Phone || !form.Email) {
-    setMessage({ type: "error", text: "Todos los campos son obligatorios" });
+    toast.showErrorToast({
+      title: "Campos incompletos",
+      message: "Todos los campos son obligatorios",
+    });
+    setLoading(false);
     return;
   }
+
   try {
     const response = await apiMutual.RegisterSupplier(form);
-    setMessage({ type: "success", text: response.mensaje });
+    toast.showSuccessToast({
+      title: "Proveedor creado",
+      message: response.mensaje,
+    });
     setTimeout(() => navigate("/proveedores"), 1500);
   } catch (error: any) {
-    setMessage({ type: "error", text: error.message });
+    // ✅ CORRECCIÓN: Extraer el mensaje correctamente del objeto
+    const errorMessage = 
+      error.response?.data?.message || 
+      error.response?.data?.mensaje || 
+      (typeof error.response?.data === 'string' ? error.response.data : null) ||
+      error.message || 
+      "Error desconocido";
+
+    toast.showErrorToast({
+      title: "Error al crear proveedor",
+      message: errorMessage
+    });
   } finally {
     setLoading(false);
   }
@@ -54,19 +80,6 @@ const CreateSupplier: React.FC = () => {
       <div className="flex flex-col items-center py-8 flex-1">
         <div className="w-full max-w-2xl bg-white rounded-lg shadow p-8">
           <h2 className="text-2xl font-bold text-blue-900 mb-6">Nuevo Proveedor</h2>
-
-          {message && (
-            <div
-              className={`p-3 rounded mb-4 text-sm font-medium ${
-                message.type === "success"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-              role="alert"
-            >
-              {message.text}
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
