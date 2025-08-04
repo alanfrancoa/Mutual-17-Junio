@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
@@ -44,10 +44,10 @@ const AllSuppliers: React.FC = () => {
   const handleToggleStatus = async (supplierId: number, currentStatus: boolean) => {
     try {
       await apiMutual.ChangeSupplierStatus(supplierId, !currentStatus);
-      
-      setSuppliers(prev => 
-        prev.map(s => 
-          s.id === supplierId 
+
+      setSuppliers(prev =>
+        prev.map(s =>
+          s.id === supplierId
             ? { ...s, active: !currentStatus }
             : s
         )
@@ -58,11 +58,11 @@ const AllSuppliers: React.FC = () => {
         message: `Proveedor ${!currentStatus ? 'activado' : 'desactivado'} correctamente`
       });
     } catch (error: any) {
-      const errorMessage = 
-        error.response?.data?.message || 
-        error.response?.data?.mensaje || 
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.mensaje ||
         (typeof error.response?.data === 'string' ? error.response.data : null) ||
-        error.message || 
+        error.message ||
         "Error desconocido";
 
       toast.showErrorToast({
@@ -75,26 +75,26 @@ const AllSuppliers: React.FC = () => {
   // Filtro por nombre, cuit, teléfono o email
   const filteredSuppliers = suppliers.filter(
     (s) =>
-     s.legalName.toLowerCase().includes(search.toLowerCase()) ||
-        s.cuit.includes(search) ||
-        (s.address && s.address.toLowerCase().includes(search.toLowerCase())) ||
-        (s.phone && s.phone.includes(search)) ||
-        (s.email && s.email.toLowerCase().includes(search.toLowerCase()))
-    );
+      s.legalName.toLowerCase().includes(search.toLowerCase()) ||
+      s.cuit.includes(search) ||
+      (s.address && s.address.toLowerCase().includes(search.toLowerCase())) ||
+      (s.phone && s.phone.includes(search)) ||
+      (s.email && s.email.toLowerCase().includes(search.toLowerCase()))
+  );
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Sidebar />
-     <Header hasNotifications={true} loans={[]}  />
+      <Header hasNotifications={true} loans={[]} />
       <div className="flex flex-col items-center py-8 flex-1">
         <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-blue-900">Proveedores</h2>
             <button
               onClick={() => navigate("/proveedores/crear")}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full font-semibold shadow transition w-full md:w-auto"
             >
-              Nuevo Proveedor
+              + Nuevo Proveedor
             </button>
           </div>
           <div className="mb-4">
@@ -118,7 +118,7 @@ const AllSuppliers: React.FC = () => {
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                 </tr>
               </thead>
-               <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-gray-200">
                 {filteredSuppliers.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="text-center py-4 text-gray-500">
@@ -126,33 +126,31 @@ const AllSuppliers: React.FC = () => {
                     </td>
                   </tr>
                 ) : (
-                 filteredSuppliers.map((s) => (
+                  filteredSuppliers.map((s) => (
                     <tr key={s.id}>
                       <td className="px-4 py-2">{s.id}</td>
                       <td className="px-4 py-2">{s.legalName}</td>
                       <td className="px-4 py-2">{s.cuit}</td>
                       <td className="px-4 py-2">{s.phone}</td>
                       <td className="px-4 py-2">{s.email}</td>
-                      <td className="px-4 py-2">
-                        <button
-                          onClick={() => {
-                            console.log("editar proveedor:", s.id);
-                            navigate(`/proveedores/editar/${s.id}`);
-                          }}
-                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm mr-2"
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => handleToggleStatus(s.id, s.active)}
-                          className={(
-                            s.active
-                            ? "bg-red-600 hover:bg-red-700"
-                            : "bg-green-600 hover:bg-green-700") +
-                          " text-white px-3 py-1 rounded text-sm"
-                          }>
-                          {s.active ? "Desactivar" : "Activar"}
-                        </button>
+                      <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
+                        <div className="space-x-2 flex justify-end">
+                          <button
+                            onClick={() => navigate(`/proveedores/editar/${s.id}`)}
+                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => handleToggleStatus(s.id, s.active)}
+                            className={`${s.active
+                              ? "bg-red-500 hover:bg-red-600"
+                              : "bg-green-500 hover:bg-green-600"
+                              } text-white px-6 py-2 rounded-full transition text-xs font-medium w-24`}
+                          >
+                            {s.active ? "Desactivar" : "Activar"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
