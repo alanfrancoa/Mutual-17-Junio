@@ -49,9 +49,13 @@ const Sidebar: React.FC = () => {
           <HomeIcon className="h-5 w-5" />
           Inicio
         </a>
+        <hr className="my-2 border-blue-900" />
         {/* vista segun roles consultor, gestor y admin sidebar */}
         {userRole === "Consultor" ? (
           <>
+            <div className="mb-2 text-xs text-blue-300 font-semibold uppercase px-2">
+              Reportes
+            </div>
             <a
               href="/periodos"
               className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
@@ -61,6 +65,9 @@ const Sidebar: React.FC = () => {
           </>
         ) : (
           <>
+            <div className="mb-2 text-xs text-blue-300 font-semibold uppercase px-2">
+              Gestión
+            </div>
             <a
               href="/asociados"
               className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
@@ -68,7 +75,6 @@ const Sidebar: React.FC = () => {
               <UsersIcon className="h-5 w-5" />
               Asociados
             </a>
-
             <div className="relative">
               <button
                 onClick={toggleSuppliersMenu}
@@ -108,7 +114,6 @@ const Sidebar: React.FC = () => {
                 </div>
               )}
             </div>
-
             <a
               href="/cobros"
               className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
@@ -123,49 +128,57 @@ const Sidebar: React.FC = () => {
               <BanknotesIcon className="h-5 w-5" />
               Prestamos
             </a>
+            <hr className="my-2 border-blue-900" />
+            <div className="mb-2 text-xs text-blue-300 font-semibold uppercase px-2">
+              Reportes
+            </div>
             <a
               href="/periodos"
               className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
             >
               <ChartBarIcon className="h-5 w-5" /> Reportes Y Periodos
             </a>
-
             {/* Solo Administrador: Acceso Administrador */}
             {userRole === "Administrador" && (
-              <div className="relative">
-                <button
-                  onClick={toggleAdminMenu}
-                  className="flex items-center justify-between w-full gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
-                >
-                  <div className="flex items-center gap-3">
-                    <Cog6ToothIcon className="h-5 w-5" />
-                    Acceso Administrador
-                  </div>
-                  <ChevronDownIcon
-                    className={`h-5 w-5 transition-transform duration-300 ${
-                      isAdminMenuOpen ? "rotate-0" : "-rotate-90"
-                    }`}
-                  />
-                </button>
-                {isAdminMenuOpen && (
-                  <div className="pl-8 pt-2 pb-1 space-y-1">
-                    <a
-                      href="/usuarios"
-                      className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
-                    >
-                      <UserGroupIcon className="h-4 w-4" />
-                      Usuarios
-                    </a>
-                    <a
-                      href="/auditoria"
-                      className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
-                    >
-                      <ClipboardDocumentListIcon className="h-4 w-4" />{" "}
-                      Auditorías
-                    </a>
-                  </div>
-                )}
-              </div>
+              <>
+                <hr className="my-2 border-blue-900" />
+                <div className="mb-2 text-xs text-blue-300 font-semibold uppercase px-2">
+                  Administrador
+                </div>
+                <div className="relative">
+                  <button
+                    onClick={toggleAdminMenu}
+                    className="flex items-center justify-between w-full gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Cog6ToothIcon className="h-5 w-5" />
+                      Acceso Administrador
+                    </div>
+                    <ChevronDownIcon
+                      className={`h-5 w-5 transition-transform duration-300 ${
+                        isAdminMenuOpen ? "rotate-0" : "-rotate-90"
+                      }`}
+                    />
+                  </button>
+                  {isAdminMenuOpen && (
+                    <div className="pl-8 pt-2 pb-1 space-y-1">
+                      <a
+                        href="/usuarios"
+                        className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                      >
+                        <UserGroupIcon className="h-4 w-4" />
+                        Usuarios
+                      </a>
+                      <a
+                        href="/auditoria"
+                        className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                      >
+                        <ClipboardDocumentListIcon className="h-4 w-4" /> Auditorías
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </>
         )}
