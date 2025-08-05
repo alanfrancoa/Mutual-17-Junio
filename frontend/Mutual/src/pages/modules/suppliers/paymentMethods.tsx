@@ -185,9 +185,9 @@ const PaymentMethods: React.FC = () => {
         <main className="flex-1 p-6 bg-gray-100">
           <div className="flex justify-start mb-4">
             <button
-              onClick={() => navigate("/proveedores")}
+              onClick={() => navigate("/proveedores/servicios")}
               className="text-gray-600 hover:text-gray-800 flex items-center"
-              aria-label="Volver a Proveedores"
+              aria-label="Volver a Servicios"
             >
               <ChevronLeftIcon className="h-5 w-5" />
               <span className="ml-1">Volver</span>

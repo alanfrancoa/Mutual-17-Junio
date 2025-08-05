@@ -12,7 +12,8 @@ const PAGE_SIZE = 10;
 
 const AllServicesPage: React.FC = () => {
   const navigate = useNavigate();
-  const userRole = (sessionStorage.getItem("userRole") || "Consultor") as UserRole;
+  const userRole = (sessionStorage.getItem("userRole") ||
+    "Consultor") as UserRole;
   const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast();
   const [search, setSearch] = useState("");
   const [services, setServices] = useState<ServiceList[]>([]);
@@ -20,7 +21,9 @@ const AllServicesPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalService, setModalService] = useState<ServiceList | null>(null);
-  const [modalAction, setModalAction] = useState<"activar" | "desactivar" | null>(null);
+  const [modalAction, setModalAction] = useState<
+    "activar" | "desactivar" | null
+  >(null);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -36,16 +39,17 @@ const AllServicesPage: React.FC = () => {
             Supplier: s.proveedor,
           }));
           setServices(mapped);
-        } else if (data && typeof data === 'object' && 'mensaje' in data) {
+        } else if (data && typeof data === "object" && "mensaje" in data) {
           setServices([]);
         } else {
           setServices([]);
         }
       } catch (error: any) {
-        setServices([])
+        setServices([]);
         let errorMessage = "Error interno al cargar los servicios.";
         if (error?.response?.data) {
-          errorMessage = error.response.data.message ||
+          errorMessage =
+            error.response.data.message ||
             error.response.data.mensaje ||
             error.response.data.errorDetails ||
             errorMessage;
@@ -54,7 +58,7 @@ const AllServicesPage: React.FC = () => {
         }
         showErrorToast({
           title: "Error del servidor.",
-          message: errorMessage
+          message: errorMessage,
         });
       } finally {
         setLoading(false);
@@ -63,17 +67,19 @@ const AllServicesPage: React.FC = () => {
     fetchServices();
   }, []);
 
-  const filteredServices = services.filter((service) =>
-    (service.Id?.toString() || "").includes(search) ||
-    (service.Supplier || "").toLowerCase().includes(search.toLowerCase()) ||
-    (service.Active ? "activo" : "inactivo").includes(search.toLowerCase())
+  const filteredServices = services.filter(
+    (service) =>
+      (service.Id?.toString() || "").includes(search) ||
+      (service.Supplier || "").toLowerCase().includes(search.toLowerCase()) ||
+      (service.Active ? "activo" : "inactivo").includes(search.toLowerCase())
   );
 
   const handleEditClick = (service: ServiceList) => {
     if (userRole !== "Administrador" && userRole !== "Gestor") {
       showWarningToast({
         title: "Acceso denegado",
-        message: 'Solo usuarios con rol "Administrador" o "Gestor" pueden editar un servicio.'
+        message:
+          'Solo usuarios con rol "Administrador" o "Gestor" pueden editar un servicio.',
       });
       return;
     }
@@ -84,7 +90,8 @@ const AllServicesPage: React.FC = () => {
     if (userRole !== "Administrador" && userRole !== "Gestor") {
       showWarningToast({
         title: "Acceso denegado",
-        message: 'Solo usuarios con rol "Administrador" o "Gestor" pueden cambiar el estado.'
+        message:
+          'Solo usuarios con rol "Administrador" o "Gestor" pueden cambiar el estado.',
       });
       return;
     }
@@ -99,25 +106,27 @@ const AllServicesPage: React.FC = () => {
       await apiMutual.UpdateServiceStatus(modalService.Id);
       showSuccessToast({
         title: "Estado actualizado",
-        message: `Servicio ${modalAction === 'desactivar' ? 'desactivado' : 'activado'} correctamente`
+        message: `Servicio ${
+          modalAction === "desactivar" ? "desactivado" : "activado"
+        } correctamente`,
       });
-      setServices(prevServices =>
-        prevServices.map(s =>
-          s.Id === modalService.Id
-            ? { ...s, Active: !s.Active }
-            : s
+      setServices((prevServices) =>
+        prevServices.map((s) =>
+          s.Id === modalService.Id ? { ...s, Active: !s.Active } : s
         )
       );
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message ||
         error.response?.data?.mensaje ||
-        (typeof error.response?.data === 'string' ? error.response.data : null) ||
+        (typeof error.response?.data === "string"
+          ? error.response.data
+          : null) ||
         error.message ||
         "Error desconocido";
       showErrorToast({
         title: `Error al ${modalAction} servicio`,
-        message: errorMessage
+        message: errorMessage,
       });
     } finally {
       setModalOpen(false);
@@ -162,34 +171,26 @@ const AllServicesPage: React.FC = () => {
                     className="w-full md:w-72 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <button
-                  onClick={() => navigate("/proveedores/servicios/crear/")}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full font-semibold shadow transition w-full md:w-auto"
-                >
-                  + Nuevo Servicio
-                </button>
-              </div>
-
-              {/* Botones de navegación adicionales */}
-              <div className="flex flex-wrap gap-2 mb-4">
-                <button
-                  onClick={() => navigate("/proveedores/facturas")}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-full font-semibold text-sm"
-                >
-                  Facturas
-                </button>
-                <button
-                  onClick={() => navigate("/proveedores/metodos-pago")}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-full font-semibold text-sm"
-                >
-                  Medios de pago
-                </button>
-                <button
-                  onClick={() => navigate("/proveedores/tipos-servicio")}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-full font-semibold text-sm"
-                >
-                  Tipos de servicio
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => navigate("/proveedores/servicios/crear/")}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full font-semibold shadow transition"
+                  >
+                    + Nuevo Servicio
+                  </button>
+                  <button
+                    onClick={() => navigate("/proveedores/metodos-pago")}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold shadow transition"
+                  >
+                    Medios de pago
+                  </button>
+                  <button
+                    onClick={() => navigate("/proveedores/tipos-servicio")}
+                    className="bg-blue-500 hover:bg-blue-700 text-white px-6 py-2 rounded-full font-semibold shadow transition"
+                  >
+                    Tipos de servicio
+                  </button>
+                </div>
               </div>
 
               {loading ? (
@@ -223,8 +224,12 @@ const AllServicesPage: React.FC = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {paginatedServices.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="text-center py-8 text-gray-400">
-                          No se encontraron servicios que coincidan con la búsqueda.
+                        <td
+                          colSpan={6}
+                          className="text-center py-8 text-gray-400"
+                        >
+                          No se encontraron servicios que coincidan con la
+                          búsqueda.
                         </td>
                       </tr>
                     ) : (
@@ -247,17 +252,19 @@ const AllServicesPage: React.FC = () => {
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap">
                             <span
-                              className={`px-3 py-1 rounded-full text-xs font-semibold ${service.Active
+                              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                service.Active
                                   ? "bg-green-100 text-green-800"
                                   : "bg-red-100 text-red-800"
-                                }`}
+                              }`}
                             >
                               {service.Active ? "Activo" : "Inactivo"}
                             </span>
                           </td>
                           <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
                             <div className="space-x-2 flex justify-end">
-                              {(userRole === "Administrador" || userRole === "Gestor") && (
+                              {(userRole === "Administrador" ||
+                                userRole === "Gestor") && (
                                 <button
                                   onClick={() => handleEditClick(service)}
                                   className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
@@ -265,13 +272,15 @@ const AllServicesPage: React.FC = () => {
                                   Editar
                                 </button>
                               )}
-                              {(userRole === "Administrador" || userRole === "Gestor") && (
+                              {(userRole === "Administrador" ||
+                                userRole === "Gestor") && (
                                 <button
                                   onClick={() => handleToggleStatus(service)}
-                                  className={`px-6 py-2 rounded-full transition text-xs font-medium text-white ${service.Active
+                                  className={`px-6 py-2 rounded-full transition text-xs font-medium text-white ${
+                                    service.Active
                                       ? "bg-red-500 hover:bg-red-600"
                                       : "bg-green-500 hover:bg-green-600"
-                                    }`}
+                                  }`}
                                 >
                                   {service.Active ? "Desactivar" : "Activar"}
                                 </button>
@@ -322,20 +331,26 @@ const AllServicesPage: React.FC = () => {
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
             <h2 className="text-lg font-semibold mb-4">Confirmar acción</h2>
             <p className="mb-6">
-              ¿Está seguro que desea {modalAction} el servicio "<b>{modalService.Description}</b>"?
+              ¿Está seguro que desea {modalAction} el servicio "
+              <b>{modalService.Description}</b>"?
             </p>
             <div className="flex justify-end gap-2">
               <button
                 className="px-4 py-2 text-white rounded-full bg-gray-500 hover:bg-gray-400"
-                onClick={() => { setModalOpen(false); setModalService(null); setModalAction(null); }}
+                onClick={() => {
+                  setModalOpen(false);
+                  setModalService(null);
+                  setModalAction(null);
+                }}
               >
                 Cancelar
               </button>
               <button
-                className={`px-4 py-2 rounded-full text-white ${modalAction === "desactivar"
+                className={`px-4 py-2 rounded-full text-white ${
+                  modalAction === "desactivar"
                     ? "bg-red-500 hover:bg-red-600"
                     : "bg-green-500 hover:bg-green-600"
-                  }`}
+                }`}
                 onClick={confirmToggleStatus}
               >
                 Confirmar
