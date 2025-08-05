@@ -34,6 +34,7 @@ const Login = () => {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showForgotPassModal, setShowForgotPassModal] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const toast = useAppToast(); // Inicializa el hook
 
   useEffect(() => {
@@ -41,17 +42,6 @@ const Login = () => {
       navigate("/dashboard", { replace: true });
     }
   }, [navigate]);
-
-  useEffect(() => {
-    if (username) {
-      // Verifica si por Username ya aceptó los términos y condiciones y la política de privacidad
-      const termsAccepted = checkUserAcceptance(username, "terms");
-      const privacyAccepted = checkUserAcceptance(username, "privacy");
-
-      if (!termsAccepted) setShowTermsModal(true);
-      if (!privacyAccepted) setShowPrivacyModal(true);
-    }
-  }, [username]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,11 +140,43 @@ const Login = () => {
               />
             </div>
 
+            {/* Checkbox de aceptación */}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="acceptTerms"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="mr-2"
+                required
+              />
+              <label htmlFor="acceptTerms" className="text-sm">
+                Acepto los{" "}
+                <button
+                  type="button"
+                  className="underline text-blue-600 hover:text-blue-800"
+                  onClick={() => setShowTermsModal(true)}
+                >
+                  Términos y Condiciones
+                </button>{" "}
+                y la{" "}
+                <button
+                  type="button"
+                  className="underline text-blue-600 hover:text-blue-800"
+                  onClick={() => setShowPrivacyModal(true)}
+                >
+                  Política de Privacidad
+                </button>
+              </label>
+            </div>
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !acceptedTerms}
               className={`w-full ${
-                loading ? "bg-blue-300" : "bg-blue-400 hover:bg-blue-500"
+                loading || !acceptedTerms
+                  ? "bg-blue-300 cursor-not-allowed"
+                  : "bg-blue-400 hover:bg-blue-500"
               } text-white py-2 rounded-full font-semibold transition`}
             >
               {loading ? "Iniciando sesión..." : "Iniciar sesión"}
