@@ -466,7 +466,18 @@ export const apiMutual = {
         data?.mensaje || "No se pudieron obtener los tipos de servicio"
       );
     }
-    return response.data as IServiceType[];
+
+    // Si la respuesta es un objeto con mensaje (caso vacio)
+    if (
+      response.data &&
+      typeof response.data === "object" &&
+      "mensaje" in response.data
+    ) {
+      return [];
+    }
+
+    // si no hay datos, devolver array vacío
+    return Array.isArray(response.data) ? response.data : [];
   },
 
   /* ----------------------- Obtener servicio por ID ----------------------- */
