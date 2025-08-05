@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../../dashboard/components/Sidebar";
 import Header from "../../dashboard/components/Header";
 import { apiMutual } from "../../../api/apiMutual";
+import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import useAppToast from "../../../hooks/useAppToast";
 
 interface ICollectionMethod {
   id: number;
@@ -11,16 +13,21 @@ interface ICollectionMethod {
   isActive: boolean;
 }
 
+interface NewCollectionMethod {
+  code: string;
+  name: string;
+  wasEdited?: boolean;
+}
+
 const PaymentMethodsCollection: React.FC = () => {
   const navigate = useNavigate();
   const [methods, setMethods] = useState<ICollectionMethod[]>([]);
-  const [filteredMethods, setFilteredMethods] = useState<ICollectionMethod[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [newMethod, setNewMethod] = useState({ code: "", name: "" });
+  const [newMethods, setNewMethods] = useState<NewCollectionMethod[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [editedRow, setEditedRow] = useState<Partial<ICollectionMethod>>({});
+  const { showSuccessToast, showErrorToast } = useAppToast();
 
   useEffect(() => {
     const userRole = sessionStorage.getItem("userRole");
@@ -34,249 +41,413 @@ const PaymentMethodsCollection: React.FC = () => {
     fetchMethods();
   }, []);
 
-  useEffect(() => {
-    const filtered = methods.filter(
-      (method) =>
-        method.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        method.code.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredMethods(filtered);
-  }, [methods, searchTerm]);
-
   const fetchMethods = async () => {
-    setLoading(true);
+    setDataLoading(true);
     try {
       const data = await apiMutual.GetCollectionMethods();
-      setMethods(data);
-      setError("");
+      if (Array.isArray(data)) {
+        setMethods(data);
+      } else {
+        setMethods([]);
+        showErrorToast({ message: "Formato de datos incorrecto" });
+      }
     } catch (err: any) {
-      setError(err.message || "Error al cargar métodos de cobro");
       setMethods([]);
+      showErrorToast({ message: err.message || "Error al cargar métodos de cobro" });
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+  const handleAddRow = () => {
+    setNewMethods([...newMethods, { code: "", name: "", wasEdited: false }]);
+  };
+
+  const handleNewRowChange = (
+    index: number,
+    field: keyof NewCollectionMethod,
+    value: string | boolean
+  ) => {
+    setNewMethods(prevRows => {
+      const updatedRows = [...prevRows];
+      if (field === "wasEdited") {
+        updatedRows[index][field] = Boolean(value);
+      } else {
+        updatedRows[index][field] = value as string;
+      }
+      updatedRows[index].wasEdited = true;
+      return updatedRows;
+    });
+  };
+
+  const removeMethodLine = (index: number) => {
+    const row = newMethods[index];
+    if (row.wasEdited) {
+      showErrorToast({ message: "No puedes quitar una línea que ya fue editada" });
+      return;
+    }
+    setNewMethods(newMethods.filter((_, i) => i !== index));
+  };
+
+  const handleSaveNewMethods = async () => {
+    try {
+      if (newMethods.length === 0) {
+        showErrorToast({ message: "No hay métodos de cobro para guardar" });
+        return;
+      }
+
+      // Validaciones
+      for (let i = 0; i < newMethods.length; i++) {
+        const method = newMethods[i];
+        
+        if (!method.code || !method.name) {
+          showErrorToast({ message: `Línea ${i + 1}: Completa todos los campos` });
+          return;
+        }
+      }
+
+      // Validar códigos únicos
+      const codes = newMethods.map(m => m.code.trim().toLowerCase());
+      const duplicates = codes.filter((item, index) => codes.indexOf(item) !== index);
+      if (duplicates.length > 0) {
+        showErrorToast({ message: "Hay códigos duplicados en las líneas" });
+        return;
+      }
+
+      setLoading(true);
+      
+      for (const method of newMethods) {
+        await apiMutual.RegisterCollectionMethod(method.code.trim(), method.name.trim());
+      }
+
+      setNewMethods([]);
+      await fetchMethods();
+      showSuccessToast({
+        title: "Métodos guardados",
+        message: "Los métodos de cobro se registraron correctamente"
+      });
+    } catch (err: any) {
+      showErrorToast({ message: err.message || "Error al agregar métodos de cobro" });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateMethod = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-
-    if (!newMethod.code.trim() || !newMethod.name.trim()) {
-      setError("Todos los campos son obligatorios");
-      return;
-    }
-
-    try {
-      await apiMutual.RegisterCollectionMethod(newMethod.code.trim(), newMethod.name.trim());
-      setSuccess("Método de cobro registrado correctamente");
-      setNewMethod({ code: "", name: "" });
-      setShowModal(false);
-      await fetchMethods();
-    } catch (err: any) {
-      setError(err.message || "Error al registrar método de cobro");
-    }
-  };
-
   const handleToggleMethodStatus = async (id: number, name: string, currentStatus: boolean) => {
-    const action = currentStatus ? "desactivar" : "activar";
-    if (!window.confirm(`¿Está seguro de ${action} el método "${name}"?`)) {
-      return;
-    }
-
     try {
+      setLoading(true);
       if (currentStatus) {
         await apiMutual.DeleteCollectionMethod(id);
-        setSuccess("Método de cobro desactivado correctamente");
+        showSuccessToast({ message: `Método "${name}" desactivado correctamente` });
       } else {
         await apiMutual.ActivateCollectionMethod(id);
-        setSuccess("Método de cobro activado correctamente");
+        showSuccessToast({ message: `Método "${name}" activado correctamente` });
       }
       await fetchMethods();
     } catch (err: any) {
-      setError(err.message || `Error al ${action} método de cobro`);
+      showErrorToast({ message: err.message || "Error al cambiar el estado del método" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveEdit = async (index: number) => {
+    try {
+      const method = methods[index];
+
+      if (!editedRow.name?.trim() || !editedRow.code?.trim()) {
+        showErrorToast({ message: "El nombre y código no pueden estar vacíos" });
+        return;
+      }
+
+      setLoading(true);
+      await apiMutual.UpdateCollectionMethod(method.id, {
+        name: editedRow.name ?? method.name,
+        code: editedRow.code ?? method.code,
+      });
+
+      await fetchMethods();
+      setEditIndex(null);
+      setEditedRow({});
+      showSuccessToast({ message: "Método de cobro actualizado correctamente" });
+    } catch (err: any) {
+      showErrorToast({ message: err.message || "Error al actualizar el método de cobro" });
+    } finally {
+      setLoading(false);
     }
   };
 
   const userRole = sessionStorage.getItem("userRole");
   const canModify = userRole === "Administrador" || userRole === "Gestor";
 
-  return (
-    <div className="min-h-screen bg-gray-100 flex">
-      <Sidebar />
-      <div className="flex-1" style={{ marginLeft: "18rem" }}>
-     <Header hasNotifications={true} loans={[]}  />
-        <div className="flex flex-col items-center py-8">
-          <div className="w-full max-w-6xl bg-white rounded-lg shadow p-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Métodos de Cobro</h2>
-              {canModify && (
-                <button
-                  onClick={() => setShowModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-                >
-                  Agregar Método
-                </button>
-              )}
-            </div>
-
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {success}
-              </div>
-            )}
-
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Buscar por código o nombre..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
-              />
-            </div>
-
-            {loading ? (
-              <div className="text-center py-8">
-                <div className="text-lg text-gray-600">Cargando métodos de cobro...</div>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full table-auto border-collapse border border-gray-300">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="border border-gray-300 px-4 py-3 text-left font-medium text-gray-700">ID</th>
-                      <th className="border border-gray-300 px-4 py-3 text-left font-medium text-gray-700">Código</th>
-                      <th className="border border-gray-300 px-4 py-3 text-left font-medium text-gray-700">Nombre</th>
-                      <th className="border border-gray-300 px-4 py-3 text-center font-medium text-gray-700">Estado</th>
-                      {canModify && (
-                        <th className="border border-gray-300 px-4 py-3 text-center font-medium text-gray-700">Acciones</th>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredMethods.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={canModify ? 5 : 4}
-                          className="text-center py-8 text-gray-500"
-                        >
-                          {searchTerm ? "No se encontraron métodos de cobro" : "No hay métodos de cobro registrados"}
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredMethods.map((method, index) => (
-                        <tr
-                          key={method.id}
-                          className={`hover:bg-gray-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-25"}`}
-                        >
-                          <td className="border border-gray-300 px-4 py-3">{method.id}</td>
-                          <td className="border border-gray-300 px-4 py-3 font-medium">{method.code}</td>
-                          <td className="border border-gray-300 px-4 py-3">{method.name}</td>
-                          <td className="border border-gray-300 px-4 py-3 text-center">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                method.isActive
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {method.isActive ? "Activo" : "Inactivo"}
-                            </span>
-                          </td>
-                          {canModify && (
-                            <td className="border border-gray-300 px-4 py-3 text-center">
-                              <button
-                                onClick={() => handleToggleMethodStatus(method.id, method.name, method.isActive)}
-                                className={`px-3 py-1 rounded text-sm ${
-                                  method.isActive
-                                    ? "bg-red-500 hover:bg-red-600 text-white"
-                                    : "bg-green-500 hover:bg-green-600 text-white"
-                                }`}
-                              >
-                                {method.isActive ? "Desactivar" : "Activar"}
-                              </button>
-                            </td>
-                          )}
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            <div className="flex justify-end mt-6">
-              <button
-                onClick={() => navigate("/cobros")}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-              >
-                Volver a Cobros
-              </button>
+  if (dataLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex">
+        <Sidebar />
+        <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
+          <Header hasNotifications={true} loans={[]} />
+          <div className="flex flex-col items-center justify-center py-8 flex-1">
+            <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8 text-center">
+              <div className="text-lg text-gray-600">Cargando métodos de cobro...</div>
             </div>
           </div>
         </div>
       </div>
+    );
+  }
 
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-bold mb-4">Agregar Método de Cobro</h3>
-
-            <form onSubmit={handleCreateMethod}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Código</label>
-                <select
-      value={newMethod.code}
-      onChange={(e) => setNewMethod({ ...newMethod, code: e.target.value })}
-      className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
-      required
-    >
-      <option value="">Seleccione un código...</option>
-      <option value="Automatico">Automático</option>
-      <option value="Transferencia">Transferencia</option>
-      <option value="Efectivo">Efectivo</option>
-    </select>
-  </div>
-  <div className="mb-4">
-    <label className="block text-sm font-medium mb-2">Nombre</label>
-    <input
-      type="text"
-      value={newMethod.name}
-      onChange={(e) => setNewMethod({ ...newMethod, name: e.target.value })}
-      className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
-      required
-    />
-  </div>
-  <div className="flex justify-end gap-2">
-    <button
-      type="button"
-      onClick={() => {
-        setShowModal(false);
-        setNewMethod({ code: "", name: "" });
-        setError("");
-      }}
-      className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-    >
-      Cancelar
-    </button>
-    <button
-      type="submit"
-      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-    >
-      Guardar
-    </button>
-  </div>
-</form>
+  return (
+    <div className="min-h-screen bg-gray-100 flex">
+      <Sidebar />
+      <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
+        <Header hasNotifications={true} loans={[]} />
+        
+        <main className="flex-1 p-6 bg-gray-100">
+          <div className="flex justify-start mb-4">
+            <button
+              onClick={() => navigate("/cobros")}
+              className="text-gray-600 hover:text-gray-800 flex items-center"
+              aria-label="Volver a Cobros"
+            >
+              <ChevronLeftIcon className="h-5 w-5" />
+              <span className="ml-1">Volver</span>
+            </button>
           </div>
-        </div>
-      )}
+          
+          <h1 className="text-2xl font-bold text-blue-900 mb-4">
+            Métodos de Cobro
+          </h1>
+
+          <div className="flex-1 w-full">
+            <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
+                <div className="flex gap-2 w-full md:w-auto">
+                  {/* Espacio para futuras funcionalidades de búsqueda */}
+                </div>
+                {canModify && (
+                  <button
+                    onClick={handleAddRow}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full font-semibold shadow transition w-full md:w-auto"
+                    disabled={loading}
+                  >
+                    + Agregar Método
+                  </button>
+                )}
+              </div>
+
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Nombre
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Código
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {/* Métodos existentes */}
+                  {methods.map((method, index) => (
+                    <tr key={method.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {editIndex === index ? (
+                          <input
+                            type="text"
+                            value={editedRow.name ?? method.name}
+                            onChange={(e) =>
+                              setEditedRow({ ...editedRow, name: e.target.value })
+                            }
+                            className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                            disabled={loading}
+                            maxLength={255}
+                          />
+                        ) : (
+                          method.name
+                        )}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {editIndex === index ? (
+                          <select
+                            value={editedRow.code ?? method.code}
+                            onChange={(e) =>
+                              setEditedRow({ ...editedRow, code: e.target.value })
+                            }
+                            className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                            disabled={loading}
+                          >
+                            <option value="">Seleccione un código...</option>
+                            <option value="Transferencia">Transferencia</option>
+                            <option value="Automatico">Automático</option>
+                            <option value="Efectivo">Efectivo</option>
+                          </select>
+                        ) : (
+                          method.code
+                        )}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            method.isActive
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {method.isActive ? "Activo" : "Inactivo"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
+                        <div className="space-x-2 flex justify-end">
+                          {editIndex === index ? (
+                            <>
+                              <button
+                                onClick={() => handleSaveEdit(index)}
+                                className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
+                                disabled={loading}
+                              >
+                                Guardar
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditIndex(null);
+                                  setEditedRow({});
+                                }}
+                                className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
+                                disabled={loading}
+                              >
+                                Cancelar
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              {canModify && (
+                                <button
+                                  onClick={() => {
+                                    setEditIndex(index);
+                                    setEditedRow(method);
+                                  }}
+                                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
+                                  disabled={loading}
+                                >
+                                  Editar
+                                </button>
+                              )}
+                              {canModify && (
+                                <button
+                                  onClick={() => handleToggleMethodStatus(method.id, method.name, method.isActive)}
+                                  className={`${
+                                    method.isActive
+                                      ? "bg-red-500 hover:bg-red-600"
+                                      : "bg-green-500 hover:bg-green-600"
+                                  } text-white px-6 py-2 rounded-full transition text-xs font-medium`}
+                                  disabled={loading}
+                                >
+                                  {method.isActive ? "Desactivar" : "Activar"}
+                                </button>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {/* Líneas nuevas */}
+                  {newMethods.map((method, idx) => (
+                    <tr key={`new-${idx}`} className="bg-blue-50 hover:bg-blue-100">
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <input
+                          type="text"
+                          value={method.name}
+                          onChange={(e) => handleNewRowChange(idx, "name", e.target.value)}
+                          className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Nombre del método"
+                          disabled={loading}
+                          maxLength={255}
+                        />
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <select
+                          value={method.code}
+                          onChange={(e) => handleNewRowChange(idx, "code", e.target.value)}
+                          className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                          disabled={loading}
+                        >
+                          <option value="">Seleccione un código...</option>
+                          <option value="Transferencia">Transferencia</option>
+                          <option value="Automatico">Automático</option>
+                          <option value="Efectivo">Efectivo</option>
+                        </select>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                          Nuevo
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
+                        <div className="space-x-2 flex justify-end">
+                          <button
+                            onClick={() => removeMethodLine(idx)}
+                            className={`bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full transition text-xs font-medium ${
+                              method.wasEdited ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
+                            disabled={loading || method.wasEdited}
+                            title={method.wasEdited ? "No puedes quitar una línea que ya fue editada" : ""}
+                          >
+                            Quitar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {/* Fila vacía */}
+                  {methods.length === 0 && newMethods.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="text-center py-8 text-gray-400">
+                        No hay métodos de cobro registrados. Haz clic en "Agregar Método" para comenzar.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+
+              {/* Botones de acción para nuevos métodos */}
+              {newMethods.length > 0 && (
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-2">
+                  <div className="flex justify-center items-center gap-4 flex-1">
+                    <span className="text-gray-700 font-medium">
+                      {newMethods.length} método(s) por guardar
+                    </span>
+                  </div>
+                  <div className="flex gap-2 md:w-auto w-full">
+                    <button
+                      onClick={() => setNewMethods([])}
+                      className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-full transition duration-200 ease-in-out flex-1 md:flex-initial"
+                      disabled={loading}
+                    >
+                      Limpiar Todo
+                    </button>
+                    <button
+                      onClick={handleSaveNewMethods}
+                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold transition duration-200 ease-in-out disabled:opacity-50 flex-1 md:flex-initial"
+                      disabled={loading}
+                    >
+                      {loading ? "Guardando..." : "Guardar Cambios"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

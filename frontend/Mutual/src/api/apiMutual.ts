@@ -982,6 +982,25 @@ export const apiMutual = {
     return response.data as { message: string };
   },
 
+  /* ----------------------- Actualizar metodo de cobro ----------------------- */
+  UpdateCollectionMethod: async (id: number, data: { name: string; code: string }): Promise<{ message: string }> => {
+    const url = `https://localhost:7256/api/collection-method/${id}`;
+    const response = await Fetcher.put(url, {
+      Name: data.name,    // ✅ Cambiar a PascalCase
+      Code: data.code     // ✅ Cambiar a PascalCase
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+    });
+    if (response.status && response.status >= 400) {
+      const responseData = response.data as { message?: string };
+      throw new Error(responseData?.message || "No se pudo actualizar el método de cobro");
+    }
+    return response.data as { message: string };
+  },
+
   /* ----------------------- Activar metodo de cobro ----------------------- */
 
   ActivateCollectionMethod: async (
