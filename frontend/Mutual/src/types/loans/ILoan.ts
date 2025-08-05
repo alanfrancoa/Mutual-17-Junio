@@ -16,5 +16,5 @@ export interface IInstallmentInfo {
   installmentNumber: number;
   dueDate: string;
   amount: number;
-  collected: "Pagado" | "Pendiente";
+  collected: "Pagado" | "Pendiente" | "Atrasado";
 }
