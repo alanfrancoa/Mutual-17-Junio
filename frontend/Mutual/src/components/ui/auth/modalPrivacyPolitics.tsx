@@ -86,7 +86,7 @@ const PrivacyModal = ({ isOpen, onClose, onAccept }: PrivacyModalProps) => {
           <h3 className="border-b pb-1 mb-2">7. Derechos del Titular</h3>
           <ul>
             <li>Acceso, rectificación, portabilidad, oposición, supresión</li>
-            <li>Solicitudes: <a href="mailto:derechosarco@mutual17junio.org" className="text-blue-600">derechosarco@mutual17junio.org</a></li>
+            <li>Solicitudes: <a href="mailto:notificaciones17dejunio@gmail.com" className="text-blue-600">notificaciones17dejunio@gmail.com</a></li>
           </ul>
           <hr />
           <h3 className="border-b pb-1 mb-2">8. Transparencia Algorítmica</h3>
