@@ -5,6 +5,7 @@ import Header from "../../dashboard/components/Header";
 import { apiMutual } from "../../../api/apiMutual";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import useAppToast from "../../../hooks/useAppToast";
+import PaymentMethodStatusModal from '../../../components/ui/paymentMethodsStatusModal';
 
 interface NewPaymentMethod {
   name: string;
@@ -29,19 +30,21 @@ const PAGE_SIZE = 10;
 const PaymentMethods: React.FC = () => {
   const navigate = useNavigate();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [newPaymentMethods, setNewPaymentMethods] = useState<
-    NewPaymentMethod[]
-  >([]);
+  const [newPaymentMethods, setNewPaymentMethods] = useState<NewPaymentMethod[]>([]);
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editedRow, setEditedRow] = useState<Partial<PaymentMethod>>({});
   const { showSuccessToast, showErrorToast } = useAppToast();
   const [search, setSearch] = useState("");
-  const [estadoFiltro, setEstadoFiltro] = useState<
-    "Todos" | "Activo" | "Inactivo"
-  >("Todos");
+  const [estadoFiltro, setEstadoFiltro] = useState<"Todos" | "Activo" | "Inactivo">("Todos");
   const [page, setPage] = useState(1);
+
+  // Estados para el modal
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
+  const [statusModalAction, setStatusModalAction] = useState<'deactivate' | 'reactivate'>('deactivate');
+  const [modalError, setModalError] = useState<string | null>(null);
 
   const PAYMENT_METHOD_OPTIONS: PaymentMethodOption[] = [
     { label: "Transferencia", value: "Transferencia", code: "Transferencia" },
@@ -91,6 +94,13 @@ const PaymentMethods: React.FC = () => {
     } finally {
       setDataLoading(false);
     }
+  };
+
+  const handleOpenStatusModal = (method: PaymentMethod) => {
+    setSelectedMethod(method);
+    setStatusModalAction(method.active ? 'deactivate' : 'reactivate');
+    setModalError(null);
+    setIsStatusModalOpen(true);
   };
 
   const addPaymentMethodLine = () => {
@@ -185,17 +195,13 @@ const PaymentMethods: React.FC = () => {
       setLoading(true);
       await apiMutual.PaymentMethodState(id);
       await loadPaymentMethods();
+      setIsStatusModalOpen(false);
       showSuccessToast({ message: "Estado actualizado correctamente" });
     } catch (error: any) {
       if (error.message.includes("500")) {
-        showErrorToast({
-          title: "Error del servidor",
-          message: "Error interno del servidor",
-        });
+        setModalError("Error interno del servidor");
       } else {
-        showErrorToast({
-          message: error.message || "Error al cambiar el estado",
-        });
+        setModalError(error.message || "Error al cambiar el estado");
       }
     } finally {
       setLoading(false);
@@ -451,9 +457,7 @@ const PaymentMethods: React.FC = () => {
                                       Editar
                                     </button>
                                     <button
-                                      onClick={() =>
-                                        togglePaymentMethodStatus(method.id)
-                                      }
+                                      onClick={() => handleOpenStatusModal(method)}
                                       className={`${
                                         method.active
                                           ? "bg-red-500 hover:bg-red-600"
@@ -597,6 +601,23 @@ const PaymentMethods: React.FC = () => {
             </div>
           </div>
         </main>
+       {/* Agregar el modal aquí */}
+        <PaymentMethodStatusModal
+          isOpen={isStatusModalOpen}
+          onClose={() => {
+            setIsStatusModalOpen(false);
+            setModalError(null);
+          }}
+          onConfirm={() => {
+            if (selectedMethod) {
+              togglePaymentMethodStatus(selectedMethod.id);
+            }
+          }}
+          paymentMethodName={selectedMethod?.name || ''}
+          action={statusModalAction}
+          modalError={modalError}
+          isLoading={loading}
+        />
       </div>
     </div>
   );
