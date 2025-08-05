@@ -6,7 +6,7 @@ import { apiMutual } from "../../../api/apiMutual";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
 import useAppToast from "../../../hooks/useAppToast";
 
-const roles = ["Admin", "Gestor", "Consultor"];
+const roles = ["Administrador", "Gestor", "Consultor"];
 
 const EditUser: React.FC = () => {
   const navigate = useNavigate();
