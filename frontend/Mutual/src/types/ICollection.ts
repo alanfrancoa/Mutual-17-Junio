@@ -38,6 +38,7 @@ export interface ICollectionDetail {
     dueDate: string;
     loanId: number;
   };
+  observations?: string;
   auditInfo: {
     createdAt: string;
     createdBy: string;

@@ -4,6 +4,8 @@ import Sidebar from "../../dashboard/components/Sidebar";
 import Header from "../../dashboard/components/Header";
 import { apiMutual } from "../../../api/apiMutual";
 import { ICollectionDetail, ICollectionMethod } from "../../../types/ICollection";
+import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import useAppToast from "../../../hooks/useAppToast";
 
 const EditCollection: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -16,8 +18,7 @@ const EditCollection: React.FC = () => {
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
+    const { showSuccessToast, showErrorToast } = useAppToast();
 
     useEffect(() => {
         const userRole = sessionStorage.getItem("userRole");
@@ -30,7 +31,6 @@ const EditCollection: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
-            setError("");
             try {
                 const [detail, meths] = await Promise.all([
                     apiMutual.GetCollectionById(Number(id)),
@@ -42,14 +42,14 @@ const EditCollection: React.FC = () => {
                     methodId: meths.find(m => m.name === detail.method)?.id?.toString() || "",
                     observations: "",
                 });
-            } catch {
-                setError("Error al cargar el cobro");
+            } catch (err: any) {
+                showErrorToast({ message: err.message || "Error al cargar el cobro" });
             } finally {
                 setLoading(false);
             }
         };
         fetchData();
-    }, [id]);
+    }, [id, showErrorToast]);
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLTextAreaElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -58,23 +58,24 @@ const EditCollection: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!form.methodId) {
-            setError("Seleccione un método de cobro");
+            showErrorToast({ message: "Seleccione un método de cobro" });
             return;
         }
 
         setSaving(true);
-        setError("");
-        setSuccess("");
 
         try {
             await apiMutual.UpdateCollection(Number(id), {
                 methodId: Number(form.methodId),
                 observations: form.observations.trim(),
             });
-            setSuccess("Cobro actualizado correctamente");
-            setTimeout(() => navigate("/collections"), 1500);
+            showSuccessToast({ 
+                title: "Cobro actualizado",
+                message: "El cobro se ha actualizado correctamente" 
+            });
+            setTimeout(() => navigate("/cobros"), 1500);
         } catch (err: any) {
-            setError(err.message || "Error al actualizar el cobro");
+            showErrorToast({ message: err.message || "Error al actualizar el cobro" });
         } finally {
             setSaving(false);
         }
@@ -84,10 +85,12 @@ const EditCollection: React.FC = () => {
         return (
             <div className="min-h-screen bg-gray-100 flex">
                 <Sidebar />
-                <div className="flex-1" style={{ marginLeft: "18rem" }}>
-     <Header hasNotifications={true} loans={[]}  />
-                    <div className="flex justify-center items-center h-64">
-                        <div className="text-lg">Cargando...</div>
+                <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
+                    <Header hasNotifications={true} loans={[]} />
+                    <div className="flex flex-col items-center justify-center py-8 flex-1">
+                        <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8 text-center">
+                            <div className="text-lg text-gray-600">Cargando información del cobro...</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -96,90 +99,128 @@ const EditCollection: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 flex">
+            {/* Sidebar fija a la izquierda */}
             <Sidebar />
-            <div className="flex-1" style={{ marginLeft: "18rem" }}>
-     <Header hasNotifications={true} loans={[]}  />
-                <div className="flex flex-col items-center py-8">
-                    <div className="w-full max-w-lg bg-white rounded-lg shadow p-8">
-                        <h2 className="text-2xl font-bold mb-6">Editar Cobro</h2>
-
-                        {error && (
-                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                                {error}
-                            </div>
-                        )}
-
-                        {success && (
-                            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                                {success}
-                            </div>
-                        )}
-
-                        {collection && (
-                            <div className="mb-6 p-4 bg-gray-50 rounded">
-                                <h3 className="font-semibold mb-2">Información del Cobro</h3>
-                                <p><strong>Comprobante:</strong> {collection.receiptNumber}</p>
-                                <p><strong>Asociado:</strong> {collection.associate.name}</p>
-                                <p><strong>Monto:</strong> ${collection.amount}</p>
-                                <p><strong>Fecha:</strong> {collection.collectionDate}</p>
-                            </div>
-                        )}
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Método de cobro *</label>
-                                <select
-                                    name="methodId"
-                                    value={form.methodId}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
-                                    disabled={saving}
-                                >
-                                    <option value="">Seleccione un método...</option>
-                                    {methods.map(m => (
-                                        <option key={m.id} value={m.id}>
-                                            {m.name} ({m.code})
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Observaciones</label>
-                                <textarea
-                                    name="observations"
-                                    value={form.observations}
-                                    onChange={handleChange}
-                                    className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-blue-500"
-                                    maxLength={255}
-                                    rows={3}
-                                    disabled={saving}
-                                    placeholder="Observaciones adicionales (opcional)"
-                                />
-                                <small className="text-gray-500">{form.observations.length}/255 caracteres</small>
-                            </div>
-
-                            <div className="flex justify-end gap-2 pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => navigate("/collections")}
-                                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors"
-                                    disabled={saving}
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors disabled:bg-blue-400"
-                                    disabled={saving}
-                                >
-                                    {saving ? "Guardando..." : "Actualizar Cobro"}
-                                </button>
-                            </div>
-                        </form>
+            
+            {/* Contenido principal desplazado a la derecha */}
+            <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
+                {/* Header */}
+                <Header hasNotifications={true} loans={[]} />
+                
+                {/* Main Content */}
+                <main className="flex-1 p-6 bg-gray-100">
+                    {/* Botón volver */}
+                    <div className="flex justify-start mb-4">
+                        <button
+                            onClick={() => navigate("/cobros")}
+                            className="text-gray-600 hover:text-gray-800 flex items-center"
+                            aria-label="Volver a Cobros"
+                        >
+                            <ChevronLeftIcon className="h-5 w-5" />
+                            <span className="ml-1">Volver</span>
+                        </button>
                     </div>
-                </div>
+                    
+                    {/* Título */}
+                    <h1 className="text-2xl font-bold text-blue-900 mb-4">
+                        Editar Cobro
+                    </h1>
+
+                    <div className="flex justify-center">
+                        <div className="w-full max-w-2xl">
+                            <div className="overflow-x-auto rounded-lg shadow bg-white p-6">
+                                {/* Información del cobro */}
+                                {collection && (
+                                    <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Información del Cobro</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <span className="font-medium text-gray-700">Comprobante:</span>
+                                                <span className="ml-2 text-gray-900">{collection.receiptNumber}</span>
+                                            </div>
+                                            <div>
+                                                <span className="font-medium text-gray-700">Asociado:</span>
+                                                <span className="ml-2 text-gray-900">{collection.associate.name}</span>
+                                            </div>
+                                            <div>
+                                                <span className="font-medium text-gray-700">Monto:</span>
+                                                <span className="ml-2 text-gray-900">${collection.amount.toLocaleString()}</span>
+                                            </div>
+                                            <div>
+                                                <span className="font-medium text-gray-700">Fecha:</span>
+                                                <span className="ml-2 text-gray-900">{collection.collectionDate}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Formulario */}
+                                <form onSubmit={handleSubmit} className="space-y-6">
+                                    {/* Campo método de cobro */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            Método de cobro *
+                                        </label>
+                                        <select
+                                            name="methodId"
+                                            value={form.methodId}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            disabled={saving}
+                                        >
+                                            <option value="">Seleccione un método...</option>
+                                            {methods.map(m => (
+                                                <option key={m.id} value={m.id}>
+                                                    {m.name} ({m.code})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Campo observaciones */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            Observaciones
+                                        </label>
+                                        <textarea
+                                            name="observations"
+                                            value={form.observations}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            maxLength={255}
+                                            rows={4}
+                                            disabled={saving}
+                                            placeholder="Observaciones adicionales (opcional)"
+                                        />
+                                        <div className="mt-1 text-right">
+                                            <small className="text-gray-500">{form.observations.length}/255 caracteres</small>
+                                        </div>
+                                    </div>
+
+                                    {/* Botones de acción */}
+                                    <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-3 pt-4 border-t border-gray-200">
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate("/cobros")}
+                                            className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-full font-semibold shadow transition duration-200 ease-in-out w-full md:w-auto"
+                                            disabled={saving}
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold shadow transition duration-200 ease-in-out disabled:opacity-50 w-full md:w-auto"
+                                            disabled={saving}
+                                        >
+                                            {saving ? "Guardando..." : "Actualizar Cobro"}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </main>
             </div>
         </div>
     );
