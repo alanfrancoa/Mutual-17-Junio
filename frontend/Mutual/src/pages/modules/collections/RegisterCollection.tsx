@@ -36,7 +36,7 @@ const RegisterCollection: React.FC = () => {
       setDataLoading(true);
       try {
         if (id) {
-          const installmentData = await apiMutual.GetInstallmentById(
+           const installmentData = await apiMutual.GetInstallmentById(
             Number(id)
           );
           setInstallment(installmentData);

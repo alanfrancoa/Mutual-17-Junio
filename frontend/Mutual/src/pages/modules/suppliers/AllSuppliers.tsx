@@ -52,10 +52,6 @@ const AllSuppliers: React.FC = () => {
         }));
 
         setSuppliers(mapped);
-        toast.showSuccessToast({
-          title: "Proveedores cargados",
-          message: `Se cargaron ${mapped.length} proveedores correctamente.`,
-        });
       } catch (err: any) {
         setSuppliers([]);
 
@@ -90,13 +86,12 @@ const AllSuppliers: React.FC = () => {
             title: "Error del servidor",
             message: detailedMessage,
             options: {
-              duration: 6000, // Más tiempo para leer el mensaje detallado
+              duration: 6000,
             },
           });
 
           console.error("Error 500:", {
             message: errorMessage,
-           
           });
           return;
         }
@@ -120,7 +115,6 @@ const AllSuppliers: React.FC = () => {
         console.error("Error en la petición:", {
           status: err.response?.status,
           message: errorMessage,
-          
         });
       } finally {
         setLoading(false);

@@ -248,7 +248,7 @@ const InvoicesPage: React.FC = () => {
                     ) : filteredInvoices.length === 0 ? (
                       <tr>
                         <td colSpan={8} className="text-center py-4 text-gray-500">
-                          No se encontraron facturas.
+                          No hay facturas registradas. Haz clic en "+ Nueva Factura" para comenzar.
                         </td>
                       </tr>
                     ) : (

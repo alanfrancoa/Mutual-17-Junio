@@ -182,7 +182,7 @@ const AllServicesPage: React.FC = () => {
                     onClick={() => navigate("/proveedores/metodos-pago")}
                     className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold shadow transition"
                   >
-                    Medios de pago
+                    Metodos de pago
                   </button>
                   <button
                     onClick={() => navigate("/proveedores/tipos-servicio")}
@@ -228,8 +228,7 @@ const AllServicesPage: React.FC = () => {
                           colSpan={6}
                           className="text-center py-8 text-gray-400"
                         >
-                          No se encontraron servicios que coincidan con la
-                          búsqueda.
+                          No hay servicios registrado. Haz clic en "+ Nuevo Servicio" para comenzar.
                         </td>
                       </tr>
                     ) : (
