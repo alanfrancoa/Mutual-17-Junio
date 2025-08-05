@@ -30,6 +30,9 @@ const ServiceTypeList: React.FC = () => {
     "Todos" | "Activo" | "Inactivo"
   >("Todos");
   const [page, setPage] = useState(1);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalServiceType, setModalServiceType] = useState<IServiceType | null>(null);
+  const [modalAction, setModalAction] = useState<"activar" | "desactivar" | null>(null);
 
   // Verificar permisos
   useEffect(() => {
@@ -181,20 +184,12 @@ const ServiceTypeList: React.FC = () => {
     }
   };
 
-  const handleToggleState = async (id: number, newStatus: boolean) => {
-    try {
-      setLoading(true);
-      await apiMutual.ServiceTypeState(id, newStatus);
-      await fetchServiceTypes();
-      showSuccessToast({ message: "Estado actualizado correctamente" });
-    } catch (err: any) {
-      showErrorToast({
-        message:
-          err.message || "Error al cambiar el estado del tipo de servicio",
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleToggleState = (id: number, newStatus: boolean) => {
+    const type = serviceTypes.find((t) => t.id === id);
+    if (!type) return;
+    setModalServiceType(type);
+    setModalAction(newStatus ? "activar" : "desactivar");
+    setModalOpen(true);
   };
 
   const handleSaveEdit = async (index: number) => {
@@ -226,6 +221,25 @@ const ServiceTypeList: React.FC = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const confirmToggleState = async () => {
+    if (!modalServiceType || modalAction === null) return;
+    try {
+      setLoading(true);
+      await apiMutual.ServiceTypeState(modalServiceType.id, modalAction === "activar");
+      await fetchServiceTypes();
+      showSuccessToast({ message: "Estado actualizado correctamente" });
+    } catch (err: any) {
+      showErrorToast({
+        message: err.message || "Error al cambiar el estado del tipo de servicio",
+      });
+    } finally {
+      setLoading(false);
+      setModalOpen(false);
+      setModalServiceType(null);
+      setModalAction(null);
     }
   };
 
@@ -434,9 +448,7 @@ const ServiceTypeList: React.FC = () => {
                                     Editar
                                   </button>
                                   <button
-                                    onClick={() =>
-                                      handleToggleState(type.id, !type.active)
-                                    }
+                                    onClick={() => handleToggleState(type.id, !type.active)}
                                     className={`${
                                       type.active
                                         ? "bg-red-500 hover:bg-red-600"
@@ -576,6 +588,40 @@ const ServiceTypeList: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {modalOpen && modalServiceType && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Confirmar acción</h2>
+            <p className="mb-6">
+              ¿Está seguro que desea {modalAction} el tipo de servicio "
+              <b>{modalServiceType.name}</b>"?
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                className="px-4 py-2 text-white rounded-full bg-gray-500 hover:bg-gray-400"
+                onClick={() => {
+                  setModalOpen(false);
+                  setModalServiceType(null);
+                  setModalAction(null);
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                className={`px-4 py-2 rounded-full text-white ${
+                  modalAction === "desactivar"
+                    ? "bg-red-500 hover:bg-red-600"
+                    : "bg-green-500 hover:bg-green-600"
+                }`}
+                onClick={confirmToggleState}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
