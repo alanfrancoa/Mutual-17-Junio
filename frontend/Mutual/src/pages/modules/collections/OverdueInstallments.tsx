@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../../dashboard/components/Sidebar";
 import Header from "../../dashboard/components/Header";
 import { apiMutual } from "../../../api/apiMutual";
-import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import useAppToast from "../../../hooks/useAppToast";
 
 interface OverdueInstallment {
@@ -21,6 +21,16 @@ const OverdueInstallments: React.FC = () => {
     const navigate = useNavigate();
     const [installments, setInstallments] = useState<OverdueInstallment[]>([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(10);
+    const [filters, setFilters] = useState({
+        associate: "",
+        loanType: "",
+        amountMin: "",
+        amountMax: "",
+        daysMin: "",
+        daysMax: "",
+    });
     const { showErrorToast } = useAppToast();
 
     useEffect(() => {
@@ -52,6 +62,20 @@ const OverdueInstallments: React.FC = () => {
         };
         fetchOverdue();
     }, []); // ✅ Quité showErrorToast de las dependencias
+
+    // Filtra antes de paginar
+    const filteredInstallments = installments.filter(i =>
+        (!filters.associate || i.associate.toLowerCase().includes(filters.associate.toLowerCase())) &&
+        (!filters.loanType || i.loanType.toLowerCase().includes(filters.loanType.toLowerCase())) &&
+        (!filters.amountMin || i.amount >= Number(filters.amountMin)) &&
+        (!filters.amountMax || i.amount <= Number(filters.amountMax)) &&
+        (!filters.daysMin || i.daysOverdue >= Number(filters.daysMin)) &&
+        (!filters.daysMax || i.daysOverdue <= Number(filters.daysMax))
+    );
+
+    // Calcula los elementos a mostrar en la página actual
+    const paginatedInstallments = filteredInstallments.slice((page - 1) * pageSize, page * pageSize);
+    const totalPages = Math.ceil(filteredInstallments.length / pageSize);
 
     if (loading) {
         return (
@@ -100,13 +124,53 @@ const OverdueInstallments: React.FC = () => {
 
                     <div className="flex-1 w-full">
                         <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
-                            {/* Filtros y búsqueda - espacio para futuras funcionalidades */}
-                            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
-                                <div className="flex gap-2 w-full md:w-auto">
-                                    {/* Espacio para futuras funcionalidades de filtros */}
+                            {/* Filtros y búsqueda organizados */}
+                            <div className="mb-4">
+                                <div className="flex flex-col md:flex-row gap-2 mb-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Nombre asociado"
+                                        value={filters.associate}
+                                        onChange={e => { setPage(1); setFilters(f => ({ ...f, associate: e.target.value })); }}
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Tipo préstamo"
+                                        value={filters.loanType}
+                                        onChange={e => { setPage(1); setFilters(f => ({ ...f, loanType: e.target.value })); }}
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
                                 </div>
-                                <div className="flex gap-2 w-full md:w-auto">
-                                    {/* Espacio para futuras funcionalidades de acciones */}
+                                <div className="flex flex-col md:flex-row gap-2">
+                                    <input
+                                        type="number"
+                                        placeholder="Monto mínimo"
+                                        value={filters.amountMin}
+                                        onChange={e => { setPage(1); setFilters(f => ({ ...f, amountMin: e.target.value })); }}
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Monto máximo"
+                                        value={filters.amountMax}
+                                        onChange={e => { setPage(1); setFilters(f => ({ ...f, amountMax: e.target.value })); }}
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Días vencidos mínimo"
+                                        value={filters.daysMin}
+                                        onChange={e => { setPage(1); setFilters(f => ({ ...f, daysMin: e.target.value })); }}
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Días vencidos máximo"
+                                        value={filters.daysMax}
+                                        onChange={e => { setPage(1); setFilters(f => ({ ...f, daysMax: e.target.value })); }}
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
                                 </div>
                             </div>
 
@@ -137,14 +201,14 @@ const OverdueInstallments: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {installments.length === 0 ? (
+                                    {paginatedInstallments.length === 0 ? (
                                         <tr>
                                             <td colSpan={7} className="text-center py-8 text-gray-400">
                                                 No hay cuotas vencidas.
                                             </td>
                                         </tr>
                                     ) : (
-                                        installments.map((installment, index) => (
+                                        paginatedInstallments.map((installment, index) => (
                                             <tr key={installment.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                     {installment.associate}
@@ -178,18 +242,46 @@ const OverdueInstallments: React.FC = () => {
                             </table>
 
                             {/* Información adicional */}
-                            {installments.length > 0 && (
+                            {filteredInstallments.length > 0 && (
                                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-2">
                                     <div className="flex justify-center items-center gap-4 flex-1">
                                         <span className="text-gray-700 font-medium">
-                                            {installments.length} cuota(s) vencida(s) encontrada(s)
+                                            {filteredInstallments.length} cuota(s) vencida(s) encontrada(s)
                                         </span>
                                     </div>
                                     <span className="text-gray-500 text-sm md:w-auto w-full text-center md:text-right">
-                                        Total: ${installments.reduce((sum, i) => sum + i.amount, 0).toLocaleString()}
+                                        Total: ${filteredInstallments.reduce((sum, i) => sum + i.amount, 0).toLocaleString()}
                                     </span>
                                 </div>
                             )}
+
+                            {/* Paginación */}
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-2">
+                                <div className="flex justify-center items-center gap-4 flex-1">
+                                    <button
+                                        className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                        disabled={page === 1}
+                                        aria-label="Anterior"
+                                    >
+                                        <ChevronLeftIcon className="h-5 w-5 text-gray-700" />
+                                    </button>
+                                    <span className="text-gray-700">
+                                        Página {page} de {totalPages}
+                                    </span>
+                                    <button
+                                        className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                        disabled={page === totalPages}
+                                        aria-label="Siguiente"
+                                    >
+                                        <ChevronRightIcon className="h-5 w-5 text-gray-700" />
+                                    </button>
+                                </div>
+                                <span className="text-gray-500 text-sm md:w-auto w-full text-center md:text-right">
+                                    {filteredInstallments.length} cuota(s) vencida(s) encontrada(s)
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </main>

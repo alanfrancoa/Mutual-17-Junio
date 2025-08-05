@@ -28,19 +28,23 @@ const CreateSupplier: React.FC = () => {
     e.preventDefault();
     setLoading(true);
 
+    // Validación del CUIT
     if (!/^\d{2}-\d{8}-\d{1}$/.test(form.CUIT)) {
       toast.showErrorToast({
         title: "CUIT inválido",
         message: "El CUIT debe tener el formato 20-12345678-3",
+        options: { duration: 4000 },
       });
       setLoading(false);
       return;
     }
 
+    // Validación de campos requeridos
     if (!form.LegalName || !form.Address || !form.Phone || !form.Email) {
       toast.showErrorToast({
-        title: "Campos incompletos",
+        title: "Error de validación",
         message: "Todos los campos son obligatorios",
+        options: { duration: 4000 },
       });
       setLoading(false);
       return;
@@ -48,22 +52,90 @@ const CreateSupplier: React.FC = () => {
 
     try {
       const response = await apiMutual.RegisterSupplier(form);
+
+      // Éxito - Status 200
       toast.showSuccessToast({
-        title: "Proveedor creado",
-        message: response.mensaje,
+        title: "¡Éxito!",
+        message: response.mensaje || "Proveedor ingresado correctamente.",
+        options: { duration: 3000 },
       });
+
+      // Redireccionar después del mensaje de éxito
       setTimeout(() => navigate("/proveedores"), 1500);
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.mensaje ||
-        (typeof error.response?.data === "string" ? error.response.data : null) ||
-        error.message ||
-        "Error desconocido";
+      const errorResponse = error.response;
 
-      toast.showErrorToast({
-        title: "Error al crear proveedor",
-        message: errorMessage,
+      // Si no hay respuesta del servidor (error de conexión)
+      if (!errorResponse) {
+        toast.showErrorToast({
+          title: "Error de conexión",
+          message:
+            "No se pudo establecer conexión con el servidor. Por favor, intente nuevamente.",
+          options: { duration: 5000 },
+        });
+        return;
+      }
+
+      // Manejar diferentes códigos de estado
+      switch (errorResponse.status) {
+        case 400: // Bad Request
+          toast.showErrorToast({
+            title: "Error de validación",
+            message: "Por favor, verifique los datos ingresados.",
+            options: { duration: 4000 },
+          });
+          break;
+
+        case 401: // Unauthorized
+          toast.showErrorToast({
+            title: "No autorizado",
+            message:
+              errorResponse.data?.mensaje ||
+              "No tiene permisos para realizar esta acción.",
+            options: { duration: 4000 },
+          });
+          break;
+
+        case 409: // Conflict
+          toast.showErrorToast({
+            title: "Conflicto",
+            message:
+              errorResponse.data?.mensaje ||
+              "El proveedor ya existe en el sistema.",
+            options: { duration: 4000 },
+          });
+          break;
+
+        case 500: // Internal Server Error
+          const errorMessage =
+            errorResponse.data?.message ||
+            "Ocurrió un error al intentar registrar el proveedor.";
+         
+          const innerError = errorResponse.data?.innerExceptionDetails
+            ? `\nError interno: ${errorResponse.data.innerExceptionDetails}`
+            : "";
+
+          toast.showErrorToast({
+            title: "Error del servidor",
+            message: `${errorMessage}${innerError}`,
+            options: { duration: 6000 },
+          });
+          break;
+
+        default:
+          toast.showErrorToast({
+            title: "Error",
+            message:
+              "Ocurrió un error inesperado. Por favor, intente nuevamente.",
+            options: { duration: 4000 },
+          });
+      }
+
+      // Log del error para debugging
+      console.error("Error al registrar proveedor:", {
+        status: errorResponse?.status,
+        data: errorResponse?.data,
+        error: error,
       });
     } finally {
       setLoading(false);
