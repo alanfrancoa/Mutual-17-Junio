@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../dashboard/components/Header";
 import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
-import useAppToast from "../../../hooks/useAppToast"; 
+import useAppToast from "../../../hooks/useAppToast";
 
 interface Supplier {
     id: number;
@@ -17,8 +17,8 @@ interface ServiceType {
 
 const InvoiceCreatePage: React.FC = () => {
     const navigate = useNavigate();
-    const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast(); 
-    
+    const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast();
+
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
     const [form, setForm] = useState({
@@ -49,7 +49,7 @@ const InvoiceCreatePage: React.FC = () => {
 
                 setSuppliers([]);
                 setServiceTypes([]);
-                
+
                 showErrorToast({
                     title: "Error de carga",
                     message: error.message || "Error al cargar proveedores y tipos de servicio"
@@ -77,9 +77,29 @@ const InvoiceCreatePage: React.FC = () => {
             return;
         }
 
+        // Agregamos validación para la descripción
+        if (!form.Description.trim()) {
+            showWarningToast({
+                title: "Descripción requerida",
+                message: "Por favor ingrese una descripción para la factura"
+            });
+            setLoading(false);
+            return;
+        }
+
+        // Validación opcional de longitud mínima
+        if (form.Description.trim().length < 10) {
+            showWarningToast({
+                title: "Descripción muy corta",
+                message: "La descripción debe tener al menos 10 caracteres"
+            });
+            setLoading(false);
+            return;
+        }
+
         const issueDate = new Date(form.IssueDate);
         const dueDate = new Date(form.DueDate);
-        
+
         if (dueDate < issueDate) {
             showWarningToast({
                 title: "Fechas inválidas",
@@ -108,17 +128,17 @@ const InvoiceCreatePage: React.FC = () => {
                 description: form.Description,
                 supplierId: Number(form.SupplierId),
             });
-            
+
             showSuccessToast({
                 title: "¡Factura registrada!",
                 message: "La factura fue registrada correctamente"
             });
-            
+
             setTimeout(() => navigate("/proveedores/facturas"), 1500);
         } catch (err: any) {
             console.error("Error completo al registrar factura:", err);
             console.error("Error response data:", err.response?.data);
-            
+
             let errorMessage = "Error desconocido al registrar factura";
             let errorTitle = "Error al registrar factura";
 
@@ -189,7 +209,7 @@ const InvoiceCreatePage: React.FC = () => {
                                 disabled={loading}
                                 className="w-full border border-gray-300 rounded px-3 py-2 disabled:opacity-50"
                             >
-                                <option value="">Seleccione...</option> 
+                                <option value="">Seleccione...</option>
                                 {suppliers.map((s) => (
                                     <option key={s.id} value={s.id}>{s.legalName}</option>
                                 ))}
@@ -204,7 +224,7 @@ const InvoiceCreatePage: React.FC = () => {
                                 onChange={handleChange}
                                 required
                                 disabled={loading}
-                                className="w-full border border-gray-300 rounded px-3 py-2 disabled:opacity-50" 
+                                className="w-full border border-gray-300 rounded px-3 py-2 disabled:opacity-50"
                                 placeholder="Ejemplo: 001-001-00000123"
                             />
                         </div>
@@ -217,8 +237,8 @@ const InvoiceCreatePage: React.FC = () => {
                                     value={form.IssueDate}
                                     onChange={handleChange}
                                     required
-                                    disabled={loading} 
-                                    className="w-full border border-gray-300 rounded px-3 py-2 disabled:opacity-50" 
+                                    disabled={loading}
+                                    className="w-full border border-gray-300 rounded px-3 py-2 disabled:opacity-50"
                                 />
                             </div>
                             <div className="flex-1">
@@ -230,7 +250,7 @@ const InvoiceCreatePage: React.FC = () => {
                                     onChange={handleChange}
                                     required
                                     disabled={loading}
-                                    className="w-full border border-gray-300 rounded px-3 py-2 disabled:opacity-50" 
+                                    className="w-full border border-gray-300 rounded px-3 py-2 disabled:opacity-50"
                                 />
                             </div>
                         </div>
@@ -245,7 +265,7 @@ const InvoiceCreatePage: React.FC = () => {
                                 min={0}
                                 step="0.01"
                                 disabled={loading}
-                                className="w-full border border-gray-300 rounded px-3 py-2 disabled:opacity-50" 
+                                className="w-full border border-gray-300 rounded px-3 py-2 disabled:opacity-50"
                                 placeholder="0.00"
                             />
                         </div>
@@ -266,7 +286,7 @@ const InvoiceCreatePage: React.FC = () => {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Descripción</label>
+                            <label className="block text-sm font-medium text-gray-700">Descripción *</label>
                             <textarea
                                 name="Description"
                                 value={form.Description}
@@ -274,22 +294,22 @@ const InvoiceCreatePage: React.FC = () => {
                                 disabled={loading}
                                 className="w-full border border-gray-300 rounded px-3 py-2 disabled:opacity-50"
                                 rows={2}
-                                placeholder="Descripción adicional (opcional)"
+                                placeholder="Descripción adicional."
                             />
                         </div>
-                                                
+
                         <div className="flex justify-end gap-4">
                             <button
                                 type="button"
                                 onClick={() => navigate("/proveedores/facturas")}
-                                className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded transition disabled:opacity-50" 
+                                className="bg-gray-500 hover:bg-gray-400 text-white px-4 py-2 rounded-full transition disabled:opacity-50"
                                 disabled={loading}
                             >
                                 Cancelar
                             </button>
                             <button
                                 type="submit"
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold transition disabled:opacity-50" 
+                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full font-semibold transition disabled:opacity-50"
                                 disabled={loading}
                             >
                                 {loading ? "Guardando..." : "Guardar"}
