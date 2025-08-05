@@ -29,7 +29,10 @@ const CollectionDetail: React.FC = () => {
         const data = await apiMutual.GetCollectionActiveById(Number(id));
         setCollection(data);
       } catch (err: any) {
-        const errorMessage = err?.response?.data?.message || err?.message || "Error al obtener el detalle del cobro";
+        const errorMessage =
+          err?.response?.data?.message ||
+          err?.message ||
+          "Error al obtener el detalle del cobro";
         showErrorToast({
           title: "Error",
           message: errorMessage,
@@ -49,7 +52,9 @@ const CollectionDetail: React.FC = () => {
           <Header hasNotifications={true} loans={[]} />
           <div className="flex flex-col items-center justify-center py-8 flex-1">
             <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8 text-center">
-              <div className="text-lg text-gray-600">Cargando detalle del cobro...</div>
+              <div className="text-lg text-gray-600">
+                Cargando detalle del cobro...
+              </div>
             </div>
           </div>
         </div>
@@ -65,7 +70,9 @@ const CollectionDetail: React.FC = () => {
           <Header hasNotifications={true} loans={[]} />
           <div className="flex flex-col items-center justify-center py-8 flex-1">
             <div className="w-full max-w-5xl bg-white rounded-lg shadow p-8 text-center">
-              <div className="text-lg text-red-600">No se encontró el cobro solicitado.</div>
+              <div className="text-lg text-red-600">
+                No se encontró el cobro solicitado.
+              </div>
             </div>
           </div>
         </div>
@@ -75,148 +82,149 @@ const CollectionDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar fija a la izquierda */}
       <Sidebar />
-
-      {/* Contenido principal desplazado a la derecha */}
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-        {/* Header */}
         <Header hasNotifications={true} loans={[]} />
+        <div className="flex flex-col items-center py-8 flex-1">
+          <div className="w-full max-w-xl">
+            <div className="flex justify-start mb-6">
+              <button
+                onClick={() => navigate(-1)}
+                className="text-gray-600 hover:text-gray-800 flex items-center"
+                aria-label="Volver a Prestamo"
+              >
+                <ChevronLeftIcon className="h-5 w-5" />
+                <span className="ml-1">Volver</span>
+              </button>
+            </div>
+            <h2 className="text-2xl font-bold text-blue-900 mb-4">
+              Detalle de Cobro
+            </h2>
 
-        {/* Main Content */}
-        <main className="flex-1 p-6 bg-gray-100">
-          {/* Botón volver */}
-          <div className="flex justify-start mb-4">
-            <button
-              onClick={() => navigate(-1)}
-              className="text-gray-600 hover:text-gray-800 flex items-center"
-              aria-label="Volver a la página anterior"
-            >
-              <ChevronLeftIcon className="h-5 w-5" />
-              <span className="ml-1">Volver</span>
-            </button>
-          </div>
-
-          {/* Título */}
-          <h1 className="text-2xl font-bold text-blue-900 mb-4">
-            Detalle de Cobro
-          </h1>
-
-          <div className="flex justify-center">
-            <div className="w-full max-w-2xl">
-              <div className="overflow-x-auto rounded-lg shadow bg-white p-6">
-                {/* Información del cobro */}
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Información del Cobro</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium text-gray-700">ID del Cobro:</span>
-                      <span className="ml-2 text-gray-900">#{collection.id}</span>
+            <div className="flex justify-center">
+              <div className="w-full max-w-2xl">
+                <div className="overflow-x-auto rounded-lg shadow bg-white p-6">
+                  {/* Información del cobro */}
+                  <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      Información del Cobro
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium text-gray-700">
+                          ID del Cobro:
+                        </span>
+                        <span className="ml-2 text-gray-900">
+                          #{collection.id}
+                        </span>
+                      </div>
                     </div>
-
-                  </div>
-                </div>
-
-                {/* Detalles del cobro */}
-                <div className="space-y-6">
-                  {/* Monto */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Monto del cobro
-                    </label>
-                    <input
-                      type="text"
-                      value={`$${collection.amount.toLocaleString()}`}
-                      readOnly
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
-                    />
                   </div>
 
-                  {/* Fecha de cobro */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Fecha de cobro
-                    </label>
-                    <input
-                      type="text"
-                      value={
-                        collection.collectionDate
-                          ? new Date(collection.collectionDate).toLocaleDateString('es-AR', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })
-                          : "No especificada"
-                      }
-                      readOnly
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
-                    />
-                  </div>
-
-                  {/* Método de cobro */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Método de cobro
-                    </label>
-                    <input
-                      type="text"
-                      value={collection.method || "No especificado"}
-                      readOnly
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
-                    />
-                  </div>
-
-                  {/* Número de comprobante */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      N° de comprobante
-                    </label>
-                    <input
-                      type="text"
-                      value={collection.receiptNumber || "No especificado"}
-                      readOnly
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
-                    />
-                  </div>
-
-                  {/* Información adicional si existe */}
-                  {collection.observations && (
+                  {/* Detalles del cobro */}
+                  <div className="space-y-6">
+                    {/* Monto */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Observaciones
+                        Monto del cobro
                       </label>
-                      <textarea
-                        value={collection.observations}
+                      <input
+                        type="text"
+                        value={`$${collection.amount.toLocaleString()}`}
                         readOnly
-                        rows={3}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
                       />
                     </div>
-                  )}
+
+                    {/* Fecha de cobro */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Fecha de cobro
+                      </label>
+                      <input
+                        type="text"
+                        value={
+                          collection.collectionDate
+                            ? new Date(
+                                collection.collectionDate
+                              ).toLocaleDateString("es-AR", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })
+                            : "No especificada"
+                        }
+                        readOnly
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                      />
+                    </div>
+
+                    {/* Método de cobro */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Método de cobro
+                      </label>
+                      <input
+                        type="text"
+                        value={collection.method || "No especificado"}
+                        readOnly
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                      />
+                    </div>
+
+                    {/* Número de comprobante */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        N° de comprobante
+                      </label>
+                      <input
+                        type="text"
+                        value={collection.receiptNumber || "No especificado"}
+                        readOnly
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                      />
+                    </div>
+
+                    {/* Información adicional si existe */}
+                    {collection.observations && (
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Observaciones
+                        </label>
+                        <textarea
+                          value={collection.observations}
+                          readOnly
+                          rows={3}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                        />
+                      </div>
+                    )}
+                    {/* Botones de acción */}
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-3 pt-6 border-t border-gray-200 mt-8">
+                      <button
+                        onClick={() => navigate(-1)}
+                        className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-full font-semibold shadow transition duration-200 ease-in-out w-full md:w-auto"
+                      >
+                        Cancelar
+                      </button>
+
+                      {collection.status === "Activo" && (
+                        <button
+                          onClick={() =>
+                            navigate(`/cobros/editar/${collection.id}`)
+                          }
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold shadow transition duration-200 ease-in-out w-full md:w-auto"
+                        >
+                          Editar Cobro
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Botones de acción - si tienes alguno al final */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-3 pt-6 border-t border-gray-200 mt-8">
-            <button
-              onClick={() => navigate(-1)}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-full font-semibold shadow transition duration-200 ease-in-out w-full md:w-auto"
-            >
-              Volver
-            </button>
-            
-            {collection.status === "Activo" && (
-              <button
-                onClick={() => navigate(`/cobros/editar/${collection.id}`)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold shadow transition duration-200 ease-in-out w-full md:w-auto"
-              >
-                Editar Cobro
-              </button>
-            )}
-          </div>
-        </main>
+        </div>
       </div>
     </div>
   );
