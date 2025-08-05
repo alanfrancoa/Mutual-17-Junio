@@ -6,11 +6,14 @@ import {
   HomeIcon,
   UsersIcon,
   CreditCardIcon,
-  BanknotesIcon,
+  CurrencyDollarIcon,
   ChartBarIcon,
   Cog6ToothIcon,
   UserGroupIcon,
   ClipboardDocumentListIcon,
+  DocumentChartBarIcon,
+  DocumentCurrencyDollarIcon,
+  DocumentPlusIcon,
 } from "@heroicons/react/24/outline";
 
 const Sidebar: React.FC = () => {
@@ -81,7 +84,7 @@ const Sidebar: React.FC = () => {
                 className="flex items-center justify-between w-full gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
               >
                 <div className="flex items-center gap-3">
-                  <Cog6ToothIcon className="h-5 w-5" />
+                  <UserGroupIcon className="h-5 w-5" />
                   Proveedores
                 </div>
                 <ChevronDownIcon
@@ -103,7 +106,7 @@ const Sidebar: React.FC = () => {
                     href="/proveedores/servicios"
                     className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
                   >
-                    <ClipboardDocumentListIcon className="h-4 w-4" /> Servicios
+                    <DocumentPlusIcon className="h-4 w-4" /> Servicios
                   </a>
                   <a
                     href="/proveedores/facturas"
@@ -118,14 +121,14 @@ const Sidebar: React.FC = () => {
               href="/cobros"
               className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
             >
-              <CreditCardIcon className="h-5 w-5" />
+              <CurrencyDollarIcon className="h-5 w-5" />
               Cobros y Morosidad
             </a>
             <a
               href="/prestamos"
               className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
             >
-              <BanknotesIcon className="h-5 w-5" />
+              <DocumentCurrencyDollarIcon className="h-5 w-5" />
               Prestamos
             </a>
             <hr className="my-2 border-blue-900" />
@@ -136,7 +139,7 @@ const Sidebar: React.FC = () => {
               href="/periodos"
               className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
             >
-              <ChartBarIcon className="h-5 w-5" /> Reportes Y Periodos
+              <DocumentChartBarIcon className="h-5 w-5" /> Reportes Y Periodos
             </a>
             {/* Solo Administrador: Acceso Administrador */}
             {userRole === "Administrador" && (
@@ -173,7 +176,8 @@ const Sidebar: React.FC = () => {
                         href="/auditoria"
                         className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
                       >
-                        <ClipboardDocumentListIcon className="h-4 w-4" /> Auditorías
+                        <ClipboardDocumentListIcon className="h-4 w-4" />{" "}
+                        Auditorías
                       </a>
                     </div>
                   )}
