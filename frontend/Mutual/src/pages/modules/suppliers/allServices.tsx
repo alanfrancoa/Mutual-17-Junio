@@ -202,9 +202,6 @@ const AllServicesPage: React.FC = () => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        ID
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Proveedor
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -228,7 +225,8 @@ const AllServicesPage: React.FC = () => {
                           colSpan={6}
                           className="text-center py-8 text-gray-400"
                         >
-                          No hay servicios registrado. Haz clic en "+ Nuevo Servicio" para comenzar.
+                          No hay servicios registrado. Haz clic en "+ Nuevo
+                          Servicio" para comenzar.
                         </td>
                       </tr>
                     ) : (
@@ -237,9 +235,6 @@ const AllServicesPage: React.FC = () => {
                           key={service.Id || idx}
                           className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
                         >
-                          <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {service.Id || "N/A"}
-                          </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                             {service.Supplier || "Sin proveedor"}
                           </td>
