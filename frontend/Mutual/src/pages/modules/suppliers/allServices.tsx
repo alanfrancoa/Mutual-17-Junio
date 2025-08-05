@@ -18,6 +18,9 @@ const AllServicesPage: React.FC = () => {
   const [services, setServices] = useState<ServiceList[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalService, setModalService] = useState<ServiceList | null>(null);
+  const [modalAction, setModalAction] = useState<"activar" | "desactivar" | null>(null);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -69,7 +72,7 @@ const AllServicesPage: React.FC = () => {
     navigate(`/proveedores/servicios/editar/${service.Id}`);
   };
 
-  const handleToggleStatus = async (service: ServiceList) => {
+  const handleToggleStatus = (service: ServiceList) => {
     if (userRole !== "Administrador" && userRole !== "Gestor") {
       showWarningToast({
         title: "Acceso denegado",
@@ -77,43 +80,41 @@ const AllServicesPage: React.FC = () => {
       });
       return;
     }
+    setModalService(service);
+    setModalAction(service.Active ? "desactivar" : "activar");
+    setModalOpen(true);
+  };
 
-    const action = service.Active ? 'desactivar' : 'activar';
-    const confirmMessage = `¿Está seguro que desea ${action} el servicio "${service.Description}"?`;
-
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
+  const confirmToggleStatus = async () => {
+    if (!modalService || !modalAction) return;
     try {
-      await apiMutual.UpdateServiceStatus(service.Id);
-
+      await apiMutual.UpdateServiceStatus(modalService.Id);
       showSuccessToast({
         title: "Estado actualizado",
-        message: `Servicio ${action === 'desactivar' ? 'desactivado' : 'activado'} correctamente`
+        message: `Servicio ${modalAction === 'desactivar' ? 'desactivado' : 'activado'} correctamente`
       });
-
       setServices(prevServices =>
         prevServices.map(s =>
-          s.Id === service.Id
+          s.Id === modalService.Id
             ? { ...s, Active: !s.Active }
             : s
         )
       );
     } catch (error: any) {
-      console.error("Error al cambiar estado:", error);
-
       const errorMessage =
         error.response?.data?.message ||
         error.response?.data?.mensaje ||
         (typeof error.response?.data === 'string' ? error.response.data : null) ||
         error.message ||
         "Error desconocido";
-
       showErrorToast({
-        title: `Error al ${action} servicio`,
+        title: `Error al ${modalAction} servicio`,
         message: errorMessage
       });
+    } finally {
+      setModalOpen(false);
+      setModalService(null);
+      setModalAction(null);
     }
   };
 
@@ -165,19 +166,19 @@ const AllServicesPage: React.FC = () => {
               <div className="flex flex-wrap gap-2 mb-4">
                 <button
                   onClick={() => navigate("/proveedores/facturas")}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded font-semibold text-sm"
+                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-full font-semibold text-sm"
                 >
                   Facturas
                 </button>
                 <button
                   onClick={() => navigate("/proveedores/metodos-pago")}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded font-semibold text-sm"
+                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-full font-semibold text-sm"
                 >
                   Medios de pago
                 </button>
                 <button
                   onClick={() => navigate("/proveedores/tipos-servicio")}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded font-semibold text-sm"
+                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-full font-semibold text-sm"
                 >
                   Tipos de servicio
                 </button>
@@ -309,6 +310,35 @@ const AllServicesPage: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {modalOpen && modalService && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Confirmar acción</h2>
+            <p className="mb-6">
+              ¿Está seguro que desea {modalAction} el servicio "<b>{modalService.Description}</b>"?
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                className="px-4 py-2 text-white rounded-full bg-gray-500 hover:bg-gray-400"
+                onClick={() => { setModalOpen(false); setModalService(null); setModalAction(null); }}
+              >
+                Cancelar
+              </button>
+              <button
+                className={`px-4 py-2 rounded-full text-white ${
+                  modalAction === "desactivar"
+                    ? "bg-red-500 hover:bg-red-600"
+                    : "bg-green-500 hover:bg-green-600"
+                }`}
+                onClick={confirmToggleStatus}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
