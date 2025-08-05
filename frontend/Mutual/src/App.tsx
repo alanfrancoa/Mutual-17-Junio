@@ -6,8 +6,8 @@ import { LoansProvider } from "./context/LoansContext";
 function App() {
   return (
     <>
+      <Toaster position="top-right" />
       <LoansProvider>
-        <Toaster position="top-right" />
         <AppRouter />;
       </LoansProvider>
     </>

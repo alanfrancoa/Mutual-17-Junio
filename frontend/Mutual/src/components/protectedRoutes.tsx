@@ -1,7 +1,6 @@
 import { JSX } from "react";
 import { Navigate } from "react-router-dom";
 import { Role } from "../helper/config";
-// import { isTokenExpired } from "../helper/authservice";
 
 export interface ProtectedUser {
   username: string | null;
@@ -17,16 +16,23 @@ type ProtectedRouteProps = {
 
 const ProtectedRoute = ({
   user,
-  redirectPath = "/auth/login",
   children,
   authorizedRoles,
 }: ProtectedRouteProps) => {
-  //const token = sessionStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
-  // limpieza token vencido +2hs
-  if (!user?.username || !user?.role ) {
-    //sessionStorage.clear();
-    return <Navigate to={redirectPath} replace />;
+  // Validacion username y role para redirigir sin ningun dato en session storage
+  if (!user?.username || !user?.role) {
+    return (
+      <Navigate to="/auth/login" state={{ tokenExpired: false }} replace />
+    );
+  }
+
+  // Primero validamos el token, para redirigir al login con msj error de token vencido
+  if (!token) {
+    return (
+      <Navigate to={`/auth/login`} state={{ tokenExpired: true }} replace />
+    );
   }
 
   if (authorizedRoles && !authorizedRoles.includes(user.role!)) {

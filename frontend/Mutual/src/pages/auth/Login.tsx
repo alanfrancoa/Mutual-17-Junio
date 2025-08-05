@@ -1,6 +1,5 @@
-// src/components/Login.tsx
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { apiMutual } from "../../api/apiMutual";
 import useAppToast from "../../hooks/useAppToast";
 import TermsModal from "../../components/ui/auth/modalTermsAndConditions";
@@ -29,13 +28,27 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showForgotPassModal, setShowForgotPassModal] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const toast = useAppToast(); // Inicializa el hook
+  const toast = useAppToast();
+  const location = useLocation();
+
+  useEffect(() => {
+    // estado pasado desde ProtectedRoute
+    if (location.state?.tokenExpired) {
+      setErrorMessage(
+        "Tu sesión ha expirado, por favor inicia sesión nuevamente."
+      );
+      // Limpiamos el estado despues de mostrar  msj
+      window.history.replaceState({}, document.title, location.pathname);
+    }
+  }, [location]);
 
   useEffect(() => {
     if (sessionStorage.getItem("token")) {
@@ -45,12 +58,13 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setLoading(true);
+    setErrorMessage("");
 
     try {
       const response = await apiMutual.Login(username, password);
-      console.log("Token recibido:", response);
+
+      const token = response as string;
 
       sessionStorage.setItem("token", response);
       sessionStorage.setItem("username", username);
@@ -64,11 +78,11 @@ const Login = () => {
         sessionStorage.setItem("username", payload.username);
       }
 
-
       navigate("/dashboard");
       window.location.reload();
     } catch (err: any) {
       let errorMsg = "Error desconocido";
+
       if (
         err.response &&
         err.response.data &&
@@ -78,10 +92,7 @@ const Login = () => {
       } else if (err instanceof Error) {
         errorMsg = err.message;
       }
-      toast.showErrorToast({
-        title: "Error de inicio de sesión",
-        message: errorMsg,
-      });
+      setErrorMessage(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -112,6 +123,15 @@ const Login = () => {
 
         {/* Card blanca */}
         <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 text-black">
+          {errorMessage && (
+            <div
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+              role="alert"
+            >
+              <span className="block sm:inline">{errorMessage}</span>
+            </div>
+          )}
+
           {/* Elimina el div de error */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
