@@ -65,18 +65,7 @@ const AccountingPeriods: React.FC = () => {
         return;
       }
 
-      // Si la respuesta es exitosa con datos
-      if (Array.isArray(data)) {
-        setAccountingPeriods(data);
-        showSuccessToast({
-          title: "Periodos Contables",
-          message: `Se ${
-            data.length === 1
-              ? "ha encontrado 1 período contable"
-              : `han encontrado ${data.length} períodos contables`
-          }`,
-        });
-      }
+  
 
       setAccountingPeriods(data);
     } catch (err: any) {

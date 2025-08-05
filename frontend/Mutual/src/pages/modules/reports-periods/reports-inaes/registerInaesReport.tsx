@@ -32,13 +32,7 @@ useEffect(() => {
       const reports = await apiMutual.GetInaesReports();
       const reportsList = Array.isArray(reports) ? reports : [];
       setInaesReports(reportsList);
-      
-      if (reportsList.length > 0) {
-        showSuccessToast({
-          title: "Reportes INAES",
-          message: `Se encontraron ${reportsList.length} reporte(s) INAES.`,
-        });
-      }
+     
     } catch (error: any) {
       showErrorToast({
         title: "Error al cargar reportes",
