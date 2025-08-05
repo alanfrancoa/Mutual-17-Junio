@@ -144,32 +144,26 @@ const RegisterCollection: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar fija a la izquierda */}
       <Sidebar />
-      
-      {/* Contenido principal desplazado a la derecha */}
       <div className="flex-1 flex flex-col" style={{ marginLeft: "18rem" }}>
-        {/* Header */}
         <Header hasNotifications={true} loans={[]} />
-        
-        {/* Main Content */}
-        <main className="flex-1 p-6 bg-gray-100">
-          {/* Botón volver */}
-          <div className="flex justify-start mb-4">
-            <button
-              onClick={() => navigate("/prestamos")}
-              className="text-gray-600 hover:text-gray-800 flex items-center"
-              aria-label="Volver a Préstamos"
-            >
-              <ChevronLeftIcon className="h-5 w-5" />
-              <span className="ml-1">Volver</span>
-            </button>
-          </div>
-          
-          {/* Título */}
-          <h1 className="text-2xl font-bold text-blue-900 mb-4">
+        <div className="flex flex-col items-center py-8 flex-1">
+          <div className="w-full max-w-xl">
+            <div className="flex justify-start mb-6">
+              <button
+                onClick={() =>
+                  navigate(`/asociados/detalle/${"parsedAssociateId"}`)
+                }
+                className="text-gray-600 hover:text-gray-800 flex items-center"
+                aria-label="Volver a Asociados"
+              >
+                <ChevronLeftIcon className="h-5 w-5" />
+                <span className="ml-1">Volver</span>
+              </button>
+            </div>
+          <h2 className="text-2xl font-bold text-blue-900 mb-4">
             Registrar Cobro
-          </h1>
+          </h2>
 
           <div className="flex justify-center">
             <div className="w-full max-w-2xl">
@@ -177,7 +171,8 @@ const RegisterCollection: React.FC = () => {
                 {/* Información de la cuota */}
                 {installment && (
                   <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Información de la Cuota</h3>
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">Información de la Cuota</h3>
+                    
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="font-medium text-gray-700">Cuota N°:</span>
@@ -303,8 +298,9 @@ const RegisterCollection: React.FC = () => {
               </div>
             </div>
           </div>
-        </main>
       </div>
+      </div>
+    </div>
     </div>
   );
 };
