@@ -6,6 +6,7 @@ import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
 import { ServiceList } from "../../../types/IServiceList";
 import useAppToast from "../../../hooks/useAppToast";
+import ServiceStatusModal from "../../../components/ui/serviceStatusModal";
 
 type UserRole = "Administrador" | "Gestor" | "Consultor";
 const PAGE_SIZE = 10;
@@ -24,6 +25,8 @@ const AllServicesPage: React.FC = () => {
   const [modalAction, setModalAction] = useState<
     "activar" | "desactivar" | null
   >(null);
+  const [modalError, setModalError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -98,10 +101,23 @@ const AllServicesPage: React.FC = () => {
     setModalService(service);
     setModalAction(service.Active ? "desactivar" : "activar");
     setModalOpen(true);
+    setModalError(null);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setModalService(null);
+    setModalAction(null);
+    setModalError(null);
+    setIsProcessing(false);
   };
 
   const confirmToggleStatus = async () => {
     if (!modalService || !modalAction) return;
+
+    setIsProcessing(true);
+    setModalError(null);
+
     try {
       await apiMutual.UpdateServiceStatus(modalService.Id);
       showSuccessToast({
@@ -115,6 +131,7 @@ const AllServicesPage: React.FC = () => {
           s.Id === modalService.Id ? { ...s, Active: !s.Active } : s
         )
       );
+      handleCloseModal();
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message ||
@@ -124,14 +141,9 @@ const AllServicesPage: React.FC = () => {
           : null) ||
         error.message ||
         "Error desconocido";
-      showErrorToast({
-        title: `Error al ${modalAction} servicio`,
-        message: errorMessage,
-      });
+      setModalError(errorMessage);
     } finally {
-      setModalOpen(false);
-      setModalService(null);
-      setModalAction(null);
+      setIsProcessing(false);
     }
   };
 
@@ -276,7 +288,7 @@ const AllServicesPage: React.FC = () => {
                                       : "bg-green-500 hover:bg-green-600"
                                   }`}
                                 >
-                                  {service.Active ? "Desactivar" : "Activar"}
+                                  {service.Active ? "Desactivar" : "Reactivar"}
                                 </button>
                               )}
                             </div>
@@ -320,39 +332,15 @@ const AllServicesPage: React.FC = () => {
         </main>
       </div>
 
-      {modalOpen && modalService && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">Confirmar acción</h2>
-            <p className="mb-6">
-              ¿Está seguro que desea {modalAction} el servicio "
-              <b>{modalService.Description}</b>"?
-            </p>
-            <div className="flex justify-end gap-2">
-              <button
-                className="px-4 py-2 text-white rounded-full bg-gray-500 hover:bg-gray-400"
-                onClick={() => {
-                  setModalOpen(false);
-                  setModalService(null);
-                  setModalAction(null);
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                className={`px-4 py-2 rounded-full text-white ${
-                  modalAction === "desactivar"
-                    ? "bg-red-500 hover:bg-red-600"
-                    : "bg-green-500 hover:bg-green-600"
-                }`}
-                onClick={confirmToggleStatus}
-              >
-                Confirmar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ServiceStatusModal
+        isOpen={modalOpen && modalService !== null}
+        onClose={handleCloseModal}
+        onConfirm={confirmToggleStatus}
+        serviceName={modalService?.Description || ""}
+        action={modalAction === "desactivar" ? "deactivate" : "reactivate"}
+        modalError={modalError}
+        isLoading={isProcessing}
+      />
     </div>
   );
 };
