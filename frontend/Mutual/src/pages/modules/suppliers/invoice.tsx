@@ -60,12 +60,20 @@ const InvoicesPage: React.FC = () => {
       }));
       setInvoices(mappedData);
     } catch (err: any) {
-      console.error("Error al cargar facturas:", err);
       setInvoices([]);
-      
+
+      let errorMessage = "Error interno al cargar las facturas";
+      if (err?.response?.data) {
+        errorMessage = err.response.data.message ||
+          err.response.data.mensaje ||
+          err.response.data.errorDetails ||
+          errorMessage;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
       showErrorToast({
-        title: "Error de carga",
-        message: err.response?.data?.message || err.message || "No se pudieron cargar las facturas"
+        title: "Error del servidor.",
+        message: errorMessage
       });
     } finally {
       setLoading(false);

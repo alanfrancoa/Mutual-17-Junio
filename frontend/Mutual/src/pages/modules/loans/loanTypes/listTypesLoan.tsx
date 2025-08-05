@@ -31,7 +31,7 @@ const ListTypesLoan: React.FC = () => {
       setError(backendMsg);
 
       showErrorToast({
-        title: "Error al cargar tipos de préstamo",
+        title: "Error del servidor.",
         message: backendMsg,
       });
     } finally {

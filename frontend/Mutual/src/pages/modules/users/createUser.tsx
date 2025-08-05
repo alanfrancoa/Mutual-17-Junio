@@ -67,7 +67,10 @@ const CreateUser: React.FC = () => {
         error?.response?.data?.message ||
         error?.message ||
         "Error de sistema al crear usuario";
-      showErrorToast({ message: errorMsg });
+      showErrorToast({
+          title: "Error del servidor.",
+          message: errorMsg
+        });
     }
   };
 

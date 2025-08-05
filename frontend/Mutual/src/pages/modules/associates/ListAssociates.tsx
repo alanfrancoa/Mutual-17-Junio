@@ -41,7 +41,7 @@ const Associates: React.FC<DashboardProps> = ({}) => {
         "Error de sistema al cargar los asociados.";
       setError(errorMsg);
       showErrorToast({
-        title: "Error",
+        title: "Error de servidor.",
         message: errorMsg,
       });
     } finally {

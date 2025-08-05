@@ -63,7 +63,7 @@ const ServiceTypeList: React.FC = () => {
           : "";
 
         showErrorToast({
-          title: "Error del servidor",
+          title: "Error del servidor.",
           message: `${errorMessage}${innerError}`,
           options: { duration: 6000 },
         });
@@ -153,9 +153,21 @@ const ServiceTypeList: React.FC = () => {
         message: "Los tipos de servicio se registraron correctamente",
       });
     } catch (err: any) {
-      showErrorToast({
-        message: err.message || "Error al agregar tipos de servicio",
-      });
+      let errorMessage = "Error interno al guardar los tipos de servicio";
+        if (err?.response?.data) {
+
+          errorMessage = err.response.data.message ||
+            err.response.data.mensaje ||
+            err.response.data.errorDetails ||
+            errorMessage;
+        } else if (err?.message) {
+
+          errorMessage = err.message;
+        }
+        showErrorToast({
+          title: "Error del servidor.",
+          message: errorMessage
+        });
     } finally {
       setLoading(false);
     }

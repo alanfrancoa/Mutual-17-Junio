@@ -34,7 +34,6 @@ const Loans: React.FC = () => {
       const data: ILoanList[] = await apiMutual.GetLoans();
       setLoans(data);
     } catch (err: any) {
-      console.error("Error cargando prestamos:", err);
       const backendMsg =
         err.response?.data?.message ||
         err.response?.data?.mensaje ||
@@ -42,7 +41,7 @@ const Loans: React.FC = () => {
       setError(backendMsg);
 
       showErrorToast({
-        title: "Error al cargar préstamos",
+        title: "Error del servidor.",
         message: backendMsg,
       });
     } finally {

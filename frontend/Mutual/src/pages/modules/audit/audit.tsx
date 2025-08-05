@@ -62,12 +62,15 @@ const AuditTable: React.FC = () => {
         setAuditLogs(data);
       }
     } catch (err) {
-      console.error("Error fetching audit logs:", err);
+      const errorObj = err as any;
+      const errorMsg =
+        errorObj?.response?.data?.message ||
+        errorObj?.message ||
+        "Error de sistema al listar auditorías  ";
       showErrorToast({
-        message: "Error al cargar los registros de auditoría.",
+        title: "Error del servidor.",
+        message: errorMsg
       });
-
-      setError("Error al cargar los registros de auditoría.");
       setAuditLogs([]);
     } finally {
       setLoading(false);

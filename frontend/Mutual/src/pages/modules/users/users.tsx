@@ -27,8 +27,20 @@ const UsersTable: React.FC = () => {
       try {
         const data = await apiMutual.GetUsers();
         setUsuarios(data);
-      } catch (error) {
-        showErrorToast({ message: "Error de sistema al obtener usuarios" });
+      } catch (error: any) {
+        let errorMessage = "Error interno al cargar los servicios.";
+        if (error?.response?.data) {
+          errorMessage = error.response.data.message ||
+            error.response.data.mensaje ||
+            error.response.data.errorDetails ||
+            errorMessage;
+        } else if (error?.message) {
+          errorMessage = error.message;
+        }
+        showErrorToast({
+          title: "Error del servidor.",
+          message: errorMessage
+        });
       }
       setLoading(false);
     };
@@ -123,7 +135,7 @@ const UsersTable: React.FC = () => {
                           colSpan={5}
                           className="text-center py-8 text-gray-400"
                         >
-                        
+
                           {search.trim() || estadoFiltro !== "Todos"
                             ? "No hay usuarios con ese criterio de búsqueda"
                             : "No hay usuarios registrados"}
@@ -143,11 +155,10 @@ const UsersTable: React.FC = () => {
                           </td>
                           <td className="px-4 py-4 border-b whitespace-nowrap">
                             <span
-                              className={`px-3 py-1 rounded-full text-xs font-semibold  ${
-                                user.status === "Activo"
+                              className={`px-3 py-1 rounded-full text-xs font-semibold  ${user.status === "Activo"
                                   ? "bg-green-100 text-green-800"
                                   : "bg-red-100 text-red-800"
-                              }`}
+                                }`}
                             >
                               {user.status}
                             </span>
@@ -167,11 +178,10 @@ const UsersTable: React.FC = () => {
                               Editar
                             </button>
                             <button
-                              className={`bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full transition text-xs font-medium ${
-                                user.status === "Inactivo"
+                              className={`bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full transition text-xs font-medium ${user.status === "Inactivo"
                                   ? "opacity-50 cursor-not-allowed"
                                   : ""
-                              }`}
+                                }`}
                               onClick={() =>
                                 navigate(`/usuarios/eliminar/${user.id}`)
                               }
@@ -180,11 +190,10 @@ const UsersTable: React.FC = () => {
                               Baja
                             </button>
                             <button
-                              className={`bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full transition text-xs font-medium ${
-                                user.status === "Activo"
+                              className={`bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full transition text-xs font-medium ${user.status === "Activo"
                                   ? "opacity-50 cursor-not-allowed"
                                   : ""
-                              }`}
+                                }`}
                               onClick={() =>
                                 navigate(`/usuarios/reactivar/${user.id}`)
                               }

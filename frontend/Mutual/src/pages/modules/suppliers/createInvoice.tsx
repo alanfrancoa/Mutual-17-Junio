@@ -45,14 +45,23 @@ const InvoiceCreatePage: React.FC = () => {
                 const activeServiceTypes = serviceTypesData.filter((serviceType: any) => serviceType.active === true);
                 setServiceTypes(activeServiceTypes);
             } catch (error: any) {
-                console.error("Error al cargar datos:", error);
 
                 setSuppliers([]);
                 setServiceTypes([]);
 
+                let errorMessage = "Error interno al cargar las facturas";
+                if (error?.response?.data) {
+                    errorMessage = error.response.data.message ||
+                        error.response.data.mensaje ||
+                        error.response.data.errorDetails ||
+                        errorMessage;
+                } else if (error?.message) {
+                    errorMessage = error.message;
+                }
+
                 showErrorToast({
-                    title: "Error de carga",
-                    message: error.message || "Error al cargar proveedores y tipos de servicio"
+                    title: "Error del servidor.",
+                    message: errorMessage
                 });
             }
         };
@@ -166,9 +175,16 @@ const InvoiceCreatePage: React.FC = () => {
                         errorMessage = data?.message || "Los datos no cumplen con los requisitos";
                         break;
                     case 500:
-                        errorTitle = "Error del servidor";
-                        //backend puede devolver errorDetails e innerExceptionDetails
-                        errorMessage = data?.message || "Error interno del servidor. Intente nuevamente";
+                        errorTitle = "Error del servidor.";
+                        errorMessage = "Error interno al intentar registrar la factura.";
+                        if (err?.response?.data) {
+                            errorMessage = err.response.data.message ||
+                                err.response.data.mensaje ||
+                                err.response.data.errorDetails ||
+                                errorMessage;
+                        } else if (err?.message) {
+                            errorMessage = err.message;
+                        }
                         break;
                     default:
                         errorTitle = `Error ${status}`;

@@ -53,7 +53,7 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
     const fetchSuppliers = async () => {
       try {
         const data = await apiMutual.GetAllSuppliers();
-        
+
         if (Array.isArray(data)) {
           const activeSuppliers = data.filter((s: Supplier) => s.active);
           setSuppliers(activeSuppliers);
@@ -62,9 +62,20 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
         }
       } catch (error: any) {
         setSuppliers([]);
+        let errorMessage = "No se pudieron cargar los proveedores";
+        if (error?.response?.data) {
+
+          errorMessage = error.response.data.message ||
+            error.response.data.mensaje ||
+            error.response.data.errorDetails ||
+            errorMessage;
+        } else if (error?.message) {
+
+          errorMessage = error.message;
+        }
         showErrorToast({
-          title: "Error de carga",
-          message: error.message || "No se pudieron cargar los proveedores"
+          title: "Error del servidor.",
+          message: errorMessage
         });
       }
     };
@@ -75,7 +86,7 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
     const fetchServiceTypes = async () => {
       try {
         const data = await apiMutual.GetServiceTypes();
-        
+
         if (Array.isArray(data)) {
           const activeTypes = data.filter((t: ServiceType) => t.active);
           setServiceTypes(activeTypes);
@@ -84,9 +95,20 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
         }
       } catch (error: any) {
         setServiceTypes([]);
+         let errorMessage = "No se pudieron cargar los tipos de servicio";
+        if (error?.response?.data) {
+
+          errorMessage = error.response.data.message ||
+            error.response.data.mensaje ||
+            error.response.data.errorDetails ||
+            errorMessage;
+        } else if (error?.message) {
+
+          errorMessage = error.message;
+        }
         showErrorToast({
-          title: "Error de carga",
-          message: error.message || "No se pudieron cargar los tipos de servicio"
+          title: "Error del servidor.",
+          message: errorMessage
         });
       }
     };
@@ -130,18 +152,17 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
         Description: form.description,
         MonthlyCost: Number(form.monthlyCost),
       });
-      
+
       showSuccessToast({
         title: "¡Servicio creado!",
         message: "El servicio fue registrado correctamente"
       });
-      
+
       setTimeout(() => navigate("/proveedores/servicios"), 1500);
     } catch (err: any) {
-      console.error("Error al crear servicio:", err);
-      
+
       let errorMessage = "Error desconocido al crear el servicio";
-      
+
       if (err.response?.status === 400) {
         if (typeof err.response.data === 'string') {
           if (err.response.data.includes("tipo de servicio no existe")) {
@@ -157,10 +178,10 @@ const CreateService: React.FC<CreateServiceProps> = ({ onBack }) => {
       } else if (err.response?.status === 500) {
         errorMessage = err.response.data?.message || "Error interno del servidor. Intente nuevamente más tarde";
       } else if (err.response?.data) {
-        errorMessage = err.response.data.message || 
-                     err.response.data.mensaje || 
-                     (typeof err.response.data === 'string' ? err.response.data : null) ||
-                     "Error del servidor";
+        errorMessage = err.response.data.message ||
+          err.response.data.mensaje ||
+          (typeof err.response.data === 'string' ? err.response.data : null) ||
+          "Error del servidor";
       } else {
         errorMessage = err.message || "Error de conexión. Verifique su conexión a internet";
       }

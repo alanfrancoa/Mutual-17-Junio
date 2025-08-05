@@ -190,11 +190,17 @@ const CreateAssociate: React.FC = () => {
         navigate("/asociados");
       }, 2000);
     } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message ||
-        "Error de sistema al registrar el asociado.";
+      let errorMessage = "Error interno al registrar el asociado.";
+      if (error?.response?.data) {
+        errorMessage = error.response.data.message ||
+          error.response.data.mensaje ||
+          error.response.data.errorDetails ||
+          errorMessage;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
       showErrorToast({
-        title: "Error",
+        title: "Error del servidor.",
         message: errorMessage,
       });
     } finally {

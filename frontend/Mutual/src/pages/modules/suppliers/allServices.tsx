@@ -42,11 +42,19 @@ const AllServicesPage: React.FC = () => {
           setServices([]);
         }
       } catch (error: any) {
-        console.error("Error al cargar servicios:", error);
         setServices([])
+        let errorMessage = "Error interno al cargar los servicios.";
+        if (error?.response?.data) {
+          errorMessage = error.response.data.message ||
+            error.response.data.mensaje ||
+            error.response.data.errorDetails ||
+            errorMessage;
+        } else if (error?.message) {
+          errorMessage = error.message;
+        }
         showErrorToast({
-          title: "Error de carga",
-          message: error.message || "No se pudieron cargar los servicios"
+          title: "Error del servidor.",
+          message: errorMessage
         });
       } finally {
         setLoading(false);
@@ -239,11 +247,10 @@ const AllServicesPage: React.FC = () => {
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap">
                             <span
-                              className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                service.Active
+                              className={`px-3 py-1 rounded-full text-xs font-semibold ${service.Active
                                   ? "bg-green-100 text-green-800"
                                   : "bg-red-100 text-red-800"
-                              }`}
+                                }`}
                             >
                               {service.Active ? "Activo" : "Inactivo"}
                             </span>
@@ -261,11 +268,10 @@ const AllServicesPage: React.FC = () => {
                               {(userRole === "Administrador" || userRole === "Gestor") && (
                                 <button
                                   onClick={() => handleToggleStatus(service)}
-                                  className={`px-6 py-2 rounded-full transition text-xs font-medium text-white ${
-                                    service.Active
+                                  className={`px-6 py-2 rounded-full transition text-xs font-medium text-white ${service.Active
                                       ? "bg-red-500 hover:bg-red-600"
                                       : "bg-green-500 hover:bg-green-600"
-                                  }`}
+                                    }`}
                                 >
                                   {service.Active ? "Desactivar" : "Activar"}
                                 </button>
@@ -326,11 +332,10 @@ const AllServicesPage: React.FC = () => {
                 Cancelar
               </button>
               <button
-                className={`px-4 py-2 rounded-full text-white ${
-                  modalAction === "desactivar"
+                className={`px-4 py-2 rounded-full text-white ${modalAction === "desactivar"
                     ? "bg-red-500 hover:bg-red-600"
                     : "bg-green-500 hover:bg-green-600"
-                }`}
+                  }`}
                 onClick={confirmToggleStatus}
               >
                 Confirmar
