@@ -77,7 +77,6 @@ const CreateAssociate: React.FC = () => {
     text: string;
   } | null>(null);
   const { showSuccessToast, showErrorToast } = useAppToast();
-  
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -91,58 +90,66 @@ const CreateAssociate: React.FC = () => {
     setMessage(null);
 
     // Validaciones específicas
-  if (!form.LegalName) {
-    showErrorToast({ message: "El nombre legal es obligatorio." });
-    setLoading(false);
-    return;
-  }
-  if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(form.LegalName)) {
-    showErrorToast({ message: "El nombre legal solo puede contener letras y espacios." });
-    setLoading(false);
-    return;
-  }
-  if (!form.DNI || form.DNI.length < 8) {
-    showErrorToast({ message: "El DNI debe tener al menos 8 caracteres." });
-    setLoading(false);
-    return;
-  }
-  if (!form.Gender || form.Gender === "Seleccione una opcion") {
-    showErrorToast({ message: "El género es obligatorio." });
-    setLoading(false);
-    return;
-  }
-  if (!form.Province || form.Province === "Seleccione una opcion") {
-    showErrorToast({ message: "La provincia es obligatoria." });
-    setLoading(false);
-    return;
-  }
-  if (!form.CivilStatus || form.CivilStatus === "Seleccione una opcion") {
-    showErrorToast({ message: "El estado civil es obligatorio." });
-    setLoading(false);
-    return;
-  }
-  if (
-  !form.CBU ||
-  !/^\d{22}$/.test(form.CBU)
-) {
-  showErrorToast({ message: "El CBU debe tener exactamente 22 dígitos numéricos." });
-  setLoading(false);
-  return;
-}
-   if (!form.BirthDate) {
-    showErrorToast({ message: "La fecha de nacimiento es obligatoria." });
-    setLoading(false);
-    return;
-  }
-  // Validación de fecha de nacimiento (no mayor a 120 años)
-  const birthDate = new Date(form.BirthDate);
-  const today = new Date();
-  const maxAgeDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
-  if (birthDate < maxAgeDate) {
-    showErrorToast({ message: "La fecha de nacimiento no puede corresponder a una persona mayor a 120 años." });
-    setLoading(false);
-    return;
-  }
+    if (!form.LegalName) {
+      showErrorToast({ message: "El nombre legal es obligatorio." });
+      setLoading(false);
+      return;
+    }
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(form.LegalName)) {
+      showErrorToast({
+        message: "El nombre legal solo puede contener letras y espacios.",
+      });
+      setLoading(false);
+      return;
+    }
+    if (!form.DNI || form.DNI.length < 8) {
+      showErrorToast({ message: "El DNI debe tener al menos 8 caracteres." });
+      setLoading(false);
+      return;
+    }
+    if (!form.Gender || form.Gender === "Seleccione una opcion") {
+      showErrorToast({ message: "El género es obligatorio." });
+      setLoading(false);
+      return;
+    }
+    if (!form.Province || form.Province === "Seleccione una opcion") {
+      showErrorToast({ message: "La provincia es obligatoria." });
+      setLoading(false);
+      return;
+    }
+    if (!form.CivilStatus || form.CivilStatus === "Seleccione una opcion") {
+      showErrorToast({ message: "El estado civil es obligatorio." });
+      setLoading(false);
+      return;
+    }
+    if (!form.CBU || !/^\d{22}$/.test(form.CBU)) {
+      showErrorToast({
+        message: "El CBU debe tener exactamente 22 dígitos numéricos.",
+      });
+      setLoading(false);
+      return;
+    }
+    if (!form.BirthDate) {
+      showErrorToast({ message: "La fecha de nacimiento es obligatoria." });
+      setLoading(false);
+      return;
+    }
+    // Validación de fecha de nacimiento (no mayor a 120 años)
+    const birthDate = new Date(form.BirthDate);
+    const today = new Date();
+    const maxAgeDate = new Date(
+      today.getFullYear() - 120,
+      today.getMonth(),
+      today.getDate()
+    );
+    if (birthDate < maxAgeDate) {
+      showErrorToast({
+        message:
+          "La fecha de nacimiento no puede corresponder a una persona mayor a 120 años.",
+      });
+      setLoading(false);
+      return;
+    }
     // Validación de todos los campos obligatorios
     if (
       !form.LegalName ||
@@ -192,7 +199,8 @@ const CreateAssociate: React.FC = () => {
     } catch (error: any) {
       let errorMessage = "Error interno al registrar el asociado.";
       if (error?.response?.data) {
-        errorMessage = error.response.data.message ||
+        errorMessage =
+          error.response.data.message ||
           error.response.data.mensaje ||
           error.response.data.errorDetails ||
           errorMessage;
@@ -217,8 +225,7 @@ const CreateAssociate: React.FC = () => {
           <div className="w-full max-w-xl">
             <div className="flex justify-start mb-6">
               <button
-                onClick={() => navigate("/asociados/detalle/:id")}
-                ///asociados/crear/familiar/:associateId
+                onClick={() => navigate("/asociados")}
                 className="text-gray-600 hover:text-gray-800 flex items-center"
                 aria-label="Volver a Usuarios"
               >
