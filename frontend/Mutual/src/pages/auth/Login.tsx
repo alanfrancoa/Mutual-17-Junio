@@ -50,12 +50,15 @@ const Login = () => {
 
       const payload = parseJwt(token);
       if (payload?.role) sessionStorage.setItem("userRole", payload.role);
-      if (payload?.username) sessionStorage.setItem("username", payload.username);
+      if (payload?.username)
+        sessionStorage.setItem("username", payload.username);
 
       navigate("/dashboard");
       window.location.reload();
+
+    
     } catch (err: any) {
-      let errorMsg = "Error desconocido";
+      let errorMsg = "Credenciales invalidas";
       if (err.response?.data?.message || err.response?.data?.mensaje) {
         errorMsg = err.response.data.message || err.response.data.mensaje;
       } else if (err instanceof Error) {
@@ -116,7 +119,9 @@ const Login = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Contraseña</label>
+              <label className="block text-sm font-medium mb-1">
+                Contraseña
+              </label>
               <input
                 type="password"
                 value={password}
@@ -138,15 +143,15 @@ const Login = () => {
                 required
               />
               <label htmlFor="acceptTerms" className="text-sm">
-                Acepto los{' '}
+                Acepto los{" "}
                 <button
                   type="button"
                   className="underline text-blue-600 hover:text-blue-800"
                   onClick={() => setShowTermsModal(true)}
                 >
                   Términos y Condiciones
-                </button>{' '}
-                y la{' '}
+                </button>{" "}
+                y la{" "}
                 <button
                   type="button"
                   className="underline text-blue-600 hover:text-blue-800"
@@ -163,11 +168,11 @@ const Login = () => {
               disabled={loading || !acceptedTerms}
               className={`w-full ${
                 loading || !acceptedTerms
-                  ? 'bg-blue-300 cursor-not-allowed'
-                  : 'bg-blue-400 hover:bg-blue-500'
+                  ? "bg-blue-300 cursor-not-allowed"
+                  : "bg-blue-400 hover:bg-blue-500"
               } text-white py-2 rounded-full font-semibold transition`}
             >
-              {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+              {loading ? "Iniciando sesión..." : "Iniciar sesión"}
             </button>
           </div>
 
@@ -176,7 +181,7 @@ const Login = () => {
               type="button"
               onClick={() => setShowForgotPassModal(true)}
               className="text-blue-600 hover:underline text-sm bg-transparent border-none p-0"
-              style={{ background: 'none' }}
+              style={{ background: "none" }}
             >
               ¿Olvidaste tu contraseña?
             </button>
