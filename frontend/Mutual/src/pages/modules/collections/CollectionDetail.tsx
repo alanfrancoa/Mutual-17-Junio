@@ -27,6 +27,7 @@ const CollectionDetail: React.FC = () => {
       setLoading(true);
       try {
         const data = await apiMutual.GetCollectionActiveById(Number(id));
+        console.log("fecha", data.collectionDate);
         setCollection(data);
       } catch (err: any) {
         const errorMessage =
@@ -43,6 +44,43 @@ const CollectionDetail: React.FC = () => {
     };
     if (id) fetchDetail();
   }, [id]);
+
+  // Actualizar esta función para manejar el formato dd/MM/yyyy
+  const parseLocalDate = (dateStr: string | null | undefined) => {
+    if (!dateStr || typeof dateStr !== "string") return null;
+
+    try {
+      // Si viene en formato dd/MM/yyyy 
+      if (dateStr.includes("/")) {
+        const [day, month, year] = dateStr.split("/");
+        if (!day || !month || !year) return null;
+
+        const date = new Date(Number(year), Number(month) - 1, Number(day));
+
+        // Verificar que la fecha es válida
+        if (isNaN(date.getTime())) return null;
+
+        return date;
+      }
+
+      // Si viene en formato yyyy-MM-dd 
+      if (dateStr.includes("-")) {
+        const [year, month, day] = dateStr.split("-");
+        if (!year || !month || !day) return null;
+
+        const date = new Date(Number(year), Number(month) - 1, Number(day));
+
+        // Verificar que la fecha es válida
+        if (isNaN(date.getTime())) return null;
+
+        return date;
+      }
+
+      return null;
+    } catch (error) {
+      return null;
+    }
+  };
 
   if (loading) {
     return (
@@ -143,17 +181,16 @@ const CollectionDetail: React.FC = () => {
                       </label>
                       <input
                         type="text"
-                        value={
-                          collection.collectionDate
-                            ? new Date(
-                                collection.collectionDate
-                              ).toLocaleDateString("es-AR", {
+                        value={(() => {
+                          const parsedDate = parseLocalDate(collection.collectionDate);
+                          return parsedDate
+                            ? parsedDate.toLocaleDateString("es-AR", {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric",
                               })
-                            : "No especificada"
-                        }
+                            : "No especificada";
+                        })()}
                         readOnly
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
                       />
@@ -199,6 +236,7 @@ const CollectionDetail: React.FC = () => {
                         />
                       </div>
                     )}
+                    
                     {/* Botones de acción */}
                     <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-3 pt-6 border-t border-gray-200 mt-8">
                       <button
