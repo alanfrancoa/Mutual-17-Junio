@@ -8,7 +8,7 @@ export interface ICollection {
   method: string;
 }
 
-export interface ICollectionList {
+export interface ICollectionsResponse {
   items: ICollection[];
   totalItems: number;
   page: number;

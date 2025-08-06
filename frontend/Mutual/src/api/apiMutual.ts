@@ -18,6 +18,7 @@ import {
   ICollection,
   ICollectionMethod,
   ICollectionDetail,
+  ICollectionsResponse,
 } from "../types/ICollection";
 import { IOverdueInstallment } from "../types/IInstallment";
 import { ILoanTypesList } from "../types/loans/ILoanTypesList";
@@ -995,20 +996,29 @@ export const apiMutual = {
   },
 
   /* ----------------------- Actualizar metodo de cobro ----------------------- */
-  UpdateCollectionMethod: async (id: number, data: { name: string; code: string }): Promise<{ message: string }> => {
+  UpdateCollectionMethod: async (
+    id: number,
+    data: { name: string; code: string }
+  ): Promise<{ message: string }> => {
     const url = AppConfig.apiUrl + `/collection-method/${id}`;
-    const response = await Fetcher.put(url, {
-      Name: data.name,    // ✅ Cambiar a PascalCase
-      Code: data.code     // ✅ Cambiar a PascalCase
-    }, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    const response = await Fetcher.put(
+      url,
+      {
+        Name: data.name,
+        Code: data.code,
       },
-    });
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+        },
+      }
+    );
     if (response.status && response.status >= 400) {
       const responseData = response.data as { message?: string };
-      throw new Error(responseData?.message || "No se pudo actualizar el método de cobro");
+      throw new Error(
+        responseData?.message || "No se pudo actualizar el método de cobro"
+      );
     }
     return response.data as { message: string };
   },
@@ -1060,21 +1070,15 @@ export const apiMutual = {
   },
 
   /* ----------------------- Obtener listado de cobros ----------------------- */
-  GetCollections: async (): Promise<ICollection[]> => {
-    const url = AppConfig.apiUrl + `/collections`;
+  GetCollections: async (): Promise<ICollectionsResponse> => {
+    const url = AppConfig.apiUrl + "/collections";
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
-    if (response.status && response.status >= 400) {
-      const data = response.data as { mensaje?: string };
-      throw new Error(
-        data?.mensaje || "No se pudo obtener el listado de cobros"
-      );
-    }
-    return response.data as ICollection[];
+    return response.data as ICollectionsResponse;
   },
 
   /* ----------------------- Obtener listado de cobros x id ----------------------- */
