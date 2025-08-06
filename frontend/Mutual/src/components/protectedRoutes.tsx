@@ -1,6 +1,8 @@
 import { JSX } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Role } from "../helper/config";
+import useAppToast from "../hooks/useAppToast";
+import toast from "react-hot-toast";
 
 export interface ProtectedUser {
   username: string | null;
@@ -20,6 +22,8 @@ const ProtectedRoute = ({
   authorizedRoles,
 }: ProtectedRouteProps) => {
   const token = sessionStorage.getItem("token");
+  const { showErrorToast } = useAppToast();
+  const navigate = useNavigate();
 
   // Validacion username y role para redirigir sin ningun dato en session storage
   if (!user?.username || !user?.role) {
@@ -30,9 +34,15 @@ const ProtectedRoute = ({
 
   // Primero validamos el token, para redirigir al login con msj error de token vencido
   if (!token) {
+    showErrorToast({
+      title: "Error de autenticacion.",
+      message: "Sesion expirada, por favor ingrese nuevamente",
+    });
+
     return (
       <Navigate to={`/auth/login`} state={{ tokenExpired: true }} replace />
     );
+   
   }
 
   if (authorizedRoles && !authorizedRoles.includes(user.role!)) {

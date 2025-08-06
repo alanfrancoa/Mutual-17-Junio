@@ -19,12 +19,21 @@ const AxiosConfig: FC<React.PropsWithChildren> = (props) => {
     const responseInterceptor = api.interceptors.response.use(
       (response) => response,
       async (error) => {
-   
-        if (error.response?.status === 401) {
-          sessionStorage.clear();
+        console.log(error.response?.status);
+        // if (error.response?.status === 401) {
+        //   // console.error("ashdksjdhbjksdb");
+        //   // notification.error({
+        //   //   message: "Sesión expirada",
+        //   //   description: "Ingrese sesión nuevamente.",
+        //   //   placement: "topRight",
+        //   // });
 
-          return Promise.reject(error);
-        }
+        //   //sessionStorage.clear();
+        //   //window.location.replace("auth/login");
+        //   return Promise.reject(error);
+        
+        // }
+
 
         let message = "";
         if (!(error?.response?.data instanceof ArrayBuffer)) {
