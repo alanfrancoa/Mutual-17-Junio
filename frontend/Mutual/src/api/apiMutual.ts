@@ -141,14 +141,15 @@ export const apiMutual = {
 
   /* ----------------------- 5. Reactivar alta Usuarios ----------------------- */
 
-  ReactivateUser: async (id: number): Promise<void> => {
+  ReactivateUser: async (id: number): Promise<any> => {
     const url = AppConfig.apiUrl + `/users/${id}/reactivate`;
-    await Fetcher.put(url, {
+    const response = await Fetcher.put(url, {}, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
       },
     });
+    return response.data;
   },
   /* ----------------------- 6. Actualizar Usuarios ----------------------- */
 
