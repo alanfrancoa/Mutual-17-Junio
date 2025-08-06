@@ -6,7 +6,7 @@ import { apiMutual } from "../../../api/apiMutual";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import useAppToast from "../../../hooks/useAppToast";
 import { ICollection, ICollectionsResponse } from "../../../types/ICollection";
-import AnnulCollectionModal from "./AnnulCollectionModal";
+import AnnulCollectionModal from "../../../components/ui/AnnulCollectionModal";
 
 const PAGE_SIZE = 10;
 
@@ -25,9 +25,11 @@ const Collections: React.FC = () => {
     });
     const [showAnnulModal, setShowAnnulModal] = useState(false);
     const [selectedCollection, setSelectedCollection] = useState<ICollection | null>(null);
+    const [modalError, setModalError] = useState<string | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
     const [page, setPage] = useState(1);
     const navigate = useNavigate();
-    const { showErrorToast } = useAppToast();
+    const { showErrorToast, showSuccessToast } = useAppToast();
 
     const fetchCollections = async () => {
         setLoading(true);
@@ -103,6 +105,49 @@ const Collections: React.FC = () => {
     const handleAnnulCollection = (collection: ICollection) => {
         setSelectedCollection(collection);
         setShowAnnulModal(true);
+        setModalError(null);
+    };
+
+    const handleCloseModal = () => {
+        setShowAnnulModal(false);
+        setSelectedCollection(null);
+        setModalError(null);
+        setIsProcessing(false);
+    };
+
+    const confirmAnnulCollection = async (reason: string) => {
+        if (!selectedCollection) return;
+
+        setIsProcessing(true);
+        setModalError(null);
+
+        try {
+            await apiMutual.AnnullCollection(selectedCollection.id, reason);
+            showSuccessToast({
+                title: "Cobro anulado",
+                message: "El cobro ha sido anulado correctamente",
+            });
+            
+            // Actualizar la lista de cobros
+            setCollections((prevCollections) =>
+                prevCollections.map((c) =>
+                    c.id === selectedCollection.id ? { ...c, status: "Cancelado" } : c
+                )
+            );
+            handleCloseModal();
+        } catch (error: any) {
+            const errorMessage =
+                error.response?.data?.message ||
+                error.response?.data?.mensaje ||
+                (typeof error.response?.data === "string"
+                    ? error.response.data
+                    : null) ||
+                error.message ||
+                "Error desconocido";
+            setModalError(errorMessage);
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     const handlePrintCollection = async (collection: ICollection) => {
@@ -375,13 +420,15 @@ const Collections: React.FC = () => {
                 </main>
             </div>
 
-            {showAnnulModal && selectedCollection && (
-                <AnnulCollectionModal
-                    collection={selectedCollection}
-                    onClose={() => setShowAnnulModal(false)}
-                    onSuccess={fetchCollections}
-                />
-            )}
+            <AnnulCollectionModal
+                isOpen={showAnnulModal && selectedCollection !== null}
+                onClose={handleCloseModal}
+                onConfirm={confirmAnnulCollection}
+                collectionId={selectedCollection?.id || 0}
+                associateName={selectedCollection?.associate || ""}
+                modalError={modalError}
+                isLoading={isProcessing}
+            />
         </div>
     );
 };
