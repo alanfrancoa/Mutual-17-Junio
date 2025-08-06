@@ -39,10 +39,16 @@ const CreateUser: React.FC = () => {
       return;
     }
 
-    
     if (form.usuario.length < 6) {
       showErrorToast({
         message: "El nombre de usuario debe tener mínimo 6 letras.",
+      });
+      return;
+    }
+
+    if (!/^[a-zA-Z]+$/.test(form.usuario)) {
+      showErrorToast({
+        message: "El nombre de usuario solo puede contener letras.",
       });
       return;
     }
@@ -50,7 +56,7 @@ const CreateUser: React.FC = () => {
       showErrorToast({ message: "Las contraseñas no coinciden" });
       return;
     }
-    
+
     try {
       await apiMutual.CreateUser(
         form.usuario,
@@ -59,8 +65,9 @@ const CreateUser: React.FC = () => {
         form.rol
       );
       showSuccessToast({
-          title: "Usuario creado",
-        message: "Usuario creado correctamente" });
+        title: "Usuario creado",
+        message: "Usuario creado correctamente",
+      });
       navigate("/usuarios");
     } catch (error: any) {
       const errorMsg =
@@ -68,9 +75,9 @@ const CreateUser: React.FC = () => {
         error?.message ||
         "Error de sistema al crear usuario";
       showErrorToast({
-          title: "Error del servidor.",
-          message: errorMsg
-        });
+        title: "Error del servidor.",
+        message: errorMsg,
+      });
     }
   };
 
