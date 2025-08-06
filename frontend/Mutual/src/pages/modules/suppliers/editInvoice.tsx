@@ -177,21 +177,21 @@ const EditInvoice: React.FC = () => {
         message: "La factura se actualizó correctamente" 
       });
       
-      setTimeout(() => navigate("/proveedores/facturas"), 1500);
-    } catch (err: any) {
-      if (err.message.includes("No se puede editar una factura que ya ha sido pagada")) {
-        showErrorToast({ message: "No se puede editar una factura que ya ha sido pagada" });
-      } else if (err.message.includes("Ya existe otra factura con ese número")) {
-        showErrorToast({ message: "Ya existe otra factura con ese número para este proveedor" });
-      } else if (err.message.includes("No hay un período contable activo")) {
-        showErrorToast({ message: "No hay un período contable activo para actualizar la factura" });
-      } else {
-        showErrorToast({ message: err.message || "Error al actualizar la factura" });
-      }
-    } finally {
-      setLoading(false);
+   setTimeout(() => navigate("/proveedores/facturas"), 1500);
+  } catch (err: any) {
+    if (err.response?.status === 400 && err.response?.data?.message === "No se puede reducir el monto de una factura que ya ha sido pagada.") {
+      showErrorToast({ title: "Error", message: "No se puede reducir el monto de una factura que ya ha sido pagada." });
+    } else if (err.response?.data?.message?.includes("Ya existe otra factura con ese número")) {
+      showErrorToast({ message: "Ya existe otra factura con ese número para este proveedor" });
+    } else if (err.response?.data?.message?.includes("No hay un período contable activo")) {
+      showErrorToast({ message: "No hay un período contable activo para actualizar la factura" });
+    } else {
+      showErrorToast({ message: err.response?.data?.message || "Error al actualizar la factura" });
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (dataLoading) {
     return (

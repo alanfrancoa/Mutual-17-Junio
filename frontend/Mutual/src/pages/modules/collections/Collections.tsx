@@ -250,7 +250,7 @@ const Collections: React.FC = () => {
 
                                 <div className="flex gap-2 w-full md:w-auto">
                                     <button
-                                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full font-semibold shadow transition w-full md:w-auto"
+                                        className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-full font-semibold shadow transition w-full md:w-auto"
                                         onClick={() => navigate("/collections/payment-methods")}
                                     >
                                         Métodos de Cobro

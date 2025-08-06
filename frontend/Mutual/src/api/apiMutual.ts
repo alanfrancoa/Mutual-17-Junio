@@ -299,7 +299,12 @@ export const apiMutual = {
     relativeData: IRelativeRegister
   ): Promise<{ mensaje: string }> => {
     const url = AppConfig.apiUrl + `/asociate/${associateId}/relative`;
-    const response = await Fetcher.post(url, relativeData);
+     const response = await Fetcher.post(url, relativeData, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+  });
     return response.data as { mensaje: string };
   },
 
@@ -308,7 +313,12 @@ export const apiMutual = {
     associateId: number
   ): Promise<IRelativeList[]> => {
     const url = AppConfig.apiUrl + `/asociate/${associateId}/relative`;
-    const response = await Fetcher.get(url);
+    const response = await Fetcher.get(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+  });
     return response.data as IRelativeList[];
   },
 
@@ -318,7 +328,12 @@ export const apiMutual = {
     relativeData: IRelativeUpdate
   ): Promise<{ mensaje: string }> => {
     const url = AppConfig.apiUrl + `/relative/${relativeId}`;
-    const response = await Fetcher.put(url, relativeData);
+    const response = await Fetcher.put(url, relativeData,{
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+  });
     return response.data as { mensaje: string };
   },
 
@@ -393,7 +408,12 @@ export const apiMutual = {
     supplierData: ISupplierRegister
   ): Promise<{ mensaje: string }> => {
     const url = AppConfig.apiUrl + `/suppliers/${supplierId}`;
-    const response = await Fetcher.put(url, supplierData);
+    const response = await Fetcher.put(url, supplierData, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+    },
+  });
     return response.data as { mensaje: string };
   },
 
