@@ -469,7 +469,6 @@ export const apiMutual = {
       );
     }
 
-    // Si la respuesta es un objeto con mensaje (caso vacio)
     if (
       response.data &&
       typeof response.data === "object" &&
@@ -478,7 +477,6 @@ export const apiMutual = {
       return [];
     }
 
-    // si no hay datos, devolver array vacío
     return Array.isArray(response.data) ? response.data : [];
   },
 
@@ -615,7 +613,6 @@ export const apiMutual = {
       },
     });
     if (response.status && response.status >= 400) {
-      // Si Fetcher devuelve un status de error
       const data = response.data as { mensaje?: string };
       throw new Error(data?.mensaje || "No se pudo registrar el servicio");
     }
@@ -655,7 +652,6 @@ export const apiMutual = {
       );
     }
 
-    // Si la respuesta es un objeto con mensaje (caso vacio)
     if (
       response.data &&
       typeof response.data === "object" &&
@@ -664,7 +660,6 @@ export const apiMutual = {
       return [];
     }
 
-    // si no hay datos, devolver array vacío
     return Array.isArray(response.data) ? response.data : [];
   },
 
@@ -836,25 +831,19 @@ export const apiMutual = {
     } catch (error: any) {
       console.error("Error en RegisterSupplierPayment:", error);
 
-      // ✅ CAMBIO: Manejo específico de errores
       if (error.response) {
-        // El servidor respondió con un código de error
         const status = error.response.status;
         const data = error.response.data;
 
         if (status === 409) {
-          // Conflicto - número de recibo duplicado
           throw new Error(
             data?.message || "El número de recibo ya existe para esta factura"
           );
         } else if (status === 400) {
-          // Bad request - validaciones del backend
           throw new Error(data?.message || "Datos inválidos");
         } else if (status === 404) {
-          // Not found - factura, método de pago, etc.
           throw new Error(data?.message || "Recurso no encontrado");
         } else if (status >= 500) {
-          // Error del servidor
           throw new Error(data?.message || "Error interno del servidor");
         } else {
           throw new Error(data?.message || `Error ${status}`);
@@ -1160,7 +1149,6 @@ export const apiMutual = {
   ): Promise<IOverdueInstallment[]> => {
     let url = AppConfig.apiUrl + `/installments/pending`;
 
-    // Agregar parámetro de query si se proporciona
     if (estado) {
       url += `?estado=${encodeURIComponent(estado)}`;
     }
@@ -1181,6 +1169,23 @@ export const apiMutual = {
 
     return response.data as IOverdueInstallment[];
   },
+
+  /* ----------------------- Generar PDF del comprobante de cobro ----------------------- */
+  GenerateCollectionPdf: async (collectionId: number): Promise<Blob> => {
+    const url = AppConfig.apiUrl + `/collections/${collectionId}/pdf`;
+    const response = await Fetcher.get(url, {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
+      },
+      responseType: "blob",
+    });
+    if (response.status && response.status >= 400) {
+      const data = response.data as { message?: string };
+      throw new Error(data?.message || "No se pudo generar el PDF del cobro");
+    }
+    return response.data as Blob;
+  },
+
   /* -----------------------------Modulo prestamos---------------------- */
   /* ----------------------- 1. Crear tipo de prestamo ----------------------- */
   CreateLoanType: async (

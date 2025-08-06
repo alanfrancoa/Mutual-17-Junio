@@ -5,7 +5,6 @@ import Sidebar from "../../dashboard/components/Sidebar";
 import { apiMutual } from "../../../api/apiMutual";
 import { ISupplierList } from "../../../types/ISupplierList";
 import useAppToast from "../../../hooks/useAppToast";
-// Importar los íconos necesarios
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import SupplierStatusModal from "../../../components/ui/auth/supplierStatusModal";
 

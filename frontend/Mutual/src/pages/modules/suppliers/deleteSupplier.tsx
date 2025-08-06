@@ -67,7 +67,6 @@ const DeleteSupplier: React.FC = () => {
     setIsProcessing(true);
 
     try {
-      // Primero intentamos cambiar el estado
       await apiMutual.ChangeSupplierStatus(Number(id), newStatus);
 
       showSuccessToast({
@@ -78,7 +77,6 @@ const DeleteSupplier: React.FC = () => {
         options: { duration: 3000 },
       });
 
-      // Luego actualizamos la vista con el nuevo estado
       try {
         const data = await apiMutual.GetSupplierById(Number(id));
         setSupplier((prev) => (prev ? { ...prev, active: data.active } : null));
@@ -152,7 +150,7 @@ const DeleteSupplier: React.FC = () => {
           const fullErrorMessage = `${errorMessage}${errorDetails}${innerError}`;
           setModalError(fullErrorMessage);
           showErrorToast({
-            title: "Error del servidor", // Título corregido
+            title: "Error del servidor",
             message: fullErrorMessage,
             options: { duration: 6000 },
           });

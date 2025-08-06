@@ -218,11 +218,9 @@ const EditService: React.FC = () => {
     } catch (err: any) {
       console.error("Error al actualizar servicio:", err);
       
-      // Manejar diferentes tipos de error del backend según tu controller
       let errorMessage = "Error desconocido al actualizar el servicio";
       
       if (err.response?.status === 400) {
-        // Error 400: Objeto con mensaje
         if (err.response.data?.mensaje) {
           if (err.response.data.mensaje.includes("tipo de servicio no existe")) {
             errorMessage = "El tipo de servicio seleccionado no existe o no está disponible";
@@ -232,23 +230,18 @@ const EditService: React.FC = () => {
             errorMessage = err.response.data.mensaje;
           }
         } else {
-          // ModelState validation errors
           errorMessage = "Error de validación: Verifique que todos los campos estén completos y sean válidos";
         }
       } else if (err.response?.status === 404) {
-        // Error 404: Servicio no encontrado
         errorMessage = err.response.data?.mensaje || "El servicio no fue encontrado o ya no existe";
       } else if (err.response?.status === 500) {
-        // Error 500: Objeto con message
         errorMessage = err.response.data?.message || "Error interno del servidor. Intente nuevamente más tarde";
       } else if (err.response?.data) {
-        // Otros errores
         errorMessage = err.response.data.mensaje || 
                      err.response.data.message || 
                      (typeof err.response.data === 'string' ? err.response.data : null) ||
                      "Error del servidor";
       } else {
-        // Error de red o conexión
         errorMessage = err.message || "Error de conexión. Verifique su conexión a internet";
       }
 

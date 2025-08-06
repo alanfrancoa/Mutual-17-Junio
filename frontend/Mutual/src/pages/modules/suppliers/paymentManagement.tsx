@@ -74,8 +74,6 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
       const invoicePayments = allPayments.filter((p: IPaymentList) => p.invoiceId === invoiceId);
       setSavedPayments(invoicePayments);
 
-      // ✅ CAMBIO: El cálculo del total se hace en el useEffect de arriba
-      // Ya no calculamos aquí para evitar duplicación
     } catch (error) {
       console.error("Error al cargar pagos:", error);
       setSavedPayments([]);
@@ -468,7 +466,6 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
       <div className="flex justify-between items-center mt-4">
         <div className="flex gap-2">
           {!invoicePaid && remainingBalance > 0 && (
-            // Botón Agregar línea
             <button
               type="button"
               onClick={addPaymentLine}
@@ -480,7 +477,6 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({
             </button>
           )}
           {paymentLines.length > 0 && (
-            // Botón Limpiar Todo
             <button
               type="button"
               onClick={() => setPaymentLines([])}

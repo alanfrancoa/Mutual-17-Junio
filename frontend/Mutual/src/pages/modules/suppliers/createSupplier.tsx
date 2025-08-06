@@ -131,12 +131,6 @@ const CreateSupplier: React.FC = () => {
           });
       }
 
-      // Log del error para debugging
-      console.error("Error al registrar proveedor:", {
-        status: errorResponse?.status,
-        data: errorResponse?.data,
-        error: error,
-      });
     } finally {
       setLoading(false);
     }

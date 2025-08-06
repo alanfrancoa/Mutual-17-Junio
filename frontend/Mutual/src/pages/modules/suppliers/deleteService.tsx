@@ -166,7 +166,7 @@ const DeleteService: React.FC = () => {
                 type="button"
                 onClick={() => navigate("/proveedores/servicios")}
                 className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded transition disabled:opacity-50" 
-                disabled={processing} // ✅ AÑADIR
+                disabled={processing}
               >
                 Cancelar
               </button>

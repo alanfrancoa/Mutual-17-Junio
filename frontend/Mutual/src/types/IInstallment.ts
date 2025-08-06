@@ -1,7 +1,7 @@
 export interface IOverdueInstallment {
   id: number;
   installmentNumber: number;
-  dueDate: string; // formato "yyyy-MM-dd"
+  dueDate: string;
   amount: number;
   daysOverdue: number;
   associate: string;

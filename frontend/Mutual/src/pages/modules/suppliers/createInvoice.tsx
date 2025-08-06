@@ -175,7 +175,6 @@ const InvoiceCreatePage: React.FC = () => {
         switch (status) {
           case 400:
             errorTitle = "Datos inválidos";
-            //backend devuelve { message: "El proveedor especificado no existe." }
             errorMessage = data?.message || "Los datos enviados no son válidos";
             break;
           case 401:
@@ -185,7 +184,6 @@ const InvoiceCreatePage: React.FC = () => {
             break;
           case 409:
             errorTitle = "Factura duplicada";
-            //backend devuelve { message: "Ya existe una factura con ese número para este proveedor." }
             errorMessage =
               data?.message || "Ya existe una factura con estos datos";
             break;

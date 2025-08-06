@@ -61,7 +61,7 @@ const OverdueInstallments: React.FC = () => {
             }
         };
         fetchOverdue();
-    }, []); // ✅ Quité showErrorToast de las dependencias
+    }, []);
 
     // Filtra antes de paginar
     const filteredInstallments = installments.filter(i =>
