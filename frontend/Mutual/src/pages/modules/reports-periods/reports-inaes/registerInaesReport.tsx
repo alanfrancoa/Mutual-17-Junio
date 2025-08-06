@@ -25,27 +25,43 @@ const RegisterReport: React.FC<RegisterReportProps> = ({ closedPeriods }) => {
     setMessage(null);
   };
 
-// Busca si existen reportes inaes en la lista y manda toast
-useEffect(() => {
-  const fetchReports = async () => {
-    try {
-      const reports = await apiMutual.GetInaesReports();
-      const reportsList = Array.isArray(reports) ? reports : [];
-      setInaesReports(reportsList);
-     
-    } catch (error: any) {
-      showErrorToast({
-        title: "Error al cargar reportes",
-        message: "No se pudieron cargar los reportes INAES. Por favor, intente nuevamente.",
-      });
-    }
-  };
-  fetchReports();
-}, []); 
-
+  // Busca si existen reportes inaes en la lista y manda toast
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const reports = await apiMutual.GetInaesReports();
+        const reportsList = Array.isArray(reports) ? reports : [];
+        setInaesReports(reportsList);
+      } catch (error: any) {
+        showErrorToast({
+          title: "Error al cargar reportes",
+          message:
+            "No se pudieron cargar los reportes INAES. Por favor, intente nuevamente.",
+        });
+      }
+    };
+    fetchReports();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const userRole = sessionStorage.getItem("userRole");
+    if (userRole === "Consultor" || userRole === "Gestor") {
+      showErrorToast({
+        title: "Acceso no autorizado",
+        message: "No tiene permisos para registrar reportes INAES.",
+      });
+      return;
+    }
+
+    if (!selectedPeriodId) {
+      showWarningToast({
+        title: "Selección requerida",
+        message: "Por favor, seleccione un período contable.",
+      });
+      return;
+    }
 
     if (!selectedPeriodId) {
       showWarningToast({
@@ -190,8 +206,7 @@ useEffect(() => {
 
         {/* Lista de reportes INAES */}
         <div className="mt-8">
-          <ListInaesReport
-           reports={inaesReports} />
+          <ListInaesReport reports={inaesReports} />
         </div>
       </div>
     </>
