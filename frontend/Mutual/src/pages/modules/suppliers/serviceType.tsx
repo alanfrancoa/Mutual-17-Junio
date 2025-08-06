@@ -37,14 +37,7 @@ const ServiceTypeList: React.FC = () => {
   const [modalError, setModalError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Verificar permisos
-  useEffect(() => {
-    const userRole = sessionStorage.getItem("userRole");
-    if (userRole !== "Administrador") {
-      navigate("/dashboard");
-      return;
-    }
-  }, [navigate]);
+
 
   useEffect(() => {
     fetchServiceTypes();

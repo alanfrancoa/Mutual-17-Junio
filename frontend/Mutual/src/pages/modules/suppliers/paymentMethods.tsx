@@ -63,13 +63,7 @@ const PaymentMethods: React.FC = () => {
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  useEffect(() => {
-    const userRole = sessionStorage.getItem("userRole");
-    if (userRole !== "Administrador") {
-      navigate("/dashboard");
-      return;
-    }
-  }, [navigate]);
+ 
 
   useEffect(() => {
     loadPaymentMethods();
