@@ -39,13 +39,14 @@ import {
   IPaymentList,
   IPaymentMethod,
 } from "../types/IPayment";
+import { AppConfig } from "../helper/config";
 
 /* -----------------------Llamadas API----------------------- */
 
 /* -----------------------Mod. AUTH login usuarios---------------------- */
 export const apiMutual = {
   Login: async (username: string, password: string): Promise<string> => {
-    const url = `https://localhost:7256/api/login`;
+    const url = AppConfig.apiUrl + `/login`;
 
     const response = await Fetcher.post(
       url,
@@ -76,7 +77,7 @@ export const apiMutual = {
     confirmPassword: string,
     role: string
   ): Promise<any> => {
-    const url = `https://localhost:7256/api/users`;
+    const url = AppConfig.apiUrl + `/users`;
     const response = await Fetcher.post(
       url,
       {
@@ -97,7 +98,7 @@ export const apiMutual = {
 
   /* ----------------------- 2. Listar Usuarios ----------------------- */
   GetUsers: async (): Promise<User[]> => {
-    const url = `https://localhost:7256/api/users`;
+    const url = AppConfig.apiUrl + `/users`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -110,7 +111,7 @@ export const apiMutual = {
   /* ----------------------- 3. Detalle Usuarios ----------------------- */
 
   GetUserById: async (id: number): Promise<User> => {
-    const url = `https://localhost:7256/api/users/${id}`;
+    const url = AppConfig.apiUrl + `/users/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -123,7 +124,7 @@ export const apiMutual = {
   /* ----------------------- 4. Baja Usuarios ----------------------- */
 
   DeleteUser: async (id: number): Promise<any> => {
-    const url = `https://localhost:7256/api/users/${id}/state`;
+    const url = AppConfig.apiUrl + `/users/${id}/state`;
     const response = await Fetcher.put(
       url,
       {},
@@ -140,7 +141,7 @@ export const apiMutual = {
   /* ----------------------- 5. Reactivar alta Usuarios ----------------------- */
 
   ReactivateUser: async (id: number): Promise<void> => {
-    const url = `https://localhost:7256/api/users/${id}/reactivate`;
+    const url = AppConfig.apiUrl + `/users/${id}/reactivate`;
     await Fetcher.put(url, {
       headers: {
         "Content-Type": "application/json",
@@ -156,7 +157,7 @@ export const apiMutual = {
     Newpassword: string | null,
     role: string
   ): Promise<any> => {
-    const url = `https://localhost:7256/api/users/${id}`;
+    const url = AppConfig.apiUrl + `/users/${id}`;
     const response = await Fetcher.put(
       url,
       {
@@ -179,7 +180,7 @@ export const apiMutual = {
 
   /* ----------------------- 1. Listar registros de auditoria ----------------------- */
   GetAuditLogs: async (): Promise<AuditLog[]> => {
-    const url = `https://localhost:7256/api/audits-logs`;
+    const url = AppConfig.apiUrl + `/audits-logs`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -192,7 +193,7 @@ export const apiMutual = {
 
   /* ----------------------- 2. Filtrar registros de auditoria por entidad ----------------------- */
   GetAuditLogsByEntityType: async (entityType: string): Promise<AuditLog[]> => {
-    const url = `https://localhost:7256/api/audits-logs/${entityType}`;
+    const url = AppConfig.apiUrl + `/audits-logs/${entityType}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -209,7 +210,7 @@ export const apiMutual = {
   RegisterAssociate: async (
     associateData: IAssociateRegister
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/associates`;
+    const url = AppConfig.apiUrl + `/associates`;
     const response = await Fetcher.post(url, associateData, {
       headers: {
         "Content-Type": "application/json",
@@ -221,7 +222,7 @@ export const apiMutual = {
 
   /* ----------------------- 2. Obtener lista de Asociados ----------------------- */
   GetAllAssociates: async (): Promise<IAssociateList[]> => {
-    const url = `https://localhost:7256/api/associates`;
+    const url = AppConfig.apiUrl + `/associates`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -233,7 +234,7 @@ export const apiMutual = {
 
   /* ----------------------- 3. Obtener Asociado por ID ----------------------- */
   GetAssociateById: async (id: number): Promise<IAssociateList> => {
-    const url = `https://localhost:7256/api/associates/${id}`;
+    const url = AppConfig.apiUrl + `/associates/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -245,7 +246,7 @@ export const apiMutual = {
 
   /* ----------------------- 4. Obtener Asociado por DNI ----------------------- */
   GetAssociateByDni: async (dni: string): Promise<IAssociateList> => {
-    const url = `https://localhost:7256/api/associates/dni/${dni}`;
+    const url = AppConfig.apiUrl + `/associates/dni/${dni}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -260,7 +261,7 @@ export const apiMutual = {
     id: number,
     associateData: IAssociateRegister
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/associates/${id}`;
+    const url = AppConfig.apiUrl + `/associates/${id}`;
     const response = await Fetcher.put(url, associateData, {
       headers: {
         "Content-Type": "application/json",
@@ -275,7 +276,7 @@ export const apiMutual = {
     id: number,
     newStatus: boolean
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/associates/${id}/state`;
+    const url = AppConfig.apiUrl + `/associates/${id}/state`;
     console.log(url);
     console.log(newStatus);
 
@@ -296,7 +297,7 @@ export const apiMutual = {
     associateId: number,
     relativeData: IRelativeRegister
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/asociate/${associateId}/relative`;
+    const url = AppConfig.apiUrl + `/asociate/${associateId}/relative`;
     const response = await Fetcher.post(url, relativeData);
     return response.data as { mensaje: string };
   },
@@ -305,7 +306,7 @@ export const apiMutual = {
   GetRelativesByAssociateId: async (
     associateId: number
   ): Promise<IRelativeList[]> => {
-    const url = `https://localhost:7256/api/asociate/${associateId}/relative`;
+    const url = AppConfig.apiUrl + `/asociate/${associateId}/relative`;
     const response = await Fetcher.get(url);
     return response.data as IRelativeList[];
   },
@@ -315,7 +316,7 @@ export const apiMutual = {
     relativeId: number,
     relativeData: IRelativeUpdate
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/relative/${relativeId}`;
+    const url = AppConfig.apiUrl + `/relative/${relativeId}`;
     const response = await Fetcher.put(url, relativeData);
     return response.data as { mensaje: string };
   },
@@ -325,7 +326,7 @@ export const apiMutual = {
     relativeId: number,
     newStatus: boolean
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/relative/${relativeId}/status`;
+    const url = AppConfig.apiUrl + `/relative/${relativeId}/status`;
     const response = await Fetcher.patch(url, newStatus, {
       headers: {
         "Content-Type": "application/json",
@@ -340,7 +341,7 @@ export const apiMutual = {
   RegisterSupplier: async (
     supplierData: ISupplierRegister
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/suppliers`;
+    const url = AppConfig.apiUrl + `/suppliers`;
     const response = await Fetcher.post(url, supplierData, {
       headers: {
         "Content-Type": "application/json",
@@ -356,7 +357,7 @@ export const apiMutual = {
   },
   /* ----------------------- 2. Obtener lista de Proveedores ----------------------- */
   GetAllSuppliers: async (): Promise<any[]> => {
-    const url = "https://localhost:7256/api/suppliers";
+    const url = AppConfig.apiUrl + "/suppliers";
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -374,7 +375,7 @@ export const apiMutual = {
   /* ----------------------- 3. Obtener Proveedor por ID ----------------------- */
 
   GetSupplierById: async (id: number): Promise<ISupplierList> => {
-    const url = `https://localhost:7256/api/suppliers/${id}`;
+    const url = AppConfig.apiUrl + `/suppliers/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -390,7 +391,7 @@ export const apiMutual = {
     supplierId: number,
     supplierData: ISupplierRegister
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/suppliers/${supplierId}`;
+    const url = AppConfig.apiUrl + `/suppliers/${supplierId}`;
     const response = await Fetcher.put(url, supplierData);
     return response.data as { mensaje: string };
   },
@@ -400,7 +401,7 @@ export const apiMutual = {
     supplierId: number,
     newStatus: boolean
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/suppliers/${supplierId}/status`;
+    const url = AppConfig.apiUrl + `/suppliers/${supplierId}/status`;
     const response = await Fetcher.patch(url, JSON.stringify(newStatus), {
       headers: {
         "Content-Type": "application/json",
@@ -412,7 +413,7 @@ export const apiMutual = {
 
   /* ----------------------- Obtener lista de servicios ----------------------- */
   GetServices: async (): Promise<any[]> => {
-    const url = "https://localhost:7256/api/services";
+    const url = AppConfig.apiUrl + "/services";
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -431,7 +432,7 @@ export const apiMutual = {
     code: string,
     name: string
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/services-type`;
+    const url = AppConfig.apiUrl + `/services-type`;
     const response = await Fetcher.post(
       url,
       { Code: code, Name: name },
@@ -453,7 +454,7 @@ export const apiMutual = {
   /* ----------------------- Obtener tipos de servicio ----------------------- */
 
   GetServiceTypes: async (): Promise<IServiceType[]> => {
-    const url = "https://localhost:7256/api/services-type";
+    const url = AppConfig.apiUrl + "/services-type";
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -482,7 +483,7 @@ export const apiMutual = {
 
   /* ----------------------- Obtener servicio por ID ----------------------- */
   GetServiceById: async (id: number): Promise<any> => {
-    const url = `https://localhost:7256/api/services/${id}`;
+    const url = AppConfig.apiUrl + `/services/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -506,7 +507,7 @@ export const apiMutual = {
       monthlyCost: number;
     }
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/services/${id}`;
+    const url = AppConfig.apiUrl + `/services/${id}`;
     const response = await Fetcher.put(url, serviceData, {
       headers: {
         "Content-Type": "application/json",
@@ -522,7 +523,7 @@ export const apiMutual = {
 
   /* ----------------------- Cambiar estado del servicio ----------------------- */
   UpdateServiceStatus: async (id: number): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/services/${id}/status`;
+    const url = AppConfig.apiUrl + `/services/${id}/status`;
     const response = await Fetcher.patch(
       url,
       {},
@@ -547,7 +548,7 @@ export const apiMutual = {
     id: number,
     data: { name: string; code: string }
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/services-type/${id}`;
+    const url = AppConfig.apiUrl + `/services-type/${id}`;
     const response = await Fetcher.put(
       url,
       {
@@ -575,7 +576,7 @@ export const apiMutual = {
     id: number,
     newStatus: boolean
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/services-type/${id}/status`;
+    const url = AppConfig.apiUrl + `/services-type/${id}/status`;
 
     try {
       const response = await Fetcher.patch(
@@ -605,7 +606,7 @@ export const apiMutual = {
   RegisterService: async (
     serviceDataData: IServiceRegister
   ): Promise<{ mensaje: string }> => {
-    const url = `https://localhost:7256/api/services`;
+    const url = AppConfig.apiUrl + `/services`;
     const response = await Fetcher.post(url, serviceDataData, {
       headers: {
         "Content-Type": "application/json",
@@ -623,7 +624,7 @@ export const apiMutual = {
   /* ----------------------- Metodos de pago ----------------------- */
   /* ----------------------- Crear metodo de pago ----------------------- */
   RegisterPaymentMethod: async (code: string, name: string) => {
-    const response = await fetch("https://localhost:7256/api/payment-method", {
+    const response = await fetch(AppConfig.apiUrl + "/payment-method", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -639,7 +640,7 @@ export const apiMutual = {
   },
   /* ----------------------- Listar metodos de pago ----------------------- */
   GetPaymentMethods: async (): Promise<IPaymentMethod[]> => {
-    const url = "https://localhost:7256/api/payment-method";
+    const url = AppConfig.apiUrl + "/payment-method";
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -668,7 +669,7 @@ export const apiMutual = {
 
   /* ----------------------- Estado metodo de pago ----------------------- */
   PaymentMethodState: async (id: number) => {
-    const url = `https://localhost:7256/api/payment-method/${id}/status`;
+    const url = AppConfig.apiUrl + `/payment-method/${id}/status`;
 
     try {
       const response = await Fetcher.patch(
@@ -700,7 +701,7 @@ export const apiMutual = {
     id: number,
     data: { name: string; code: string }
   ): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/payment-method/${id}`;
+    const url = AppConfig.apiUrl + `/payment-method/${id}`;
     const response = await Fetcher.put(url, data, {
       headers: {
         "Content-Type": "application/json",
@@ -726,7 +727,7 @@ export const apiMutual = {
     serviceTypeId: number;
     description: string;
   }): Promise<{ mesagge: string }> => {
-    const url = `https://localhost:7256/api/invoices`;
+    const url = AppConfig.apiUrl + `/invoices`;
     const response = await Fetcher.post(url, invoiceData, {
       headers: {
         "Content-Type": "application/json",
@@ -742,7 +743,7 @@ export const apiMutual = {
 
   /* ----------------------- Obtener listado de facturas ----------------------- */
   GetInvoices: async (): Promise<any[]> => {
-    const url = `https://localhost:7256/api/invoices`;
+    const url = AppConfig.apiUrl + `/invoices`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -758,7 +759,7 @@ export const apiMutual = {
 
   /* ----------------------- Obtener factura por ID ----------------------- */
   GetInvoiceById: async (id: number): Promise<any> => {
-    const url = `https://localhost:7256/api/invoices/${id}`;
+    const url = AppConfig.apiUrl + `/invoices/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -779,7 +780,7 @@ export const apiMutual = {
     id: number,
     invoiceData: IEditInvoice
   ): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/invoices/${id}`;
+    const url = AppConfig.apiUrl + `/invoices/${id}`;
     const response = await Fetcher.put(url, invoiceData, {
       headers: {
         "Content-Type": "application/json",
@@ -798,7 +799,7 @@ export const apiMutual = {
     id: number,
     newStatus: boolean
   ): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/invoices/${id}/status`;
+    const url = AppConfig.apiUrl + `/invoices/${id}/status`;
     const response = await Fetcher.patch(url, newStatus, {
       headers: {
         "Content-Type": "application/json",
@@ -820,7 +821,7 @@ export const apiMutual = {
   RegisterSupplierPayment: async (
     paymentData: IPaymentCreate
   ): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/supplier-payments`;
+    const url = AppConfig.apiUrl + `/supplier-payments`;
 
     try {
       const response = await Fetcher.post(url, paymentData, {
@@ -869,7 +870,7 @@ export const apiMutual = {
 
   /* ----------------------- Obtener pagos de factura ----------------------- */
   GetSupplierPayments: async (status?: string): Promise<any[]> => {
-    let url = `https://localhost:7256/api/supplier-payments`;
+    let url = AppConfig.apiUrl + `/supplier-payments`;
     if (status) {
       url += `?status=${encodeURIComponent(status)}`;
     }
@@ -902,7 +903,7 @@ export const apiMutual = {
     id: number,
     reason: string
   ): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/supplier-payments/${id}/status`;
+    const url = AppConfig.apiUrl + `/supplier-payments/${id}/status`;
     const response = await Fetcher.patch(
       url,
       { reason },
@@ -929,7 +930,7 @@ export const apiMutual = {
     code: string,
     name: string
   ): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/collection-method`;
+    const url = AppConfig.apiUrl + `/collection-method`;
     const response = await Fetcher.post(
       url,
       {
@@ -954,7 +955,7 @@ export const apiMutual = {
 
   /* ----------------------- Listar metodos de cobro ----------------------- */
   GetCollectionMethods: async (): Promise<ICollectionMethod[]> => {
-    const url = `https://localhost:7256/api/collection-method`;
+    const url = AppConfig.apiUrl + `/collection-method`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -973,7 +974,7 @@ export const apiMutual = {
   /* ----------------------- Eliminar metodo de cobro ----------------------- */
 
   DeleteCollectionMethod: async (id: number): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/collection-method/${id}/cancel`;
+    const url = AppConfig.apiUrl + `/collection-method/${id}/cancel`;
     const response = await Fetcher.patch(
       url,
       {},
@@ -995,7 +996,7 @@ export const apiMutual = {
 
   /* ----------------------- Actualizar metodo de cobro ----------------------- */
   UpdateCollectionMethod: async (id: number, data: { name: string; code: string }): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/collection-method/${id}`;
+    const url = AppConfig.apiUrl + `/collection-method/${id}`;
     const response = await Fetcher.put(url, {
       Name: data.name,    // ✅ Cambiar a PascalCase
       Code: data.code     // ✅ Cambiar a PascalCase
@@ -1017,7 +1018,7 @@ export const apiMutual = {
   ActivateCollectionMethod: async (
     id: number
   ): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/collection-method/${id}/activate`;
+    const url = AppConfig.apiUrl + `/collection-method/${id}/activate`;
     const response = await Fetcher.patch(
       url,
       {},
@@ -1044,7 +1045,7 @@ export const apiMutual = {
     collectionDate: string;
     observations?: string;
   }): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/collections`;
+    const url = AppConfig.apiUrl + `/collections`;
     const response = await Fetcher.post(url, data, {
       headers: {
         "Content-Type": "application/json",
@@ -1060,7 +1061,7 @@ export const apiMutual = {
 
   /* ----------------------- Obtener listado de cobros ----------------------- */
   GetCollections: async (): Promise<ICollection[]> => {
-    const url = `https://localhost:7256/api/collections`;
+    const url = AppConfig.apiUrl + `/collections`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -1078,7 +1079,7 @@ export const apiMutual = {
 
   /* ----------------------- Obtener listado de cobros x id ----------------------- */
   GetCollectionById: async (id: number): Promise<ICollectionDetail> => {
-    const url = `https://localhost:7256/api/collections/${id}`;
+    const url = AppConfig.apiUrl + `/collections/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -1094,7 +1095,7 @@ export const apiMutual = {
 
   /* ----------------------- Obtener el cobro activo por id ----------------------- */
   GetCollectionActiveById: async (id: number): Promise<ICollectionDetail> => {
-    const url = `https://localhost:7256/api/collection/active/${id}`;
+    const url = AppConfig.apiUrl + `/collection/active/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -1114,7 +1115,7 @@ export const apiMutual = {
     id: number,
     data: { methodId: number; observations: string }
   ) => {
-    const url = `https://localhost:7256/api/collections/${id}`;
+    const url = AppConfig.apiUrl + `/collections/${id}`;
     const response = await Fetcher.put(url, data, {
       headers: {
         "Content-Type": "application/json",
@@ -1133,7 +1134,7 @@ export const apiMutual = {
     collectionId: number,
     cancellationReason: string
   ): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/collections/${collectionId}/cancel`;
+    const url = AppConfig.apiUrl + `/collections/${collectionId}/cancel`;
     const response = await Fetcher.patch(
       url,
       { cancellationReason },
@@ -1153,7 +1154,7 @@ export const apiMutual = {
   GetOverdueInstallments: async (
     estado?: string
   ): Promise<IOverdueInstallment[]> => {
-    let url = `https://localhost:7256/api/installments/pending`;
+    let url = AppConfig.apiUrl + `/installments/pending`;
 
     // Agregar parámetro de query si se proporciona
     if (estado) {
@@ -1181,7 +1182,7 @@ export const apiMutual = {
   CreateLoanType: async (
     loanTypeData: ICreateLoanTypes
   ): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/loan-types`;
+    const url = AppConfig.apiUrl + `/loan-types`;
     const response = await Fetcher.post(url, loanTypeData, {
       headers: {
         "Content-Type": "application/json",
@@ -1197,7 +1198,7 @@ export const apiMutual = {
 
   /* ----------------------- 2. Listar tipo de prestamo ----------------------- */
   GetLoanTypes: async (): Promise<ILoanTypesList[]> => {
-    const url = `https://localhost:7256/api/loan-types`;
+    const url = AppConfig.apiUrl + `/loan-types`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -1209,7 +1210,7 @@ export const apiMutual = {
 
   /* ----------------------- 3. Desactivar tipo de prestamo ----------------------- */
   DeactivateLoanType: async (id: number): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/loan-types/${id}/state`;
+    const url = AppConfig.apiUrl + `/loan-types/${id}/state`;
 
     const response = await Fetcher.put(
       url,
@@ -1227,7 +1228,7 @@ export const apiMutual = {
   /* ----------------------- 4. Crear prestamo para asociado ----------------------- */
 
   CreateLoan: async (loanData: ILoanCreate): Promise<{ message: string }> => {
-    const url = `https://localhost:7256/api/loans`;
+    const url = AppConfig.apiUrl + `/loans`;
     const response = await Fetcher.post(url, loanData, {
       headers: {
         "Content-Type": "application/json",
@@ -1243,7 +1244,7 @@ export const apiMutual = {
 
   /* ----------------------- 5. Listar prestamos ----------------------- */
   GetLoans: async (): Promise<ILoanList[]> => {
-    const url = `https://localhost:7256/api/loans`;
+    const url = AppConfig.apiUrl + `/loans`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -1255,7 +1256,7 @@ export const apiMutual = {
 
   /* ----------------------- 6. Aprobar/rechazar prestamo ----------------------- */
   UpdateLoan: async (loanId: number, data: ILoanUpdate) => {
-    const url = `https://localhost:7256/api/loans/${loanId}/status`;
+    const url = AppConfig.apiUrl + `/loans/${loanId}/status`;
     const response = await Fetcher.patch(url, data, {
       headers: {
         "Content-Type": "application/json",
@@ -1268,7 +1269,7 @@ export const apiMutual = {
   /* ----------------------- 7. Obtener prestamo-detalle----------------------- */
 
   GetLoanById: async (loanId: number): Promise<ILoanDetails> => {
-    const url = `https://localhost:7256/api/loans/${loanId}`;
+    const url = AppConfig.apiUrl + `/loans/${loanId}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -1280,7 +1281,7 @@ export const apiMutual = {
 
   /* ----------------------- 8 Obtener cuotas de un préstamo por ID ----------------------- */
   GetLoanInstallments: async (loanId: number): Promise<IInstallmentInfo[]> => {
-    const url = `https://localhost:7256/api/loans/${loanId}/installments`;
+    const url = AppConfig.apiUrl + `/loans/${loanId}/installments`;
     const response = await Fetcher.get(url, {
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
@@ -1291,7 +1292,7 @@ export const apiMutual = {
 
   /* ----------------------- 9 Obtener cuota por ID ----------------------- */
   GetInstallmentById: async (id: number): Promise<IInstallmentInfo> => {
-    const url = `https://localhost:7256/api/installments/${id}`;
+    const url = AppConfig.apiUrl + `/installments/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -1311,7 +1312,7 @@ export const apiMutual = {
     code: string,
     periodType: PeriodType
   ): Promise<IAccountingPeriodResponse> => {
-    const url = `https://localhost:7256/api/accounting-periods`;
+    const url = AppConfig.apiUrl + `/accounting-periods`;
 
     const response = await Fetcher.post(
       url,
@@ -1340,7 +1341,7 @@ export const apiMutual = {
   GetAccountingPeriods: async (
     closed?: boolean
   ): Promise<IAccountingPeriodList[]> => {
-    let url = `https://localhost:7256/api/accounting-periods`;
+    let url = AppConfig.apiUrl + `/accounting-periods`;
     if (typeof closed === "boolean") {
       url += `?closed=${closed}`;
     }
@@ -1369,7 +1370,7 @@ export const apiMutual = {
   ): Promise<IAccountingPeriodResponse> => {
     try {
       const response = await Fetcher.patch(
-        `https://localhost:7256/api/accounting-periods/${id}/close`,
+        AppConfig.apiUrl + `/accounting-periods/${id}/close`,
         {},
         {
           headers: {
@@ -1388,7 +1389,7 @@ export const apiMutual = {
   GetAccountingPeriodById: async (
     id: number
   ): Promise<IAccountingPeriodList> => {
-    const url = `https://localhost:7256/api/accounting-periods/${id}`;
+    const url = AppConfig.apiUrl + `/accounting-periods/${id}`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -1409,7 +1410,7 @@ export const apiMutual = {
   //---------------------------MODULO REPORTES-------------------------------//
   //---------------------------1. Registrar Reporte INAES---------------------///
   RegisterInaesReport: async (periodId: number) => {
-    const url = `https://localhost:7256/api/reports/inaes?PeriodID=${periodId}`;
+    const url = AppConfig.apiUrl + `/reports/inaes?PeriodID=${periodId}`;
     const response = await Fetcher.post(
       url,
       {},
@@ -1425,7 +1426,7 @@ export const apiMutual = {
 
   //---------------------------2. Listar Reporte INAES---------------------///
   GetInaesReports: async () => {
-    const url = `https://localhost:7256/api/reports/inaes`;
+    const url = AppConfig.apiUrl + `/reports/inaes`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/json",
@@ -1440,7 +1441,7 @@ export const apiMutual = {
   //---------------------------3. GENERAR PDF Reporte INAES---------------------//
 
   GenerateInaesReportPdf: async (id: number) => {
-    const url = `https://localhost:7256/api/reports/inaes/${id}/pdf`;
+    const url = AppConfig.apiUrl + `/reports/inaes/${id}/pdf`;
     const response = await Fetcher.get(url, {
       headers: {
         "Content-Type": "application/pdf",
@@ -1455,7 +1456,7 @@ export const apiMutual = {
   ExportFinancialStatusPdf: async (
     accountingPeriodId: number
   ): Promise<Blob> => {
-    const url = `https://localhost:7256/api/reports/financial/${accountingPeriodId}`;
+    const url = AppConfig.apiUrl + `/reports/financial/${accountingPeriodId}`;
     const response = await Fetcher.get(url, {
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
@@ -1467,7 +1468,7 @@ export const apiMutual = {
 
   //---------------------------5. GENERAR PDF - Reporte PRESTAMOS---------------------//
   ExportLoansReportPdf: async (accountingPeriodId: number): Promise<Blob> => {
-    const url = `https://localhost:7256/api/reports/loans/${accountingPeriodId}`;
+    const url = AppConfig.apiUrl + `/reports/loans/${accountingPeriodId}`;
     const response = await Fetcher.get(url, {
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
@@ -1481,7 +1482,7 @@ export const apiMutual = {
   ExportDelinquencyReportPdf: async (
     accountingPeriodId: number
   ): Promise<Blob> => {
-    const url = `https://localhost:7256/api/reports/delinquency/${accountingPeriodId}`;
+    const url = AppConfig.apiUrl + `/reports/delinquency/${accountingPeriodId}`;
     const response = await Fetcher.get(url, {
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,

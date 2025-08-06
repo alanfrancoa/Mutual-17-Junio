@@ -1,8 +1,8 @@
 import axios from "axios";
-import { AppConfig } from "../helper/config";
+//import { AppConfig } from "../helper/config";
 
 const api = axios.create({
-  baseURL: AppConfig.apiUrl,
+  // baseURL: AppConfig.apiUrl,
   timeout: 30000,
   withCredentials: true,
   headers: {

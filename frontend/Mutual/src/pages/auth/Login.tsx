@@ -30,64 +30,33 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const [error, setError] = useState("");
   const navigate = useNavigate();
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showForgotPassModal, setShowForgotPassModal] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const toast = useAppToast();
-  const location = useLocation();
 
-  useEffect(() => {
-    // estado pasado desde ProtectedRoute
-    if (location.state?.tokenExpired) {
-      setErrorMessage(
-        "Tu sesión ha expirado, por favor inicia sesión nuevamente."
-      );
-      // Limpiamos el estado despues de mostrar  msj
-      window.history.replaceState({}, document.title, location.pathname);
-    }
-  }, [location]);
-
-  useEffect(() => {
-    if (sessionStorage.getItem("token")) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [navigate]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setLoading(true);
     setErrorMessage("");
 
     try {
       const response = await apiMutual.Login(username, password);
-
       const token = response as string;
 
-      sessionStorage.setItem("token", response);
+      sessionStorage.setItem("token", token);
       sessionStorage.setItem("username", username);
 
-      const payload = parseJwt(response);
-
-      if (payload && payload.role) {
-        sessionStorage.setItem("userRole", payload.role);
-      }
-      if (payload && payload.username) {
-        sessionStorage.setItem("username", payload.username);
-      }
+      const payload = parseJwt(token);
+      if (payload?.role) sessionStorage.setItem("userRole", payload.role);
+      if (payload?.username) sessionStorage.setItem("username", payload.username);
 
       navigate("/dashboard");
       window.location.reload();
     } catch (err: any) {
       let errorMsg = "Error desconocido";
-
-      if (
-        err.response &&
-        err.response.data &&
-        (err.response.data.message || err.response.data.mensaje)
-      ) {
+      if (err.response?.data?.message || err.response?.data?.mensaje) {
         errorMsg = err.response.data.message || err.response.data.mensaje;
       } else if (err instanceof Error) {
         errorMsg = err.message;
@@ -132,8 +101,8 @@ const Login = () => {
             </div>
           )}
 
-          {/* Elimina el div de error */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Contenido del formulario */}
+          <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium mb-1">Usuario</label>
               <input
@@ -147,9 +116,7 @@ const Login = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Contraseña
-              </label>
+              <label className="block text-sm font-medium mb-1">Contraseña</label>
               <input
                 type="password"
                 value={password}
@@ -171,15 +138,15 @@ const Login = () => {
                 required
               />
               <label htmlFor="acceptTerms" className="text-sm">
-                Acepto los{" "}
+                Acepto los{' '}
                 <button
                   type="button"
                   className="underline text-blue-600 hover:text-blue-800"
                   onClick={() => setShowTermsModal(true)}
                 >
                   Términos y Condiciones
-                </button>{" "}
-                y la{" "}
+                </button>{' '}
+                y la{' '}
                 <button
                   type="button"
                   className="underline text-blue-600 hover:text-blue-800"
@@ -191,24 +158,25 @@ const Login = () => {
             </div>
 
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit}
               disabled={loading || !acceptedTerms}
               className={`w-full ${
                 loading || !acceptedTerms
-                  ? "bg-blue-300 cursor-not-allowed"
-                  : "bg-blue-400 hover:bg-blue-500"
+                  ? 'bg-blue-300 cursor-not-allowed'
+                  : 'bg-blue-400 hover:bg-blue-500'
               } text-white py-2 rounded-full font-semibold transition`}
             >
-              {loading ? "Iniciando sesión..." : "Iniciar sesión"}
+              {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </button>
-          </form>
+          </div>
 
           <div className="mt-4 flex flex-col items-center space-y-2">
             <button
               type="button"
               onClick={() => setShowForgotPassModal(true)}
               className="text-blue-600 hover:underline text-sm bg-transparent border-none p-0"
-              style={{ background: "none" }}
+              style={{ background: 'none' }}
             >
               ¿Olvidaste tu contraseña?
             </button>
@@ -235,7 +203,7 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Modal de contacto admin para reseteo de pass */}
+      {/* Modal de contacto admin */}
       {showForgotPassModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
           <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center">
@@ -254,7 +222,6 @@ const Login = () => {
         </div>
       )}
 
-      {/* importacion de modales */}
       <TermsModal
         isOpen={showTermsModal}
         onClose={() => setShowTermsModal(false)}

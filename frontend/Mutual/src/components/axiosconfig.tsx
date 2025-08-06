@@ -1,12 +1,10 @@
 import { FC, useEffect, useState } from "react";
 import axios from "axios";
 import parser from "../helper/parser";
-import useAppToast from "../hooks/useAppToast";
 import api from "../api/api";
 
 const AxiosConfig: FC<React.PropsWithChildren> = (props) => {
   const [axiosReady, setAxiosReady] = useState(false);
-  const toast = useAppToast();
 
   useEffect(() => {
     const requestInterceptor = api.interceptors.request.use((config) => {
@@ -21,14 +19,8 @@ const AxiosConfig: FC<React.PropsWithChildren> = (props) => {
     const responseInterceptor = api.interceptors.response.use(
       (response) => response,
       async (error) => {
-        const currentPath = window.location.pathname;
-        const loginPath = "/auth/login";
-
-        if (
-          error.response &&
-          error.response.status === 401 &&
-          currentPath !== loginPath
-        ) {
+   
+        if (error.response?.status === 401) {
           sessionStorage.clear();
 
           return Promise.reject(error);
