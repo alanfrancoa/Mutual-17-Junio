@@ -150,8 +150,10 @@ const Collections: React.FC = () => {
         }
     };
 
+    // Simplificar la función de impresión
     const handlePrintCollection = async (collection: ICollection) => {
         if (collection.status === "Cancelado") return;
+
         try {
             const blob = await apiMutual.GenerateCollectionPdf(collection.id);
 
@@ -164,6 +166,13 @@ const Collections: React.FC = () => {
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
+
+            // Mostrar toast de éxito
+            showSuccessToast({
+                title: "PDF Descargado",
+                message: "El comprobante se descargó correctamente",
+            });
+
         } catch (err: any) {
             showErrorToast({
                 title: "Error",
