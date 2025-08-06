@@ -185,6 +185,43 @@ const Collections: React.FC = () => {
         setPage(1);
     }, [filters]);
 
+    // Función para parsear fechas locales
+    const parseLocalDate = (dateStr: string | null | undefined) => {
+        if (!dateStr || typeof dateStr !== "string") return null;
+
+        try {
+            // Si viene en formato dd/MM/yyyy 
+            if (dateStr.includes("/")) {
+                const [day, month, year] = dateStr.split("/");
+                if (!day || !month || !year) return null;
+
+                const date = new Date(Number(year), Number(month) - 1, Number(day));
+
+                // Verificar que la fecha es válida
+                if (isNaN(date.getTime())) return null;
+
+                return date;
+            }
+
+            // Si viene en formato yyyy-MM-dd 
+            if (dateStr.includes("-")) {
+                const [year, month, day] = dateStr.split("-");
+                if (!year || !month || !day) return null;
+
+                const date = new Date(Number(year), Number(month) - 1, Number(day));
+
+                // Verificar que la fecha es válida
+                if (isNaN(date.getTime())) return null;
+
+                return date;
+            }
+
+            return null;
+        } catch (error) {
+            return null;
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 flex">
             {/* Sidebar fija a la izquierda */}
@@ -348,9 +385,12 @@ const Collections: React.FC = () => {
                                                         ${collection.amount.toFixed(2)}
                                                     </td>
                                                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                                                        {new Date(
-                                                            collection.collectionDate
-                                                        ).toLocaleDateString()}
+                                                        {(() => {
+                                                            const parsedDate = parseLocalDate(collection.collectionDate);
+                                                            return parsedDate
+                                                                ? parsedDate.toLocaleDateString("es-AR")
+                                                                : "Fecha inválida";
+                                                        })()}
                                                     </td>
                                                     <td className="px-4 py-4 whitespace-nowrap">
                                                         <span
