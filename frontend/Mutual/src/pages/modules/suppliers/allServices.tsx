@@ -27,6 +27,9 @@ const AllServicesPage: React.FC = () => {
   >(null);
   const [modalError, setModalError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [estadoFiltro, setEstadoFiltro] = useState<
+    "Todos" | "Activo" | "Inactivo"
+  >("Todos"); 
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -72,9 +75,12 @@ const AllServicesPage: React.FC = () => {
 
   const filteredServices = services.filter(
     (service) =>
-      (service.Id?.toString() || "").includes(search) ||
-      (service.Supplier || "").toLowerCase().includes(search.toLowerCase()) ||
-      (service.Active ? "activo" : "inactivo").includes(search.toLowerCase())
+      (estadoFiltro === "Todos" ||
+        (estadoFiltro === "Activo" && service.Active) ||
+        (estadoFiltro === "Inactivo" && !service.Active)) &&
+      ((service.Id?.toString() || "").includes(search) ||
+        (service.Supplier || "").toLowerCase().includes(search.toLowerCase()) ||
+        (service.Active ? "activo" : "inactivo").includes(search.toLowerCase()))
   );
 
   const handleEditClick = (service: ServiceList) => {
@@ -174,7 +180,7 @@ const AllServicesPage: React.FC = () => {
                 <div className="flex gap-2 w-full md:w-auto">
                   <input
                     type="text"
-                    placeholder="Buscar por ID, proveedor o estado"
+                    placeholder="Buscar por proveedor"
                     value={search}
                     onChange={(e) => {
                       setSearch(e.target.value);
@@ -182,6 +188,21 @@ const AllServicesPage: React.FC = () => {
                     }}
                     className="w-full md:w-72 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                  <select
+                    name="estadoFiltro"
+                    value={estadoFiltro}
+                    onChange={(e) => {
+                      setEstadoFiltro(
+                        e.target.value as "Todos" | "Activo" | "Inactivo"
+                      );
+                      setPage(1); 
+                    }}
+                    className="px-3 py-2 border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="Todos">Todos</option>
+                    <option value="Activo">Activos</option>
+                    <option value="Inactivo">Inactivos</option>
+                  </select>
                 </div>
                 <div className="flex gap-2">
                   <button
