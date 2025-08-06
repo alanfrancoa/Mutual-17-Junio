@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../../dashboard/components/Sidebar";
 import Header from "../../dashboard/components/Header";
 import { apiMutual } from "../../../api/apiMutual";
-import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import useAppToast from "../../../hooks/useAppToast";
 
 interface ICollectionMethod {
@@ -19,6 +19,8 @@ interface NewCollectionMethod {
   wasEdited?: boolean;
 }
 
+const PAGE_SIZE = 10;
+
 const PaymentMethodsCollection: React.FC = () => {
   const navigate = useNavigate();
   const [methods, setMethods] = useState<ICollectionMethod[]>([]);
@@ -27,6 +29,8 @@ const PaymentMethodsCollection: React.FC = () => {
   const [dataLoading, setDataLoading] = useState(true);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editedRow, setEditedRow] = useState<Partial<ICollectionMethod>>({});
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
   const { showSuccessToast, showErrorToast } = useAppToast();
 
   useEffect(() => {
@@ -58,6 +62,39 @@ const PaymentMethodsCollection: React.FC = () => {
       setDataLoading(false);
     }
   };
+
+  // Filtrado de métodos
+  const getFilteredMethods = () => {
+    return methods.filter(method => {
+      if (!searchTerm) return true;
+      
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      return (
+        method.name.toLowerCase().includes(lowerSearchTerm) ||
+        method.code.toLowerCase().includes(lowerSearchTerm) ||
+        (method.isActive ? "activo" : "inactivo").includes(lowerSearchTerm) ||
+        method.id.toString().includes(searchTerm)
+      );
+    });
+  };
+
+  const filteredMethods = getFilteredMethods();
+  const totalPages = Math.max(1, Math.ceil(filteredMethods.length / PAGE_SIZE));
+  const paginatedMethods = filteredMethods.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
+  };
+
+  // Reset page when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
 
   const handleAddRow = () => {
     setNewMethods([...newMethods, { code: "", name: "", wasEdited: false }]);
@@ -153,7 +190,7 @@ const PaymentMethodsCollection: React.FC = () => {
 
   const handleSaveEdit = async (index: number) => {
     try {
-      const method = methods[index];
+      const method = filteredMethods[index];
 
       if (!editedRow.name?.trim() || !editedRow.code?.trim()) {
         showErrorToast({ message: "El nombre y código no pueden estar vacíos" });
@@ -222,7 +259,14 @@ const PaymentMethodsCollection: React.FC = () => {
             <div className="overflow-x-auto rounded-lg shadow bg-white p-4">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
                 <div className="flex gap-2 w-full md:w-auto">
-                  {/* Espacio para futuras funcionalidades de búsqueda */}
+                  {/* Búsqueda */}
+                  <input
+                    type="text"
+                    placeholder="Buscar por ID, nombre, código o estado..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
                 {canModify && (
                   <button
@@ -239,6 +283,9 @@ const PaymentMethodsCollection: React.FC = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      ID
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Nombre
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -254,113 +301,122 @@ const PaymentMethodsCollection: React.FC = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {/* Métodos existentes */}
-                  {methods.map((method, index) => (
-                    <tr key={method.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {editIndex === index ? (
-                          <input
-                            type="text"
-                            value={editedRow.name ?? method.name}
-                            onChange={(e) =>
-                              setEditedRow({ ...editedRow, name: e.target.value })
-                            }
-                            className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                            disabled={loading}
-                            maxLength={255}
-                          />
-                        ) : (
-                          method.name
-                        )}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {editIndex === index ? (
-                          <select
-                            value={editedRow.code ?? method.code}
-                            onChange={(e) =>
-                              setEditedRow({ ...editedRow, code: e.target.value })
-                            }
-                            className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                            disabled={loading}
-                          >
-                            <option value="">Seleccione un código...</option>
-                            <option value="Transferencia">Transferencia</option>
-                            <option value="Automatico">Automático</option>
-                            <option value="Efectivo">Efectivo</option>
-                          </select>
-                        ) : (
-                          method.code
-                        )}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            method.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {method.isActive ? "Activo" : "Inactivo"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
-                        <div className="space-x-2 flex justify-end">
-                          {editIndex === index ? (
-                            <>
-                              <button
-                                onClick={() => handleSaveEdit(index)}
-                                className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
-                                disabled={loading}
-                              >
-                                Guardar
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setEditIndex(null);
-                                  setEditedRow({});
-                                }}
-                                className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
-                                disabled={loading}
-                              >
-                                Cancelar
-                              </button>
-                            </>
+                  {paginatedMethods.map((method, index) => {
+                    const globalIndex = filteredMethods.indexOf(method);
+                    return (
+                      <tr key={method.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {method.id}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {editIndex === globalIndex ? (
+                            <input
+                              type="text"
+                              value={editedRow.name ?? method.name}
+                              onChange={(e) =>
+                                setEditedRow({ ...editedRow, name: e.target.value })
+                              }
+                              className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                              disabled={loading}
+                              maxLength={255}
+                            />
                           ) : (
-                            <>
-                              {canModify && (
+                            method.name
+                          )}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {editIndex === globalIndex ? (
+                            <select
+                              value={editedRow.code ?? method.code}
+                              onChange={(e) =>
+                                setEditedRow({ ...editedRow, code: e.target.value })
+                              }
+                              className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                              disabled={loading}
+                            >
+                              <option value="">Seleccione un código...</option>
+                              <option value="Transferencia">Transferencia</option>
+                              <option value="Automatico">Automático</option>
+                              <option value="Efectivo">Efectivo</option>
+                            </select>
+                          ) : (
+                            method.code
+                          )}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              method.isActive
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {method.isActive ? "Activo" : "Inactivo"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-right whitespace-nowrap text-sm font-medium">
+                          <div className="space-x-2 flex justify-end">
+                            {editIndex === globalIndex ? (
+                              <>
+                                <button
+                                  onClick={() => handleSaveEdit(globalIndex)}
+                                  className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
+                                  disabled={loading}
+                                >
+                                  Guardar
+                                </button>
                                 <button
                                   onClick={() => {
-                                    setEditIndex(index);
-                                    setEditedRow(method);
+                                    setEditIndex(null);
+                                    setEditedRow({});
                                   }}
-                                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
+                                  className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
                                   disabled={loading}
                                 >
-                                  Editar
+                                  Cancelar
                                 </button>
-                              )}
-                              {canModify && (
-                                <button
-                                  onClick={() => handleToggleMethodStatus(method.id, method.name, method.isActive)}
-                                  className={`${
-                                    method.isActive
-                                      ? "bg-red-500 hover:bg-red-600"
-                                      : "bg-green-500 hover:bg-green-600"
-                                  } text-white px-6 py-2 rounded-full transition text-xs font-medium`}
-                                  disabled={loading}
-                                >
-                                  {method.isActive ? "Desactivar" : "Activar"}
-                                </button>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                              </>
+                            ) : (
+                              <>
+                                {canModify && (
+                                  <button
+                                    onClick={() => {
+                                      setEditIndex(globalIndex);
+                                      setEditedRow(method);
+                                    }}
+                                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-full transition text-xs font-medium"
+                                    disabled={loading}
+                                  >
+                                    Editar
+                                  </button>
+                                )}
+                                {canModify && (
+                                  <button
+                                    onClick={() => handleToggleMethodStatus(method.id, method.name, method.isActive)}
+                                    className={`${
+                                      method.isActive
+                                        ? "bg-red-500 hover:bg-red-600"
+                                        : "bg-green-500 hover:bg-green-600"
+                                    } text-white px-6 py-2 rounded-full transition text-xs font-medium`}
+                                    disabled={loading}
+                                  >
+                                    {method.isActive ? "Desactivar" : "Activar"}
+                                  </button>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
 
                   {/* Líneas nuevas */}
                   {newMethods.map((method, idx) => (
                     <tr key={`new-${idx}`} className="bg-blue-50 hover:bg-blue-100">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                        Nuevo
+                      </td>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <input
                           type="text"
@@ -408,19 +464,49 @@ const PaymentMethodsCollection: React.FC = () => {
                   ))}
 
                   {/* Fila vacía */}
-                  {methods.length === 0 && newMethods.length === 0 && (
+                  {paginatedMethods.length === 0 && newMethods.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="text-center py-8 text-gray-400">
-                        No hay métodos de cobro registrados. Haz clic en "Agregar Método" para comenzar.
+                      <td colSpan={5} className="text-center py-8 text-gray-400">
+                        {searchTerm ? "No se encontraron métodos de cobro que coincidan con la búsqueda." : "No hay métodos de cobro registrados. Haz clic en \"Agregar Método\" para comenzar."}
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
 
+              {/* Paginación */}
+              {filteredMethods.length > 0 && (
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-2">
+                  <div className="flex justify-center items-center gap-4 flex-1">
+                    <button
+                      className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                      onClick={() => handlePageChange(page - 1)}
+                      disabled={page === 1}
+                      aria-label="Anterior"
+                    >
+                      <ChevronLeftIcon className="h-5 w-5 text-gray-700" />
+                    </button>
+                    <span className="text-gray-700">
+                      Página {page} de {totalPages}
+                    </span>
+                    <button
+                      className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                      onClick={() => handlePageChange(page + 1)}
+                      disabled={page === totalPages}
+                      aria-label="Siguiente"
+                    >
+                      <ChevronRightIcon className="h-5 w-5 text-gray-700" />
+                    </button>
+                  </div>
+                  <span className="text-gray-500 text-sm md:ml-4 md:w-auto w-full text-center md:text-right">
+                    {filteredMethods.length} método(s) encontrado(s)
+                  </span>
+                </div>
+              )}
+
               {/* Botones de acción para nuevos métodos */}
               {newMethods.length > 0 && (
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-2">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-2 pt-4 border-t border-gray-200">
                   <div className="flex justify-center items-center gap-4 flex-1">
                     <span className="text-gray-700 font-medium">
                       {newMethods.length} método(s) por guardar
